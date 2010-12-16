@@ -1,0 +1,51 @@
+{% extends "yaml.html" %}
+
+{% block title %}WebGCal{% endblock %}
+
+{% block extra-head %}
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}navigation/nav_slidingdoor.css" />
+  {% if LANGUAGE_BIDI %}
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}add-ons/rtl-support/navigation/nav_slidingdoor-rtl.css" />
+  {% endif %}
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}screen/basemod.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}screen/content.css" />
+
+  <meta name="generator" content="Google App Engine" />
+  <meta name="language" content="en" />
+  <meta name="distribution" content="global" />
+  <meta name="audience" content="all" />
+  <meta name="robots" content="index, follow, noarchive" />
+  <meta name="domain" content="Calendar Series" />
+  <meta name="author" content="Calendar Series" />
+  <meta name="publisher" content="Calendar Series" />
+  <meta name="copyright" content="Calendar Series" />
+  <meta name="keywords" content="calendar,icalendar,hcalendar,google" />
+  <meta name="revisit" content="after 1 days" />
+  <meta name="revisit-after" content="1 days" />
+  <meta name="verify-v1" content="0KSH28p2ZTWJMh5p5RFtqPlMAY3wys9TU9eJidnsFsg=" />
+
+  <script type="text/javascript" src="{{ STATICFILES_URL }}jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="{{ STATICFILES_URL }}jquery.datetime.js"></script>
+  <script type="text/javascript">
+    //var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-2841986-5']); _gaq.push(['_trackPageview']);
+  </script>
+{% endblock %}
+
+{% block extra-bottom %}
+  <script type="text/javascript">
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = 'https://ssl.google-analytics.com/ga.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+    })();
+  </script>
+{% endblock %}
+
+{% block header %}
+  <h3>Calendar Series</h3>
+{% endblock %}
+
+{% block footer %}
+  <div id="footer">
+    Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://code.google.com/appengine">App Engine</a>, <a href="http://www.djangoproject.com/">Django</a> and <a href="http://www.allbuttonspressed.com/projects/django-nonrel">Django-nonrel</a> | <a href="http://code.google.com/appengine/privacy.html">Privacy Terms</a>
+  </div>
+{% endblock %}

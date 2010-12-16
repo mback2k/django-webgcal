@@ -1,0 +1,29 @@
+application: webgcal
+version: 1
+runtime: python
+api_version: 1
+
+builtins:
+- remote_api: on
+- datastore_admin: on
+- appstats: on
+
+handlers:
+- url: /_ah/queue/deferred
+  script: djangoappengine/deferred/handler.py
+  login: admin
+
+- url: /media
+  static_dir: _generated_media
+
+- url: /.*
+  script: djangoappengine/main/main.py
+
+skip_files:
+- ^(.*/)?app\.yaml
+- ^(.*/)?cron\.yaml
+- ^(.*/)?index\.yaml
+- ^(.*/)?queue\.yaml
+- ^(.*/)?.*~
+- ^(.*/)?.*\.py[co]
+- ^(.*/)?\..*

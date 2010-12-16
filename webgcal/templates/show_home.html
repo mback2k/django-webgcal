@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block navigation %}
+  <div class="hlist"><ul>
+    <li class="active"><strong>Home</strong></li>
+    {% if user.is_authenticated %}<li><a href="{% url webgcal.views.show_dashboard %}" title="Dashboard">Dashboard</a></li>{% endif %}
+  </ul></div>
+{% endblock %}
+
+{% block content %}
+  <p>This service allows you to add hCalendar events to your Google Calendar.</p>
+{% endblock %}
