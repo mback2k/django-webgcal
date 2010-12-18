@@ -28,20 +28,20 @@ def show_dashboard(request):
 
 @login_required
 def create_item(request):
-    services = Service.objects.all().filter(user=request.user).order_by('-tstamp')
-    create_form = ServiceForm(data=request.POST)
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
+    create_form = CalendarForm(data=request.POST)
 
     if create_form.is_valid():
-        service = create_form.save(commit=False)
-        service.user = request.user
-        service.save()
+        calendar = create_form.save(commit=False)
+        calendar.user = request.user
+        calendar.save()
         create_form = None
 
     template_values = {
-        'services': services,
+        'calendars': calendars,
         'create_form': create_form,
         'edit_form': None,
-        'service': None,
+        'calendar': None,
         'message': None,
     }
     

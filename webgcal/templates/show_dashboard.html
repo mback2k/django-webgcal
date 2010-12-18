@@ -10,7 +10,7 @@
 {% block content %}
   <div id="upper">
     {% if message %}<p class="important"><span class="float_right"><a href="{% url webgcal.views.show_dashboard %}" title="Close" class="toggle">Close</a></span><span>{{ message|safe }}</span></p>{% else %}
-    {% if service %}
+    {% if calendar %}
     {% if edit_form %}
     <form action="{% url webgcal.views.edit_item edit_form.id %}" method="post" class="yform columnar">{% csrf_token %}
     <fieldset>
@@ -39,8 +39,8 @@
         <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
           <td>{{ calendar.name }}</td>
           <td>{{ calendar.websites }}</td>
-          <td><a href="{% url webgcal.views.show_item service.id %}" title="Status: {{ service.status }}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% ifequal service.statusimg "good" %}accept{% else %}{% ifequal service.statusimg "waiting" %}clock{% else %}error{% endifequal %}{% endifequal %}.png" alt="Status" /></a><a href="{% url webgcal.views.feed_item service.id %}" title="Status Feed"><img src="{{ STATICFILES_URL }}icons/feed.png" alt="Feed" /></a></td>
-          <td><a href="{% url webgcal.views.edit_item service.id %}" title="Edit" class="toggle"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_item service.id %}" title="{% if service.disabled %}Enable{% else %}Disable{% endif %}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% if not service.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not service.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_item_ask service.id %}" title="Delete" class="delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
+          <td><a href="{% url webgcal.views.show_item calendar.id %}" title="Status: {{ calendar.status }}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% ifequal calendar.statusimg "good" %}accept{% else %}{% ifequal calendar.statusimg "waiting" %}clock{% else %}error{% endifequal %}{% endifequal %}.png" alt="Status" /></a><a href="{% url webgcal.views.feed_item calendar.id %}" title="Status Feed"><img src="{{ STATICFILES_URL }}icons/feed.png" alt="Feed" /></a></td>
+          <td><a href="{% url webgcal.views.edit_item calendar.id %}" title="Edit" class="toggle"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_item calendar.id %}" title="{% if calendar.disabled %}Enable{% else %}Disable{% endif %}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_item_ask calendar.id %}" title="Delete" class="delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
         </tr>
         {% endfor %}
       </tbody>
