@@ -9,4 +9,5 @@ urlpatterns = patterns('webgcal.views',
     (r'^dashboard/edit/(?P<id>\d+)/$', 'edit_item'),
     (r'^dashboard/delete/(?P<id>\d+)/$', 'delete_item'),
     (r'^dashboard/delete/(?P<id>\d+)/ask/$', 'delete_item_ask'),
+    (r'^authsub/connect/$', 'authsub_connect'),
 )

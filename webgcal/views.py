@@ -119,3 +119,7 @@ def delete_item_ask(request, id):
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+
+@login_required
+def authsub_connect(request):
+    pass
