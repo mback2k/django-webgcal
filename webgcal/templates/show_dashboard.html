@@ -39,8 +39,8 @@
         <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
           <td>{{ calendar.name }}</td>
           <td>{{ calendar.websites }}</td>
-          <td><a href="{% url webgcal.views.show_item calendar.id %}" title="Status: {{ calendar.status }}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% ifequal calendar.statusimg "good" %}accept{% else %}{% ifequal calendar.statusimg "waiting" %}clock{% else %}error{% endifequal %}{% endifequal %}.png" alt="Status" /></a><a href="{% url webgcal.views.feed_item calendar.id %}" title="Status Feed"><img src="{{ STATICFILES_URL }}icons/feed.png" alt="Feed" /></a></td>
-          <td><a href="{% url webgcal.views.edit_item calendar.id %}" title="Edit" class="toggle"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_item calendar.id %}" title="{% if calendar.disabled %}Enable{% else %}Disable{% endif %}" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_item_ask calendar.id %}" title="Delete" class="delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
+          <td><a href="{% url webgcal.views.show_item calendar.id %}" title="Show" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% ifequal calendar.statusimg "good" %}accept{% else %}error{% endifequal %}.png" alt="Status" /></a></td>
+          <td><a href="{% url webgcal.views.edit_item calendar.id %}" title="Edit" class="toggle"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.delete_item_ask calendar.id %}" title="Delete" class="delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
         </tr>
         {% endfor %}
       </tbody>

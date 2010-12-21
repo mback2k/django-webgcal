@@ -25,3 +25,9 @@ indexes:
   properties:
   - name: user_id
   - name: name
+
+- kind: webgcal_calendar
+  properties:
+  - name: user_id
+  - name: tstamp
+    direction: desc
