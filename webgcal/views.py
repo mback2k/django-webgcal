@@ -1,10 +1,12 @@
-import datetime
-from google.appengine.ext import db
+import os.path
+import gdata.calendar.service
+import gdata.auth
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from webgcal.forms import CalendarForm
 from webgcal.models import Calendar, Website
+from webgcal.tokens import run_on_django
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 
@@ -15,13 +17,22 @@ def show_home(request):
 def show_dashboard(request):
     calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     create_form = CalendarForm()
+    
+    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
+    
+    try:
+        calendar_service.AuthSubTokenInfo()
+    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
+        message = '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request')
+    else:
+        message = None
 
     template_values = {
         'calendars': calendars,
         'create_form': create_form,
         'edit_form': None,
         'calendar': None,
-        'message': None,
+        'message': message,
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -120,6 +131,28 @@ def delete_item_ask(request, id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
+
 @login_required
-def authsub_connect(request):
-    pass
+def authsub_request(request):
+    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
+    
+    try:
+        calendar_service.AuthSubTokenInfo()
+    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
+        return HttpResponseRedirect(calendar_service.GenerateAuthSubURL(request.build_absolute_uri(reverse('webgcal.views.authsub_response')), 'https://www.google.com/calendar/feeds/', secure=True, session=True))
+    
+    return HttpResponseRedirect(reverse('webgcal.views.authsub_response'))
+
+@login_required
+def authsub_response(request):
+    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
+    
+    session_token = None
+    auth_token = gdata.auth.extract_auth_sub_token_from_url(request.get_full_path(), rsa_key=file('%s/certificates/rsakey.pem' % os.path.dirname(__file__), 'r').read())
+    
+    if auth_token:
+        session_token = calendar_service.upgrade_to_session_token(auth_token)
+    if session_token:
+        calendar_service.token_store.add_token(session_token) 
+
+    return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
