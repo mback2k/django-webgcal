@@ -105,10 +105,13 @@ def load_auth_tokens(user=None):
     if user is None:
         return {}
         
-    pickled_tokens = cache.get('gdata_pickled_tokens:%s' % user)
+    pickled_tokens = cache.get('gdata_pickled_tokens:%s' % user, {})
     if pickled_tokens:
-        return pickle.loads(pickled_tokens)
-  
+        try:
+            return pickle.loads(pickled_tokens)
+        except:
+            pass
+    
     try:  
         user_tokens = TokenCollection.objects.get(user=user)
     except TokenCollection.DoesNotExist:
@@ -116,6 +119,9 @@ def load_auth_tokens(user=None):
         
     if user_tokens:
         cache.set('gdata_pickled_tokens:%s' % user, user_tokens.pickled_tokens)
-        return pickle.loads(user_tokens.pickled_tokens)
+        try:
+            return pickle.loads(user_tokens.pickled_tokens)
+        except:
+            pass
     
     return {}
