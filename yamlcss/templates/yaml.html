@@ -54,12 +54,12 @@
       <div id="main">
         <a id="content"></a>
         {% block content-header %}
-          {% if error %}<div class="warning">{{ error }}</div>{% endif %}
-          {% if info %}<div class="info">{{ info }}</div>{% endif %}
           {% if messages %}
-            {% for message in messages %}
-              <div class="info">{{ message }}</div>
-            {% endfor %}
+          <ul class="messages">
+              {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+              {% endfor %}
+          </ul>
           {% endif %}
         {% endblock %}
         {% block content %}{% endblock %}
