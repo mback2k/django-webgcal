@@ -1,11 +1,5 @@
-from django.conf.urls.defaults import *
 from django.conf import settings
-
-urlpatterns = patterns('django.contrib.auth.views',
-    (r'^%s$' % getattr(settings, 'LOGIN_URL', '/login/')[1:], 'login'),
-    (r'^%s$' % getattr(settings, 'LOGOUT_URL', '/logout/')[1:], 'logout'),
-)
-
+from django.conf.urls.defaults import *
 from django.contrib.auth import views, authenticate, login, logout
 from django.contrib.admin import sites
 
@@ -34,3 +28,8 @@ def view_logout(request):
 views.login = view_login
 views.logout = view_logout
 sites.AdminSite.login = lambda s, r: login(r)
+
+urlpatterns = patterns('django.contrib.auth.views',
+    (r'^%s$' % getattr(settings, 'LOGIN_URL', '/login/')[1:], 'login'),
+    (r'^%s$' % getattr(settings, 'LOGOUT_URL', '/logout/')[1:], 'logout'),
+)
