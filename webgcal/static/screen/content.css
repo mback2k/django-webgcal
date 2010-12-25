@@ -149,12 +149,12 @@
   */
 
   .highlight { color: #f60; }
-  .dimmed { color: #888; }
+  .dimmed, .debug { color: #888; }
 
   .info { background: #f8f8f8; color: #666; padding: 10px; margin-bottom: 0.5em; font-size: 91.7%; }
 
-  .note { background: #efe; color: #040; border: 2px #484 solid; padding: 10px; margin-bottom: 1em; }
-  .important { background: #ffe; color: #440; border: 2px #884 solid; padding: 10px; margin-bottom: 1em; }
+  .note, .success { background: #efe; color: #040; border: 2px #484 solid; padding: 10px; margin-bottom: 1em; }
+  .important, .error { background: #ffe; color: #440; border: 2px #884 solid; padding: 10px; margin-bottom: 1em; }
   .warning { background: #fee; color: #400; border: 2px #844 solid; padding: 10px; margin-bottom: 1em; }
 
   .float_left { float: left; display:inline; margin-right: 1em; margin-bottom: 0.15em; }
@@ -219,7 +219,10 @@
   .left { text-align: left; }
   .center { text-align: center; }
   .right { text-align: right; }
-
+  
+  ul.messages { padding: 0; margin: 0; }
+  ul.messages li { list-style: none; margin-left: 0; }
+  
   form.columnar fieldset legend img, img.status { margin-bottom: -2px; }
   form.columnar fieldset em.hint { font-size: 80%; padding-left: 30%; }
 }

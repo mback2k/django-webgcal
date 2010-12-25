@@ -9,6 +9,7 @@ from webgcal.models import Calendar, Website
 from webgcal.tokens import run_on_django
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
+from django.contrib import messages
 
 def show_home(request):
     return render_to_response('show_home.html', context_instance=RequestContext(request))
@@ -23,16 +24,13 @@ def show_dashboard(request):
     try:
         calendar_service.AuthSubTokenInfo()
     except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        message = '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request')
-    else:
-        message = None
+        messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
 
     template_values = {
         'calendars': calendars,
         'create_form': create_form,
         'edit_form': None,
         'calendar': None,
-        'message': message,
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -53,7 +51,6 @@ def create_item(request):
         'create_form': create_form,
         'edit_form': None,
         'calendar': None,
-        'message': None,
     }
     
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -68,7 +65,6 @@ def show_item(request, id):
         'create_form': None,
         'edit_form': None,
         'calendar': calendar,
-        'message': None,
     }
     
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -91,7 +87,6 @@ def edit_item(request, id):
         'create_form': None,
         'edit_form': edit_form,
         'calendar': calendar,
-        'message': None,
     }
     
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -102,14 +97,14 @@ def delete_item(request, id):
     calendar = get_object_or_404(Calendar, user=request.user, id=id)
     calendar.delete()
     create_form = CalendarForm()
-    message = 'Deleted calendar from your Dashboard!'
-
+    
+    messages.success(request, 'Deleted calendar from your Dashboard!')
+    
     template_values = {
         'calendars': services,
         'create_form': create_form,
         'edit_form': None,
         'calendar': None,
-        'message': message,
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
@@ -119,14 +114,14 @@ def delete_item_ask(request, id):
     calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
     calendar = get_object_or_404(Calendar, user=request.user, id=id)
     create_form = CalendarForm()
-    message = 'Do you want to delete %s? <a href="%s" title="Yes">Yes</a>' % (calendar, reverse('webgcal.views.delete_item', kwargs={'id': id}))
-
+    
+    messages.warning(request, 'Do you want to delete %s? <a href="%s" title="Yes">Yes</a>' % (calendar, reverse('webgcal.views.delete_item', kwargs={'id': id})))
+    
     template_values = {
         'calendars': calendars,
         'create_form': create_form,
         'edit_form': None,
         'calendar': None,
-        'message': message,
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))

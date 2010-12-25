@@ -9,7 +9,6 @@
 
 {% block content %}
   <div id="upper">
-    {% if message %}<p class="important"><span class="float_right"><a href="{% url webgcal.views.show_dashboard %}" title="Close" class="toggle">Close</a></span><span>{{ message|safe }}</span></p>{% else %}
     {% if calendar %}
     {% if edit_form %}
     <form action="{% url webgcal.views.edit_item edit_form.id %}" method="post" class="yform columnar">{% csrf_token %}
@@ -22,7 +21,6 @@
       </div>
     </fieldset>
     </form>
-    {% endif %}
     {% endif %}
     {% endif %}
   </div>
