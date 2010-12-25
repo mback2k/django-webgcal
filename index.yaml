@@ -31,3 +31,14 @@ indexes:
   - name: user_id
   - name: tstamp
     direction: desc
+
+- kind: webgcal_website
+  properties:
+  - name: calendar_id
+  - name: crdate
+    direction: desc
+
+- kind: webgcal_website
+  properties:
+  - name: calendar_id
+  - name: name

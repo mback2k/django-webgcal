@@ -8,53 +8,98 @@
 {% endblock %}
 
 {% block content %}
-  <div id="upper">
-    {% if calendar %}
-    {% if edit_form %}
-    <form action="{% url webgcal.views.edit_item edit_form.id %}" method="post" class="yform columnar">{% csrf_token %}
-    <fieldset>
-      <legend><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="" /> <strong>Edit Calendar:</strong></legend>
-      {{ edit_form.as_yaml }}
-      <div class="type-button">
-        <input type="submit" name="submit" value="Save Calendar" />
-        <a href="{% url webgcal.views.show_dashboard %}" title="Close" class="toggle"><input type="button" name="close" value="Close" /></a>
-      </div>
-    </fieldset>
-    </form>
-    {% endif %}
-    {% endif %}
-  </div>
-  <div id="base">
-    <table class="full">
-      <tbody>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Websites</th>
-          <th scope="col">Status</th>
-          <th scope="col">Manage</th>
-        </tr>
-        {% for calendar in calendars %}
-        <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
-          <td>{{ calendar.name }}</td>
-          <td>{{ calendar.websites }}</td>
-          <td><a href="{% url webgcal.views.show_item calendar.id %}" title="Show" class="toggle"><img src="{{ STATICFILES_URL }}icons/{% ifequal calendar.statusimg "good" %}accept{% else %}error{% endifequal %}.png" alt="Status" /></a></td>
-          <td><a href="{% url webgcal.views.edit_item calendar.id %}" title="Edit" class="toggle"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.delete_item_ask calendar.id %}" title="Delete" class="delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <div id="lower">
-    {% if create_form %}
-    <form action="{% url webgcal.views.create_item %}" method="post" class="yform columnar">{% csrf_token %}
-    <fieldset>
-      <legend><img src="{{ STATICFILES_URL }}icons/add.png" alt="" /> <strong>Add Calendar:</strong></legend>
-      {{ create_form.as_yaml }}
-      <div class="type-button">
-        <input type="submit" name="submit" value="Add Calendar" />
-      </div>
-    </fieldset>
-    </form>
-    {% endif %}
-  </div>
+  {% if calendar %}
+  {% if calendar_edit_form %}
+  <form action="{% url webgcal.views.edit_calendar calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
+  <fieldset>
+    <legend><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="" /> <strong>Edit Calendar:</strong></legend>
+    {{ calendar_edit_form.as_yaml }}
+    <div class="type-button">
+      <input type="submit" name="submit" value="Save Calendar" />
+      <a href="{% url webgcal.views.show_dashboard %}" title="Close"><input type="button" name="close" value="Close" /></a>
+    </div>
+  </fieldset>
+  </form>
+  {% else %}
+  {% if website_edit_form %}
+  <form action="{% url webgcal.views.edit_website calendar.id website.id %}" method="post" class="yform columnar">{% csrf_token %}
+  <fieldset>
+    <legend><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="" /> <strong>Edit Website:</strong></legend>
+    {{ website_edit_form.as_yaml }}
+    <div class="type-button">
+      <input type="submit" name="submit" value="Save Website" />
+      <a href="{% url webgcal.views.show_calendar calendar.id %}" title="Close"><input type="button" name="close" value="Close" /></a>
+    </div>
+  </fieldset>
+  </form>
+  {% endif %}
+  <table class="full">
+    <thead>
+      <tr><th scope="col" colspan="4">Websites of {{ calendar.name }}:</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Website</th>
+        <th scope="col">Last Update</th>
+        <th class="right"><a href="{% url webgcal.views.show_dashboard %}" title="Close">Close</a></th>
+      </tr>
+      {% if calendar.websites %}
+      {% for website in calendar.websites %}
+      <tr {% if not website.enabled %}style="background: #fff8f8;"{% endif %}>
+        <td>{{ website.name }}</td>
+        <td>{{ website.href }}</td>
+        <td>{% if website.update %}{{ website.update|localedatetime }}{% else %}None{% endif %}</td>
+        <td><a href="{% url webgcal.views.edit_website calendar.id website.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_website calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not website.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not website.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_website_ask calendar.id website.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="4">No websites added yet.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  {% if website_create_form %}
+  <form action="{% url webgcal.views.create_website calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
+  <fieldset>
+    <legend><img src="{{ STATICFILES_URL }}icons/add.png" alt="" /> <strong>Add Website:</strong></legend>
+    {{ website_create_form.as_yaml }}
+    <div class="type-button">
+      <input type="submit" name="submit" value="Add Website" />
+    </div>
+  </fieldset>
+  </form>
+  {% endif %}
+  {% endif %}
+  {% endif %}
+  <table class="full">
+    <tbody>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Websites</th>
+        <th scope="col">Last Update</th>
+        <th scope="col">Manage</th>
+      </tr>
+      {% for calendar in calendars %}
+      <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
+        <td>{{ calendar.name }}</td>
+        <td><a href="{% url webgcal.views.show_calendar calendar.id %}" title="Show">{{ calendar.websites.count }}</a></td>
+        <td>{% if calendar.update %}{{ calendar.update|localedatetime }}{% else %}None{% endif %}</td>
+        <td><a href="{% url webgcal.views.edit_calendar calendar.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_calendar calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_calendar_ask calendar.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if calendar_create_form %}
+  <form action="{% url webgcal.views.create_calendar %}" method="post" class="yform columnar">{% csrf_token %}
+  <fieldset>
+    <legend><img src="{{ STATICFILES_URL }}icons/add.png" alt="" /> <strong>Add Calendar:</strong></legend>
+    {{ calendar_create_form.as_yaml }}
+    <div class="type-button">
+      <input type="submit" name="submit" value="Add Calendar" />
+    </div>
+  </fieldset>
+  </form>
+  {% endif %}
 {% endblock %}

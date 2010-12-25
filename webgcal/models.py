@@ -10,17 +10,25 @@ class Calendar(models.Model):
     name = models.CharField(_('name'), max_length=100)
     href = models.TextField(_('href'))
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
-    tstamp = models.DateTimeField(_('date updated'), auto_now=True)
+    tstamp = models.DateTimeField(_('date edited'), auto_now=True)
+    update = models.DateTimeField(_('date updated'), blank=True, null=True)
+    enabled = models.BooleanField(_('enabled'), default=True)
     
     def __unicode__(self):
         return self.name
+        
+    @cache_property
+    def websites(self):
+        return self.website_set.order_by('name')
         
 class Website(models.Model):
     calendar = models.ForeignKey(Calendar)
     name = models.CharField(_('name'), max_length=100)
     href = models.TextField(_('href'))
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
-    tstamp = models.DateTimeField(_('date updated'), auto_now=True)
+    tstamp = models.DateTimeField(_('date edited'), auto_now=True)
+    update = models.DateTimeField(_('date updated'), blank=True, null=True)
+    enabled = models.BooleanField(_('enabled'), default=True)
     
     def __unicode__(self):
         return self.name
@@ -30,7 +38,7 @@ class Event(models.Model):
     summary = models.CharField(_('summary'), max_length=100)
     dtstart = models.DateTimeField(_('dtstart'))
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
-    tstamp = models.DateTimeField(_('date updated'), auto_now=True)
+    tstamp = models.DateTimeField(_('date edited'), auto_now=True)
 
     def __unicode__(self):
         return self.summary
