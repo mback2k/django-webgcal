@@ -80,7 +80,8 @@ def _update_calendar(calendar_id, offset=0, limit=10):
             websites = calendar.websites.count()
             for website in calendar.websites:
                 for event in website.events:
-                    events.append((event, website))
+                    if not website.update or event.tstamp > website.update:
+                        events.append((event, website))
             
             logging.info('Events with offset at %d and limit of %d' % (offset, limit))
             
@@ -222,10 +223,16 @@ def _parse_website(calendar_id, website_id):
             if not key in events:
                 Event.objects.create(website=website, summary=event_remote.summary, dtstart=event_remote.dtstart)
             else:
+                save = False
                 event = events[key]
-                event.summary = event_remote.summary
-                event.dtstart = event_remote.dtstart
-                event.save()
+                if event.summary != event_remote.summary:
+                    event.summary = event_remote.summary
+                    save = True
+                if event.dtstart != event_remote.dtstart:
+                    event.dtstart = event_remote.dtstart
+                    save = True
+                if save:
+                    event.save()
         
         for key, event in events.iteritems():
             if not key in events_remote:
