@@ -32,6 +32,7 @@ class Website(models.Model):
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
+    errors = models.IntegerField(_('errors'), default=0)
     
     def __unicode__(self):
         return self.name
@@ -43,11 +44,11 @@ class Website(models.Model):
 class Event(models.Model):
     website = models.ForeignKey(Website)
     href = models.TextField(_('href'))
-    summary = models.CharField(_('summary'), max_length=250)
-    dtstart = models.DateTimeField(_('dtstart'))
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
     deleted = models.BooleanField(_('deleted'), default=False)
+    summary = models.CharField(_('summary'), max_length=250)
+    dtstart = models.DateTimeField(_('dtstart'))
 
     def __unicode__(self):
         return self.summary

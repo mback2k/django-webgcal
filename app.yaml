@@ -17,6 +17,14 @@ handlers:
 - url: /media
   static_dir: _generated_media
 
+- url: /cron/.*
+  script: djangoappengine/main/main.py
+  login: admin
+
+- url: /taskqueue/.*
+  script: djangoappengine/main/main.py
+  login: admin
+
 - url: /.*
   script: djangoappengine/main/main.py
   secure: always

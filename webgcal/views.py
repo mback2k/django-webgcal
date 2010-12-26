@@ -56,7 +56,7 @@ def create_calendar(request):
         calendar = create_form.save(commit=False)
         calendar.user = request.user
         calendar.save()
-        create_form = None
+        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
         'calendars': calendars,
@@ -112,7 +112,7 @@ def delete_calendar(request, calendar_id):
     messages.success(request, 'Deleted calendar from your Dashboard!')
     
     template_values = {
-        'calendars': services,
+        'calendars': calendars,
         'calendar_create_form': create_form,
     }
 
@@ -144,12 +144,11 @@ def create_website(request, calendar_id):
         website = create_form.save(commit=False)
         website.calendar = calendar
         website.save()
-        create_form = None
+        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
         'calendars': calendars,
         'calendar': calendar,
-        'website': website,
         'website_create_form': create_form,
     }
     

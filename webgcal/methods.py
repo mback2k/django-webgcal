@@ -13,26 +13,18 @@ from django.http import HttpResponse
 from webgcal.models import Calendar, Website, Event
 from webgcal.tokens import run_on_django
 
-@login_required
-def start_calendar(request):
-    for calendar in Calendar.objects.all():
-        deferred.defer(_update_calendar, calendar.id)
-    return HttpResponse('deferred')
-
-@login_required
-def start_website(request):
+def start_worker(request):
     for calendar in Calendar.objects.all():
         for website in calendar.websites:
+            website.running = True
+            website.save()
             deferred.defer(_parse_website, calendar.id, website.id)
     return HttpResponse('deferred')
 
-
-@login_required
 def update_calendar(request, calendar_id):
     deferred.defer(_update_calendar, calendar_id)
     return HttpResponse('deferred')
 
-@login_required
 def parse_website(request, calendar_id, website_id):
     deferred.defer(_parse_website, calendar_id, website_id)
     return HttpResponse('deferred')
@@ -85,14 +77,15 @@ def _update_calendar(calendar_id, offset=0, limit=10):
             batch = gdata.calendar.CalendarEventFeed()
             
             events = []
+            websites = calendar.websites.count()
             for website in calendar.websites:
                 for event in website.events:
-                    events.append(event)
+                    events.append((event, website))
             
             logging.info('Events with offset at %d and limit of %d' % (offset, limit))
             
             requests = {}
-            for event in events[offset:offset+limit]:
+            for event, website in events[offset:offset+limit]:
                 if event.href:
                     try:
                         entry = calendar_service.GetCalendarEventEntry(event.href)
@@ -101,7 +94,10 @@ def _update_calendar(calendar_id, offset=0, limit=10):
             
                 if event.href:
                     if not event.deleted:
-                        entry.title = atom.Title(text=event.summary)
+                        if websites > 1:
+                            entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
+                        else:
+                            entry.title = atom.Title(text=event.summary)
                         if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
                             entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                         else:
@@ -122,7 +118,10 @@ def _update_calendar(calendar_id, offset=0, limit=10):
                 else:
                     if not event.deleted:
                         entry = gdata.calendar.CalendarEventEntry()
-                        entry.title = atom.Title(text=event.summary)
+                        if websites > 1:
+                            entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
+                        else:
+                            entry.title = atom.Title(text=event.summary)
                         if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
                             entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                         else:
@@ -198,6 +197,9 @@ def _parse_website(calendar_id, website_id):
         
         if not website.enabled:
             return
+            
+        website.running = True
+        website.save()
         
         logging.info('Parsing website %s for %s' % (website.name, calendar.user))
         
@@ -216,18 +218,28 @@ def _parse_website(calendar_id, website_id):
         
         logging.info('Updating website %s for %s' % (website.name, calendar.user))
         
-        for key, event in events_remote.iteritems():
+        for key, event_remote in events_remote.iteritems():
             if not key in events:
-                Event.objects.create(website=website, summary=event.summary, dtstart=event.dtstart)
+                Event.objects.create(website=website, summary=event_remote.summary, dtstart=event_remote.dtstart)
+            else:
+                event = events[key]
+                event.summary = event_remote.summary
+                event.dtstart = event_remote.dtstart
+                event.save()
         
         for key, event in events.iteritems():
             if not key in events_remote:
                 event.deleted = True
                 event.save()
                 
+        website.running = False
         website.update = datetime.datetime.now()
         website.save()
         logging.info('Updated website %s for %s' % (website.name, calendar.user))
+        
+        if not calendar.websites.filter(running=True).count():
+            deferred.defer(_update_calendar, calendar_id)
+            logging.info('Deferred calendar %s sync for %s' % (calendar.name, calendar.user))
         
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
