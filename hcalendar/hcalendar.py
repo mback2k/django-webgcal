@@ -46,6 +46,8 @@ class vEvent(object):
     def getContent(self, attr):
         if not attr in self.content:
             soup = self.soup.find(attrs=attr)
+            if not soup:
+                return None
             subs = soup.findAll(attrs='value')
             soup = subs if subs else [soup]
             content = ''
