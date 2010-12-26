@@ -1,6 +1,6 @@
 import os.path
-import gdata.calendar.service
 import gdata.auth
+import gdata.calendar.service
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
@@ -240,7 +240,8 @@ def authsub_request(request):
     try:
         calendar_service.AuthSubTokenInfo()
     except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        return HttpResponseRedirect(calendar_service.GenerateAuthSubURL(request.build_absolute_uri(reverse('webgcal.views.authsub_response')), 'https://www.google.com/calendar/feeds/', secure=True, session=True))
+        calendar_service.token_store.remove_all_tokens()
+        return HttpResponseRedirect(calendar_service.GenerateAuthSubURL(request.build_absolute_uri(reverse('webgcal.views.authsub_response')), 'http://www.google.com/calendar/feeds/', secure=True, session=True))
     
     return HttpResponseRedirect(reverse('webgcal.views.authsub_response'))
 
@@ -249,11 +250,16 @@ def authsub_response(request):
     calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
     
     session_token = None
-    auth_token = gdata.auth.extract_auth_sub_token_from_url(request.get_full_path(), rsa_key=file('%s/certificates/rsakey.pem' % os.path.dirname(__file__), 'r').read())
+    auth_token = gdata.auth.extract_auth_sub_token_from_url(request.build_absolute_uri(), rsa_key=file('%s/certificates/rsakey.pem' % os.path.dirname(__file__), 'r').read())
     
     if auth_token:
         session_token = calendar_service.upgrade_to_session_token(auth_token)
     if session_token:
         calendar_service.token_store.add_token(session_token) 
 
-    return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
+    try:
+        calendar_service.AuthSubTokenInfo()
+    except gdata.service.RequestError:
+        return HttpResponseRedirect(reverse('webgcal.views.authsub_request'))
+    else:
+        return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))

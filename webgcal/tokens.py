@@ -5,14 +5,14 @@ from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
 
-def run_on_django(gdata_service, request):
+def run_on_django(gdata_service, request=None):
     try:
         import google.appengine
     except:
         pass
     else:
         from gdata.alt.appengine import run_on_appengine
-        run_on_appengine(gdata_service)
+        run_on_appengine(gdata_service, deadline=10)
         
     gdata_service.token_store = DjangoTokenStore(request)
     return gdata_service
@@ -23,7 +23,7 @@ class TokenCollection(models.Model):
 
 class DjangoTokenStore(atom.token_store.TokenStore):
     def __init__(self, request):
-        self.user = request.user
+        self.user = request.user if request else None
 
     def add_token(self, token):
         tokens = load_auth_tokens(self.user)

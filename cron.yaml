@@ -1,4 +1,12 @@
 cron:
+- description: update calendars
+  url: /cron/calendar/start/
+  schedule: every 2 hours synchronized
+
+- description: parse websites
+  url: /cron/website/start/
+  schedule: every 2 hours synchronized
+
 - description: keep alive
   url: /
   schedule: every 2 minutes

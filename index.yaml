@@ -32,6 +32,11 @@ indexes:
   - name: tstamp
     direction: desc
 
+- kind: webgcal_event
+  properties:
+  - name: website_id
+  - name: dtstart
+
 - kind: webgcal_website
   properties:
   - name: calendar_id
