@@ -51,8 +51,7 @@ class DjangoTokenStore(atom.token_store.TokenStore):
                 return token
             else:
                 del tokens[url]
-        
-        save_auth_tokens(tokens, self.user)
+                save_auth_tokens(tokens, self.user)
         
         for scope, token in tokens.iteritems():
             if token.valid_for_scope(url):
