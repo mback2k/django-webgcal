@@ -14,6 +14,7 @@ class Calendar(models.Model):
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
+    status = models.TextField(_('status'), blank=True, null=True)
     errors = models.IntegerField(_('errors'), default=0)
     
     def __unicode__(self):
@@ -32,6 +33,7 @@ class Website(models.Model):
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
+    status = models.TextField(_('status'), blank=True, null=True)
     errors = models.IntegerField(_('errors'), default=0)
     
     def __unicode__(self):

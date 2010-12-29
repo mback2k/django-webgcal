@@ -36,6 +36,7 @@ def _update_calendar(calendar_id):
             return
             
         calendar.running = True
+        calendar.status = 'Syncing calendar'
         calendar.errors = 0
         calendar.save()
     
@@ -89,11 +90,13 @@ def _update_calendar(calendar_id):
         elif e.args[0]['status'] in [401, 403]:
             calendar.enabled = False
             calendar.running = False
+            calendar.status = 'Error: %s' % _parse_request_error(e.args[0])
             calendar.errors = 0
             calendar.save()
             raise deferred.PermanentTaskFailure(e)
         else:
             calendar.running = False
+            calendar.status = 'Error: %s' % _parse_request_error(e.args[0])
             calendar.errors = 0
             calendar.save()
             raise deferred.PermanentTaskFailure(e)
@@ -101,6 +104,7 @@ def _update_calendar(calendar_id):
     except gdata.service.NonAuthSubToken, e:
         calendar.enabled = False
         calendar.running = False
+        calendar.status = 'Error: NonAuthSubToken'
         calendar.errors = 0
         calendar.save()
         raise deferred.PermanentTaskFailure(e)
@@ -117,6 +121,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
             
         website = Website.objects.get(calendar=calendar, id=website_id)
         website.running = True
+        website.status = 'Syncing calendar'
         website.errors = 0
         website.save()
         
@@ -216,12 +221,14 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
         else:
             website.running = False
+            website.status = 'Finished syncing website'
             website.save()
             logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
         
         if not calendar.websites.filter(running=True).count():
             calendar = Calendar.objects.get(id=calendar_id)
             calendar.running = False
+            calendar.status = 'Finished syncing calendar'
             calendar.update = datetime.datetime.now()
             calendar.save()
             logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar.name, calendar.user))
@@ -234,18 +241,21 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
         elif e.args[0]['status'] in [401, 403]:
             website.enabled = False
             website.running = False
+            website.status = 'Error: %s' % _parse_request_error(e.args[0])
             website.errors = 0
             website.save()
             raise deferred.PermanentTaskFailure(e)
         else:
             website.running = False
             website.errors = 0
+            website.status = 'Error: %s' % _parse_request_error(e.args[0])
             website.save()
             raise deferred.PermanentTaskFailure(e)
             
     except gdata.service.NonAuthSubToken, e:
         website.enabled = False
         website.running = False
+        website.status = 'Error: NonAuthSubToken'
         website.errors = 0
         website.save()
         raise deferred.PermanentTaskFailure(e)
@@ -265,6 +275,7 @@ def _parse_website(calendar_id, website_id):
             return
             
         website.running = True
+        website.status = 'Parsing website'
         website.save()
         
         logging.info('Parsing website %s for %s' % (website.name, calendar.user))
@@ -305,6 +316,7 @@ def _parse_website(calendar_id, website_id):
                 event.save()
                 
         website.running = False
+        website.status = 'Finished parsing website'
         website.update = datetime.datetime.now()
         website.save()
         logging.info('Updated website %s for %s' % (website.name, calendar.user))
@@ -318,3 +330,7 @@ def _parse_website(calendar_id, website_id):
         
     except Website.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
+
+def _parse_request_error(error):
+    if 'body' in error:
+        return hcalendar.BeautifulSoup.BeautifulSoup(error['body']).find('title').string.decode('utf-8')
