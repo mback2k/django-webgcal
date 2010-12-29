@@ -13,7 +13,10 @@ def run_on_django(gdata_service, request=None):
     else:
         from gdata.alt.appengine import run_on_appengine
         run_on_appengine(gdata_service, deadline=10)
-        
+    try:
+        gdata_service._SetSessionId(None)
+    except:
+        pass
     gdata_service.token_store = DjangoTokenStore(request)
     return gdata_service
 
@@ -85,7 +88,8 @@ def save_auth_tokens(token_dict, user=None):
     if user is None:
         return None
     
-    cache.set('gdata_pickled_tokens:%s' % user, pickle.dumps(token_dict))
+    pickled_tokens = pickle.dumps(token_dict)
+    cache.set('gdata_pickled_tokens:%s' % user, pickled_tokens)
     
     try:  
         user_tokens = TokenCollection.objects.get(user=user)
@@ -93,10 +97,10 @@ def save_auth_tokens(token_dict, user=None):
         user_tokens = None        
     
     if user_tokens:
-        user_tokens.pickled_tokens = pickle.dumps(token_dict)
+        user_tokens.pickled_tokens = pickled_tokens
         return user_tokens.save()
     else:
-        user_tokens = TokenCollection(user=user, pickled_tokens=pickle.dumps(token_dict))
+        user_tokens = TokenCollection(user=user, pickled_tokens=pickled_tokens)
         return user_tokens.save()
      
 
