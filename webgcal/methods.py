@@ -187,28 +187,29 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                     batch.AddDelete(entry=entry)
                     requests[entry.batch_id.text] = event
                     logging.info('%s %s' % (entry.batch_id.text, event.summary))
-                    
-        logging.info('Fetching event feed')
-        calendar_events = calendar_service.GetCalendarEventFeed(calendar_feed)
-        logging.info('Executing batch request')
-        result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
-        logging.info('Executed batch request')
         
-        for entry in result.entry:
-            if entry.batch_id and entry.batch_id.text in requests:
-                if entry.batch_status.code in ['200', '201']:
-                    logging.info('%s %s %s' % (entry.batch_id.text, entry.batch_status.code, entry.batch_status.reason))
-                    event = requests[entry.batch_id.text]
-                    if event.deleted and entry.batch_operation.type == gdata.BATCH_DELETE:
-                        event.delete()
-                    else:
-                        event.href = entry.id.text
-                        event.update = datetime.datetime.now()+datetime.timedelta(minutes=1)
-                        event.save()
-                elif not entry.batch_status.code in ['409']:
-                    logging.error(entry)
-            else:
-                logging.warning(entry)
+        if requests:
+            logging.info('Fetching event feed')
+            calendar_events = calendar_service.GetCalendarEventFeed(calendar_feed)
+            logging.info('Executing batch request')
+            result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
+            logging.info('Executed batch request')
+          
+            for entry in result.entry:
+                if entry.batch_id and entry.batch_id.text in requests:
+                    if entry.batch_status.code in ['200', '201']:
+                        logging.info('%s %s %s' % (entry.batch_id.text, entry.batch_status.code, entry.batch_status.reason))
+                        event = requests[entry.batch_id.text]
+                        if event.deleted and entry.batch_operation.type == gdata.BATCH_DELETE:
+                            event.delete()
+                        else:
+                            event.href = entry.id.text
+                            event.update = datetime.datetime.now()+datetime.timedelta(minutes=1)
+                            event.save()
+                    elif not entry.batch_status.code in ['409']:
+                        logging.error(entry)
+                else:
+                    logging.warning(entry)
         
         if offset+limit < website.events.count():
             deferred.defer(_update_calendar_sync, calendar_id, website_id, calendar_feed, offset+limit, limit, _countdown=1)
