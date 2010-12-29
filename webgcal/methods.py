@@ -153,6 +153,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%S%z'))]
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
+                    entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
                     entry.batch_id = gdata.BatchId(text='update-request-%d' % event.id)
                     batch.AddUpdate(entry=entry)
                     requests[entry.batch_id.text] = event
@@ -177,6 +178,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%S%z'))]
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
+                    entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
                     entry.batch_id = gdata.BatchId(text='insert-request-%d' % event.id)
                     batch.AddInsert(entry=entry)
                     requests[entry.batch_id.text] = event
@@ -192,14 +194,17 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
         logging.info('Executed batch request')
         
         for entry in result.entry:
-            if entry.batch_id and entry.batch_id.text in requests and entry.batch_status.code in ['200', '201']:
-                logging.info('%s %s %s' % (entry.batch_id.text, entry.batch_status.code, entry.batch_status.reason))
-                event = requests[entry.batch_id.text]
-                if event.deleted and entry.batch_operation.type == 'delete':
-                    event.delete()
-                elif not event.href:
-                    event.href = entry.id.text
-                    event.save()
+            if entry.batch_id and entry.batch_id.text in requests:
+                if entry.batch_status.code in ['200', '201']:
+                    logging.info('%s %s %s' % (entry.batch_id.text, entry.batch_status.code, entry.batch_status.reason))
+                    event = requests[entry.batch_id.text]
+                    if event.deleted and entry.batch_operation.type == gdata.BATCH_DELETE:
+                        event.delete()
+                    elif not event.href:
+                        event.href = entry.id.text
+                        event.save()
+                elif not entry.batch_status.code in ['409']:
+                    logging.error(entry)
             else:
                 logging.warning(entry)
         
