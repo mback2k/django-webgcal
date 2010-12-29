@@ -133,15 +133,38 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
         for event in website.events[offset:offset+limit]:
             if not website.enabled:
                 event.deleted = True
+                event.update = None
             
-            if event.href:
+            if event.href and not event.update or event.update < event.tstamp or event.update < datetime.datetime.now()-datetime.timedelta(days=1):
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
                     if e.args[0]['status'] in [401, 403, 404]:
                         event.href = ''
             
-            if event.href:
+            if not event.href:            
+                if not event.deleted:
+                    entry = gdata.calendar.CalendarEventEntry()
+                    if websites > 1:
+                        entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
+                    else:
+                        entry.title = atom.Title(text=event.summary)
+                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
+                    else:
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%S%z'))]
+                    entry.transparency = gdata.calendar.Transparency()
+                    entry.transparency.value = 'TRANSPARENT'
+                    entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
+                    entry.batch_id = gdata.BatchId(text='insert-request-%d' % event.id)
+                    batch.AddInsert(entry=entry)
+                    requests[entry.batch_id.text] = event
+                    logging.info('%s %s' % (entry.batch_id.text, event.summary))
+                    
+                else:
+                    event.delete()
+
+            elif not event.update or event.update < event.tstamp:
                 if not event.deleted:
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -164,28 +187,6 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                     batch.AddDelete(entry=entry)
                     requests[entry.batch_id.text] = event
                     logging.info('%s %s' % (entry.batch_id.text, event.summary))
-            
-            else:
-                if not event.deleted:
-                    entry = gdata.calendar.CalendarEventEntry()
-                    if websites > 1:
-                        entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
-                    else:
-                        entry.title = atom.Title(text=event.summary)
-                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
-                    else:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%S%z'))]
-                    entry.transparency = gdata.calendar.Transparency()
-                    entry.transparency.value = 'TRANSPARENT'
-                    entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
-                    entry.batch_id = gdata.BatchId(text='insert-request-%d' % event.id)
-                    batch.AddInsert(entry=entry)
-                    requests[entry.batch_id.text] = event
-                    logging.info('%s %s' % (entry.batch_id.text, event.summary))
-                    
-                else:
-                    event.delete()
                     
         logging.info('Fetching event feed')
         calendar_events = calendar_service.GetCalendarEventFeed(calendar_feed)
@@ -200,8 +201,9 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                     event = requests[entry.batch_id.text]
                     if event.deleted and entry.batch_operation.type == gdata.BATCH_DELETE:
                         event.delete()
-                    elif not event.href:
+                    else:
                         event.href = entry.id.text
+                        event.update = datetime.datetime.now()+datetime.timedelta(minutes=1)
                         event.save()
                 elif not entry.batch_status.code in ['409']:
                     logging.error(entry)
@@ -214,14 +216,14 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
         else:
             website.running = False
             website.save()
-            logging.info('Finished sync of calendar "%s" and website "%s" for %s' % (calendar.name, website.name, calendar.user))
+            logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
         
         if not calendar.websites.filter(running=True).count():
             calendar = Calendar.objects.get(id=calendar_id)
             calendar.running = False
             calendar.update = datetime.datetime.now()
             calendar.save()
-            logging.info('Finished sync of calendar "%s" for %s' % (calendar.name, calendar.user))
+            logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar.name, calendar.user))
 
     except gdata.service.RequestError, e:
         if e.args[0]['status'] in [401, 302] and website.errors < 15:

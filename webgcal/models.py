@@ -46,6 +46,7 @@ class Event(models.Model):
     href = models.TextField(_('href'))
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
+    update = models.DateTimeField(_('date updated'), blank=True, null=True)
     deleted = models.BooleanField(_('deleted'), default=False)
     summary = models.CharField(_('summary'), max_length=250)
     dtstart = models.DateTimeField(_('dtstart'))

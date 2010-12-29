@@ -93,7 +93,7 @@ def switch_calendar(request, calendar_id):
     calendar.save()
     create_form = CalendarForm()
     
-    messages.success(request, 'Switched calendar %s!' % ('on' if calendar.enabled else 'off'))
+    messages.success(request, 'Switched calendar %s %s!' % (calendar, 'on' if calendar.enabled else 'off'))
     
     template_values = {
         'calendars': calendars,
@@ -109,7 +109,7 @@ def delete_calendar(request, calendar_id):
     calendar.delete()
     create_form = CalendarForm()
     
-    messages.success(request, 'Deleted calendar from your Dashboard!')
+    messages.success(request, 'Deleted calendar %s from your Dashboard!' % calendar)
     
     template_values = {
         'calendars': calendars,
@@ -185,7 +185,7 @@ def switch_website(request, calendar_id, website_id):
     website.save()
     create_form = WebsiteForm()
     
-    messages.success(request, 'Switched website %s!' % ('on' if website.enabled else 'off'))
+    messages.success(request, 'Switched website %s %s!' % (website, 'on' if website.enabled else 'off'))
     
     template_values = {
         'calendars': calendars,
@@ -204,7 +204,7 @@ def delete_website(request, calendar_id, website_id):
     website.delete()
     create_form = WebsiteForm()
     
-    messages.success(request, 'Deleted website from your Dashboard!')
+    messages.success(request, 'Deleted website %s from your Dashboard!' % website)
 
     template_values = {
         'calendars': calendars,
