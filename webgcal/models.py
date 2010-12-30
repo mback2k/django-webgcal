@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 class Calendar(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(_('name'), max_length=100)
-    href = models.TextField(_('href'))
+    href = models.URLField(_('href'), verify_exists=False)
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
@@ -27,7 +27,7 @@ class Calendar(models.Model):
 class Website(models.Model):
     calendar = models.ForeignKey(Calendar)
     name = models.CharField(_('name'), max_length=100)
-    href = models.TextField(_('href'))
+    href = models.URLField(_('href'), verify_exists=False)
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
@@ -45,7 +45,7 @@ class Website(models.Model):
 
 class Event(models.Model):
     website = models.ForeignKey(Website)
-    href = models.TextField(_('href'))
+    href = models.URLField(_('href'), verify_exists=False)
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
     update = models.DateTimeField(_('date updated'), blank=True, null=True)
