@@ -140,7 +140,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, offset=0, limi
                 event.deleted = True
                 event.update = None
             
-            if event.href and not event.update or event.update < event.tstamp or event.update < datetime.datetime.now()-datetime.timedelta(days=1):
+            if event.href and (not event.update or event.update < event.tstamp or event.update < datetime.datetime.now()-datetime.timedelta(days=1)):
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
