@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
@@ -48,7 +49,7 @@ class Event(models.Model):
     href = models.URLField(_('href'), verify_exists=False)
     crdate = models.DateTimeField(_('date created'), auto_now_add=True)
     tstamp = models.DateTimeField(_('date edited'), auto_now=True)
-    update = models.DateTimeField(_('date updated'), blank=True, null=True)
+    update = models.DateTimeField(_('date updated'), default=datetime.date.min)
     deleted = models.BooleanField(_('deleted'), default=False)
     summary = models.CharField(_('summary'), max_length=250)
     dtstart = models.DateTimeField(_('dtstart'))
