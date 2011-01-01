@@ -4,6 +4,7 @@ import atom.http_interface
 from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
+from djangotoolbox.fields import BlobField
 
 def run_on_django(gdata_service, request=None):
     try:
@@ -22,7 +23,7 @@ def run_on_django(gdata_service, request=None):
 
 class TokenCollection(models.Model):
     user = models.ForeignKey(User)
-    pickled_tokens = models.TextField(db_index=False)
+    pickled_tokens = BlobField(db_index=False)
 
 class DjangoTokenStore(atom.token_store.TokenStore):
     def __init__(self, request):
