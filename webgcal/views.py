@@ -114,7 +114,7 @@ def switch_calendar(request, calendar_id):
 def delete_calendar(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
-    Website.filter(calendar=calendar).delete()
+    Website.objects.filter(calendar=calendar).delete()
     calendar.delete()
     create_form = CalendarForm()
     
