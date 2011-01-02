@@ -10,22 +10,46 @@ class hCalendar(object):
         else:
             self.cals = [vCalendar(self.soup)]
 
+    def __len__(self):
+        return len(self.cals)
+
     def __iter__(self):
         return iter(self.cals)
+
+    def __getitem__(self, key):
+        return self.cals[key]
+
+    def getCalendar(self):
+        return self.cals
 
 class vCalendar(object):
     def __init__(self, soup):
         self.soup = soup
         self.events = map(vEvent, self.soup.findAll(attrs='vevent'))
 
+    def __str__(self):
+        return str(self.soup)
+
+    def __len__(self):
+        return len(self.events)
+
     def __iter__(self):
         return iter(self.events)
+
+    def __getitem__(self, key):
+        return self.events[key]
+
+    def getEvents(self):
+        return self.events
 
 class vEvent(object):
     def __init__(self, soup):
         self.soup = soup
         self.content = {}
         self.datetime = {}
+        
+    def __str__(self):
+        return str(self.soup)
 
     def __getattr__(self, attr):
         if attr in ['dtstart', 'dtend', 'dtstamp', 'last_modified']:

@@ -5,9 +5,10 @@ def parsePage(url):
     req = urllib2.Request(url, None, {'User-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'})
     fp = urllib2.urlopen(req)
     html = fp.read()
-    for cal in hCalendar(html):
+    hcal = hCalendar(html)
+    for cal in hcal:
         for event in cal:
-            print event.dt('dtstart'), event.summary
+            print event.dtstart, event.summary
 
 parsePage('http://en.wikipedia.org/wiki/List_of_House_episodes')
 parsePage('http://en.wikipedia.org/wiki/List_of_NCIS_episodes')
