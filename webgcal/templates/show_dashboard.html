@@ -93,6 +93,7 @@
       {% endfor %}
     </tbody>
   </table>
+  <div class="info">The websites are currently parsed every hour and after all parsing is done the Google Calendar will be updated in small batches.</div>
   {% if calendar_create_form %}
   <form action="{% url webgcal.views.create_calendar %}" method="post" class="yform columnar">{% csrf_token %}
   <fieldset>
