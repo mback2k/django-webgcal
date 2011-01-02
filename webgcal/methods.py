@@ -16,7 +16,7 @@ from webgcal import deferred
 
 def start_worker(request):
     for calendar in Calendar.objects.all():
-        deferred.defer('update_calendar_wait', calendar.id, _update_calendar_wait, calendar.id, _countdown=60)
+        deferred.defer('update_website_wait', calendar.id, _update_website_wait, calendar.id, _countdown=60)
         for website in calendar.websites:
             deferred.defer('parse_website', website.id, _parse_website, calendar.id, website.id)
     return HttpResponse('deferred')
@@ -83,6 +83,10 @@ def _update_calendar(calendar_id):
                 for website in calendar.websites:
                     deferred.defer('update_calendar_sync', website.id, _update_calendar_sync, calendar_id, website.id, calendar_feed, _countdown=3)
                     logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
+                    
+        deferred.defer('update_calendar_wait', calendar_id, _update_calendar_wait, calendar_id, _countdown=60)
+        
+        logging.info('Deferred sync of calendar "%s" for user %s"' % (calendar, calendar.user))
 
     except gdata.service.RequestError, e:
         if e.args[0]['status'] in [401, 302] and calendar.errors < 15:
@@ -117,11 +121,8 @@ def _update_calendar(calendar_id):
 def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, limit=5):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
-        
-        if not calendar.enabled:
-            return
-            
         website = Website.objects.get(calendar=calendar, id=website_id)
+        
         website.running = True
         website.status = 'Syncing calendar'
         website.errors = 0
@@ -236,15 +237,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
             website.status = 'Finished syncing website'
             website.save()
             logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
-        
-        if not calendar.websites.filter(running=True).count():
-            calendar = Calendar.objects.get(id=calendar_id)
-            calendar.running = False
-            calendar.updated = datetime.datetime.now()
-            calendar.status = 'Finished syncing calendar'
-            calendar.save()
-            logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
-
+            
     except gdata.service.RequestError, e:
         if e.args[0]['status'] in [401, 302] and website.errors < 15:
             website.errors += 1
@@ -282,6 +275,23 @@ def _update_calendar_wait(calendar_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
         
+        if not calendar.websites.filter(running=True).count():
+            calendar.running = False
+            calendar.updated = datetime.datetime.now()
+            calendar.status = 'Finished syncing calendar'
+            calendar.save()
+            logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
+            
+        else:
+            deferred.defer('update_calendar_wait', calendar_id, _update_calendar_wait, calendar_id, _countdown=60)
+        
+    except Calendar.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+
+def _update_website_wait(calendar_id):
+    try:
+        calendar = Calendar.objects.get(id=calendar_id)
+        
         if not calendar.enabled:
             return
             
@@ -290,7 +300,7 @@ def _update_calendar_wait(calendar_id):
             logging.info('Deferred sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
             
         else:
-            deferred.defer('update_calendar_wait', calendar_id, _update_calendar_wait, calendar_id, _countdown=60)
+            deferred.defer('update_website_wait', calendar_id, _update_website_wait, calendar_id, _countdown=60)
         
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
@@ -349,7 +359,7 @@ def _parse_website_event(calendar_id, website_id, parse_id, event_html):
                     try:
                         event = Event.objects.get(website=website, summary=event_data.summary, dtstart=event_data.dtstart)
                         event.parse = parse_id
-                        event.parsed = parse_datetime
+                        #event.parsed = parse_datetime # This should only be updated if fields change
                         event.save()
                     except Event.DoesNotExist:
                         event = Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, parse=parse_id, parsed=parse_datetime)
