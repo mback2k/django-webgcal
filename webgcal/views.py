@@ -35,7 +35,7 @@ def show_dashboard(request):
 
 @login_required
 def show_calendar(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm()
 
@@ -67,7 +67,7 @@ def create_calendar(request):
 
 @login_required
 def edit_calendar(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     edit_form = CalendarForm(instance=calendar, data=request.POST if request.method == 'POST' else None)
 
@@ -87,7 +87,7 @@ def edit_calendar(request, calendar_id):
 
 @login_required
 def switch_calendar(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     calendar.enabled = not(calendar.enabled)
     calendar.save()
@@ -104,7 +104,7 @@ def switch_calendar(request, calendar_id):
 
 @login_required
 def delete_calendar(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     calendar.delete()
     create_form = CalendarForm()
@@ -120,7 +120,7 @@ def delete_calendar(request, calendar_id):
 
 @login_required
 def delete_calendar_ask(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     create_form = CalendarForm()
     
@@ -136,7 +136,7 @@ def delete_calendar_ask(request, calendar_id):
 
 @login_required
 def create_website(request, calendar_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm(data=request.POST)
     
@@ -156,7 +156,7 @@ def create_website(request, calendar_id):
 
 @login_required
 def edit_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     edit_form = WebsiteForm(instance=website, data=request.POST if request.method == 'POST' else None)
@@ -178,7 +178,7 @@ def edit_website(request, calendar_id, website_id):
 
 @login_required
 def switch_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.enabled = not(website.enabled)
@@ -198,7 +198,7 @@ def switch_website(request, calendar_id, website_id):
 
 @login_required
 def delete_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.delete()
@@ -216,7 +216,7 @@ def delete_website(request, calendar_id, website_id):
 
 @login_required
 def delete_website_ask(request, calendar_id, website_id):
-    calendars = Calendar.objects.all().filter(user=request.user).order_by('-tstamp')
+    calendars = Calendar.objects.all().filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     create_form = WebsiteForm()

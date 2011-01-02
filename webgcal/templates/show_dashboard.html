@@ -35,12 +35,13 @@
   {% endif %}
   <table class="full">
     <thead>
-      <tr><th scope="col" colspan="4">Websites of {{ calendar.name }}:</th></tr>
+      <tr><th scope="col" colspan="5">Websites of {{ calendar.name }}:</th></tr>
     </thead>
     <tbody>
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Website</th>
+        <th scope="col">Events</th>
         <th scope="col">Last Update</th>
         <th class="right"><a href="{% url webgcal.views.show_dashboard %}" title="Close">Close</a></th>
       </tr>
@@ -49,13 +50,14 @@
       <tr {% if not website.enabled %}style="background: #fff8f8;"{% endif %}>
         <td>{{ website.name }}</td>
         <td>{{ website.href|slice:":40" }} ...</td>
-        <td>{% if website.update %}{{ website.update|localedatetime }}{% else %}None{% endif %}</td>
+        <td>{{ website.events.count }}</td>
+        <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}</td>
         <td>{% if website.running %}<img src="{{ STATICFILES_URL }}icons/loading.gif" alt="{{ website.status }}" title="{{ website.status }}" />{% else %}<a href="{% url webgcal.views.edit_website calendar.id website.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_website calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not website.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not website.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_website_ask calendar.id website.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
       </tr>
       {% endfor %}
       {% else %}
       <tr>
-        <td colspan="4">No websites added yet.</td>
+        <td colspan="5">No websites added yet.</td>
       </tr>
       {% endif %}
     </tbody>
@@ -85,7 +87,7 @@
       <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
         <td>{{ calendar.name }}</td>
         <td><a href="{% url webgcal.views.show_calendar calendar.id %}" title="Show">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} websites</a></td>
-        <td>{% if calendar.update %}{{ calendar.update|localedatetime }}{% else %}None{% endif %}</td>
+        <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}</td>
         <td>{% if calendar.running %}<img src="{{ STATICFILES_URL }}icons/loading.gif" alt="{{ calendar.status }}" title="{{ calendar.status }}" />{% else %}<a href="{% url webgcal.views.edit_calendar calendar.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_calendar calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_calendar_ask calendar.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
       </tr>
       {% endfor %}

@@ -1,4 +1,5 @@
 import atom
+import random
 import urllib
 import urllib2
 import logging
@@ -7,28 +8,29 @@ import hcalendar
 import gdata.service
 import gdata.calendar
 import gdata.calendar.service
-from google.appengine.ext import deferred
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from webgcal.models import Calendar, Website, Event
 from webgcal.tokens import run_on_django
+from webgcal import deferred
 
 def start_worker(request):
     for calendar in Calendar.objects.all():
+        deferred.defer('update_calendar_wait', calendar.id, _update_calendar_wait, calendar.id, _countdown=60)
         for website in calendar.websites:
-            deferred.defer(_parse_website, calendar.id, website.id)
+            deferred.defer('parse_website', website.id, _parse_website, calendar.id, website.id)
     return HttpResponse('deferred')
 
 def update_calendar(request, calendar_id):
-    deferred.defer(_update_calendar, calendar_id)
+    deferred.defer('update_calendar', calendar_id, _update_calendar, calendar_id)
     return HttpResponse('deferred')
 
 def parse_website(request, calendar_id, website_id):
-    deferred.defer(_parse_website, calendar_id, website_id)
+    deferred.defer('parse_website', website_id, _parse_website, calendar_id, website_id)
     return HttpResponse('deferred')
 
 
-def _update_calendar(calendar_id):    
+def _update_calendar(calendar_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
     
@@ -40,7 +42,7 @@ def _update_calendar(calendar_id):
         calendar.errors = 0
         calendar.save()
     
-        logging.info('Starting sync of calendar "%s" for "%s"' % (calendar.name, calendar.user))
+        logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, calendar.user))
     
         calendar_service = run_on_django(gdata.calendar.service.CalendarService())
         calendar_service.token_store.user = calendar.user
@@ -79,8 +81,8 @@ def _update_calendar(calendar_id):
             
             if calendar_feed:
                 for website in calendar.websites:
-                    deferred.defer(_update_calendar_sync, calendar_id, website.id, calendar_feed, _countdown=3)
-                    logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
+                    deferred.defer('update_calendar_sync', website.id, _update_calendar_sync, calendar_id, website.id, calendar_feed, _countdown=3)
+                    logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
 
     except gdata.service.RequestError, e:
         if e.args[0]['status'] in [401, 302] and calendar.errors < 15:
@@ -125,7 +127,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
         website.errors = 0
         website.save()
         
-        logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar.name, website.name, calendar.user))
+        logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, calendar.user))
             
         calendar_service = run_on_django(gdata.calendar.service.CalendarService())
         calendar_service.token_store.user = calendar.user
@@ -140,12 +142,12 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
         if cursor:
             events = events.filter(dtstart__gt=cursor)
         for event in events[:limit]:
-            if event.href and (event.update < event.tstamp or event.update < timeout):
+            if event.href and (event.synced < event.parsed or event.synced < timeout):
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
                     if e.args[0]['status'] in [401, 403, 404]:
-                        event.href = ''
+                        event.href = None
             
             if not event.href and website.enabled:            
                 if not event.deleted:
@@ -169,7 +171,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                 else:
                     event.delete()
 
-            elif not event.update or event.update < event.tstamp:
+            elif event.synced < event.parsed:
                 if not event.deleted and website.enabled:
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -199,7 +201,9 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
             logging.info('Executing batch request')
             result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
             logging.info('Executed batch request')
-          
+            
+            sync_datetime = datetime.datetime.now()
+            
             for entry in result.entry:
                 if entry.batch_id and entry.batch_id.text in requests:
                     if entry.batch_status.code in ['200', '201']:
@@ -209,34 +213,37 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                             if event.deleted:
                                 event.delete()
                             else:
-                                event.href = ''
-                                event.update = datetime.datetime.now()+datetime.timedelta(minutes=1)
+                                event.href = None
+                                event.synced = sync_datetime
                                 event.save()
                         else:
                             event.href = entry.id.text
-                            event.update = datetime.datetime.now()+datetime.timedelta(minutes=1)
+                            event.synced = sync_datetime
                             event.save()
-                    elif not entry.batch_status.code in ['409']:
+                    elif entry.batch_status.code == '400':
+                        event.href = None
+                        event.save()
+                    elif not entry.batch_status.code == '409':
                         logging.error(entry)
                 else:
                     logging.warning(entry)
         
         if events.count() > limit:
-            deferred.defer(_update_calendar_sync, calendar_id, website_id, calendar_feed, events[5].dtstart, limit, _countdown=1)
-            logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
+            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[5].dtstart, limit, _countdown=1)
+            logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
         else:
             website.running = False
             website.status = 'Finished syncing website'
             website.save()
-            logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar.name, website.name, calendar.user))
+            logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
         
         if not calendar.websites.filter(running=True).count():
             calendar = Calendar.objects.get(id=calendar_id)
             calendar.running = False
+            calendar.updated = datetime.datetime.now()
             calendar.status = 'Finished syncing calendar'
-            calendar.update = datetime.datetime.now()
             calendar.save()
-            logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar.name, calendar.user))
+            logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
 
     except gdata.service.RequestError, e:
         if e.args[0]['status'] in [401, 302] and website.errors < 15:
@@ -271,6 +278,23 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
     except Website.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
+def _update_calendar_wait(calendar_id):
+    try:
+        calendar = Calendar.objects.get(id=calendar_id)
+        
+        if not calendar.enabled:
+            return
+            
+        if not calendar.websites.filter(running=True).count():
+            deferred.defer('update_calendar', calendar_id, _update_calendar, calendar_id, _countdown=3)
+            logging.info('Deferred sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
+            
+        else:
+            deferred.defer('update_calendar_wait', calendar_id, _update_calendar_wait, calendar_id, _countdown=60)
+        
+    except Calendar.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+
 def _parse_website(calendar_id, website_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -283,52 +307,81 @@ def _parse_website(calendar_id, website_id):
         website.status = 'Parsing website'
         website.save()
         
-        logging.info('Parsing website %s for %s' % (website.name, calendar.user))
+        logging.info('Parsing website "%s" for user "%s"' % (website, calendar.user))
         
-        events_remote = {}
-        html = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'})).read()
-        for cal in hcalendar.hCalendar(html):
-            for event in cal:
-                if event.summary and event.dtstart:
-                    events_remote[hash(event.summary)^hash(event.dtstart)] = event
+        parse_id = random.randint(0, 1000000)
         
-        logging.info('Parsed website %s for %s' % (website.name, calendar.user))
+        website_html = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'})).read()
+        for calendar_data in hcalendar.hCalendar(website_html):
+            for event_index in range(0, len(calendar_data), 5):
+                event_html = ''.join(map(str, calendar_data[event_index:event_index+5]))
+                deferred.defer('parse_website_event', website_id, _parse_website_event, calendar_id, website_id, parse_id, event_html)
         
-        events = {}
-        for event in website.events.all():
-            events[hash(event.summary)^hash(event.dtstart)] = event
+        deferred.defer('parse_website_wait', website_id, _parse_website_wait, calendar_id, website_id, parse_id, _countdown=30)
         
-        logging.info('Updating website %s for %s' % (website.name, calendar.user))
+        logging.info('Deferred event parsing of website "%s" for user %s"' % (website, calendar.user))
         
-        for key, event_remote in events_remote.iteritems():
-            if not key in events:
-                Event.objects.create(website=website, summary=event_remote.summary, dtstart=event_remote.dtstart)
-            else:
-                save = False
-                event = events[key]
-                if event.summary != event_remote.summary:
-                    event.summary = event_remote.summary
-                    save = True
-                if event.dtstart != event_remote.dtstart:
-                    event.dtstart = event_remote.dtstart
-                    save = True
-                if save:
-                    event.save()
+    except urllib2.URLError, e:
+        website.enabled = False
+        website.running = False
+        website.status = 'Error: %s' % e.reason
+        website.save()
+        raise deferred.PermanentTaskFailure(e)
         
-        for key, event in events.iteritems():
-            if not key in events_remote:
+    except Calendar.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+        
+    except Website.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+
+def _parse_website_event(calendar_id, website_id, parse_id, event_html):
+    try:
+        calendar = Calendar.objects.get(id=calendar_id)
+        website = Website.objects.get(calendar=calendar, id=website_id)
+        
+        logging.info('Parsing event of website %s for user "%s"' % (website, calendar.user))
+        
+        parse_datetime = datetime.datetime.now()
+        
+        for calendar_data in hcalendar.hCalendar(event_html):
+            for event_data in calendar_data:
+                if event_data.summary and event_data.dtstart:
+                    try:
+                        event = Event.objects.get(website=website, summary=event_data.summary, dtstart=event_data.dtstart)
+                        event.parse = parse_id
+                        event.parsed = parse_datetime
+                        event.save()
+                    except Event.DoesNotExist:
+                        event = Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, parse=parse_id, parsed=parse_datetime)
+        
+    except Calendar.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+        
+    except Website.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+
+def _parse_website_wait(calendar_id, website_id, parse_id):
+    try:
+        calendar = Calendar.objects.get(id=calendar_id)
+        website = Website.objects.get(calendar=calendar, id=website_id)
+        
+        if not deferred.deferred(name='parse_website_event', reference_id=website_id):
+            logging.info('Deleting missing events of website "%s" for user "%s"' % (website, calendar.user))
+            
+            for event in Event.objects.filter(website=website).exclude(parse=parse_id):
                 event.deleted = True
                 event.save()
                 
-        website.running = False
-        website.status = 'Finished parsing website'
-        website.update = datetime.datetime.now()
-        website.save()
-        logging.info('Updated website %s for %s' % (website.name, calendar.user))
-        
-        if not calendar.websites.filter(running=True).count():
-            deferred.defer(_update_calendar, calendar_id, _countdown=3)
-            logging.info('Deferred calendar %s sync for %s' % (calendar.name, calendar.user))
+            logging.info('Deleted missing events of website "%s" for user "%s"' % (website, calendar.user))
+            
+            website.running = False
+            website.updated = datetime.datetime.now()
+            website.status = 'Finished parsing website'
+            website.save()
+            logging.info('Parsed all events of website "%s" for user "%s"' % (website, calendar.user))
+                            
+        else:
+            deferred.defer('parse_website_wait', website_id, _parse_website_wait, calendar_id, website_id, parse_id, _countdown=30)
         
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)

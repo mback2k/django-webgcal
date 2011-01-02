@@ -21,29 +21,33 @@ indexes:
   - name: app_label
   - name: name
 
+- kind: webgcal_deferredtask
+  properties:
+  - name: name
+  - name: reference_id
+
 - kind: webgcal_calendar
   properties:
   - name: user_id
   - name: name
 
-- kind: webgcal_calendar
+- kind: webgcal_website
   properties:
-  - name: user_id
-  - name: tstamp
-    direction: desc
+  - name: calendar_id
+  - name: name
 
 - kind: webgcal_event
   properties:
   - name: website_id
   - name: dtstart
 
-- kind: webgcal_website
+- kind: webgcal_event
   properties:
-  - name: calendar_id
-  - name: crdate
-    direction: desc
+  - name: website_id
+  - name: summary
+  - name: dtstart
 
-- kind: webgcal_website
+- kind: webgcal_event
   properties:
-  - name: calendar_id
-  - name: name
+  - name: website_id
+  - name: parse
