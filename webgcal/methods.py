@@ -305,7 +305,7 @@ def _update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
-def _parse_website(calendar_id, website_id, limit=10):
+def _parse_website(calendar_id, website_id, limit=20):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
         website = Website.objects.get(calendar=calendar, id=website_id)

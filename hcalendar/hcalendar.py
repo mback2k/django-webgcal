@@ -1,9 +1,9 @@
-from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import MinimalSoup
 from dateutil.parser import parse
 
 class hCalendar(object):
     def __init__(self, html):
-        self.soup = BeautifulSoup(html)
+        self.soup = MinimalSoup(html)
         self.cals = self.soup.findAll(attrs='vcalendar')
         if self.cals:
             self.cals = map(vCalendar, self.cals)
