@@ -230,7 +230,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                     logging.warning(entry)
         
         if events.count() > limit:
-            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[5].dtstart, limit, _countdown=1)
+            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[limit].dtstart, limit, _countdown=1)
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
         else:
             website.running = False
@@ -305,7 +305,7 @@ def _update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
-def _parse_website(calendar_id, website_id):
+def _parse_website(calendar_id, website_id, limit=10):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
         website = Website.objects.get(calendar=calendar, id=website_id)
@@ -323,8 +323,8 @@ def _parse_website(calendar_id, website_id):
         
         website_html = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'})).read()
         for calendar_data in hcalendar.hCalendar(website_html):
-            for event_index in range(0, len(calendar_data), 5):
-                event_html = ''.join(map(str, calendar_data[event_index:event_index+5]))
+            for event_index in range(0, len(calendar_data), limit):
+                event_html = ''.join(map(str, calendar_data[event_index:event_index+limit]))
                 deferred.defer('parse_website_event', website_id, _parse_website_event, calendar_id, website_id, parse_id, event_html)
         
         deferred.defer('parse_website_wait', website_id, _parse_website_wait, calendar_id, website_id, parse_id, _countdown=30)
@@ -349,7 +349,7 @@ def _parse_website_event(calendar_id, website_id, parse_id, event_html):
         calendar = Calendar.objects.get(id=calendar_id)
         website = Website.objects.get(calendar=calendar, id=website_id)
         
-        logging.info('Parsing event of website %s for user "%s"' % (website, calendar.user))
+        logging.info('Parsing events of website %s for user "%s"' % (website, calendar.user))
         
         parse_datetime = datetime.datetime.now()
         
