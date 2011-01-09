@@ -41,13 +41,13 @@ indexes:
   - name: website_id
   - name: dtstart
 
-- kind: webgcal_event
-  properties:
-  - name: website_id
-  - name: summary
-  - name: dtstart
-
-- kind: webgcal_event
-  properties:
-  - name: website_id
-  - name: parse
+#- kind: webgcal_event
+#  properties:
+#  - name: website_id
+#  - name: summary
+#  - name: dtstart
+#
+#- kind: webgcal_event
+#  properties:
+#  - name: website_id
+#  - name: parse

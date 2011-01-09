@@ -49,7 +49,6 @@ def _update_calendar(calendar_id):
         calendar_service.AuthSubTokenInfo()
         
         calendar_remote = None
-        calendar_feed = None
         
         if calendar.href:
             calendars = calendar_service.GetOwnCalendarsFeed()
@@ -70,18 +69,21 @@ def _update_calendar(calendar_id):
             
             calendar_remote = calendar_service.InsertCalendar(new_calendar=cal)
             calendar.href = calendar_remote.id.text
+            calendar.feed = ''
             calendar.save()
             logging.info('Inserted calendar "%s" for user "%s"' % (calendar.name, calendar.user))
         
         if calendar_remote:
-            for link in calendar_remote.link:
-                if link.rel == 'http://schemas.google.com/gCal/2005#eventFeed':
-                    calendar_feed = link.href
-                    break
+            if not calendar.feed:
+                for link in calendar_remote.link:
+                    if link.rel == 'http://schemas.google.com/gCal/2005#eventFeed':
+                        calendar.feed = link.href
+                        calendar.save()
+                        break
             
-            if calendar_feed:
+            if calendar.feed:
                 for website in calendar.websites:
-                    deferred.defer('update_calendar_sync', website.id, _update_calendar_sync, calendar_id, website.id, calendar_feed, _countdown=3)
+                    deferred.defer('update_calendar_sync', website.id, _update_calendar_sync, calendar_id, website.id, _countdown=3)
                     logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
                     
         deferred.defer('update_calendar_wait', calendar_id, _update_calendar_wait, calendar_id, _countdown=60)
@@ -118,7 +120,7 @@ def _update_calendar(calendar_id):
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
-def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, limit=10):
+def _update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
         website = Website.objects.get(calendar=calendar, id=website_id)
@@ -142,16 +144,23 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
         events = website.events
         if cursor:
             events = events.filter(dtstart__gt=cursor)
+        try:
+            events_user = calendar.feed.split('/')[5]
+        except:
+            events_user = '/foo@bar/'
         for event in events[:limit]:
-            if event.href and (event.synced < event.parsed or event.synced < timeout):
+            if event.href and not events_user in event.href:
+                event.href = None
+            
+            elif event.href and (event.deleted or event.synced < event.parsed or event.synced < timeout):
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
                     if e.args[0]['status'] in [401, 403, 404]:
                         event.href = None
             
-            if not event.href and website.enabled:            
-                if not event.deleted:
+            if not event.href:            
+                if not event.deleted and website.enabled:
                     entry = gdata.calendar.CalendarEventEntry()
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -172,7 +181,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                 else:
                     event.delete()
 
-            elif event.deleted or not website.enabled or event.synced < event.parsed:
+            elif event.deleted or event.synced < event.parsed:
                 if not event.deleted and website.enabled:
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -198,7 +207,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
         
         if requests:
             logging.info('Fetching event feed')
-            calendar_events = calendar_service.GetCalendarEventFeed(calendar_feed)
+            calendar_events = calendar_service.GetCalendarEventFeed(calendar.feed)
             logging.info('Executing batch request')
             result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
             logging.info('Executed batch request')
@@ -230,7 +239,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                     logging.warning(entry)
         
         if events.count() > limit:
-            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[limit].dtstart-datetime.timedelta(seconds=1), limit, _countdown=1)
+            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, events[limit].dtstart-datetime.timedelta(seconds=1), limit, _countdown=2)
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
         else:
             website.running = False
@@ -373,7 +382,7 @@ def _parse_website(calendar_id, website_id):
         for event in website.events:
             events[hash(event.summary)^hash(event.dtstart)] = event
         
-        logging.info('Updating website "%s" for user "%s"' % (website, calendar.user))
+        logging.info('Updating events of website "%s" for user "%s"' % (website, calendar.user))
         
         for key, event_data in events_data.iteritems():
             if not key in events:
@@ -387,11 +396,14 @@ def _parse_website(calendar_id, website_id):
                 if event.dtstart != event_data.dtstart:
                     event.dtstart = event_data.dtstart
                     save = True
-                if save:
+                if event.deleted or save:
+                    event.deleted = False
                     event.save()
         
+        logging.info('Deleting events of website "%s" for user "%s"' % (website, calendar.user))
+        
         for key, event in events.iteritems():
-            if not key in event_data:
+            if not key in events_data:
                 event.deleted = True
                 event.save()
                 
