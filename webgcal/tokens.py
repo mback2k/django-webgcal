@@ -6,14 +6,14 @@ from django.core.cache import cache
 from django.contrib.auth.models import User
 from djangotoolbox.fields import BlobField
 
-def run_on_django(gdata_service, request=None):
+def run_on_django(gdata_service, request=None, deadline=10):
     try:
         import google.appengine
     except:
         pass
     else:
         from gdata.alt.appengine import run_on_appengine
-        run_on_appengine(gdata_service, deadline=10)
+        run_on_appengine(gdata_service, deadline=deadline)
     try:
         gdata_service._SetSessionId(None)
     except:

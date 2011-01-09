@@ -44,7 +44,7 @@ def _update_calendar(calendar_id):
     
         logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, calendar.user))
     
-        calendar_service = run_on_django(gdata.calendar.service.CalendarService())
+        calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
         calendar_service.AuthSubTokenInfo()
         
@@ -118,7 +118,7 @@ def _update_calendar(calendar_id):
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
-def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, limit=5):
+def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, limit=10):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
         website = Website.objects.get(calendar=calendar, id=website_id)
@@ -130,7 +130,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
         
         logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, calendar.user))
             
-        calendar_service = run_on_django(gdata.calendar.service.CalendarService())
+        calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
         calendar_service.AuthSubTokenInfo()
         
@@ -172,7 +172,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                 else:
                     event.delete()
 
-            elif event.synced < event.parsed:
+            elif event.deleted or not website.enabled or event.synced < event.parsed:
                 if not event.deleted and website.enabled:
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -230,7 +230,7 @@ def _update_calendar_sync(calendar_id, website_id, calendar_feed, cursor=None, l
                     logging.warning(entry)
         
         if events.count() > limit:
-            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[limit].dtstart, limit, _countdown=1)
+            deferred.defer('update_calendar_sync', website_id, _update_calendar_sync, calendar_id, website_id, calendar_feed, events[limit].dtstart-datetime.timedelta(seconds=1), limit, _countdown=1)
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
         else:
             website.running = False
@@ -305,6 +305,7 @@ def _update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
 
+"""
 def _parse_website(calendar_id, website_id, limit=20):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -343,7 +344,77 @@ def _parse_website(calendar_id, website_id, limit=20):
         
     except Website.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
+"""
 
+def _parse_website(calendar_id, website_id):
+    try:
+        calendar = Calendar.objects.get(id=calendar_id)
+        website = Website.objects.get(calendar=calendar, id=website_id)
+        
+        if not website.enabled:
+            return
+            
+        website.running = True
+        website.status = 'Parsing website'
+        website.save()
+        
+        logging.info('Parsing website "%s" for user "%s"' % (website, calendar.user))
+        
+        events_data = {}
+        website_html = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'})).read()
+        for calendar_data in hcalendar.hCalendar(website_html):
+            for event_data in calendar_data:
+                if event_data.summary and event_data.dtstart:
+                    events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
+        
+        logging.info('Parsed website "%s" for user "%s"' % (website, calendar.user))
+        
+        events = {}
+        for event in website.events:
+            events[hash(event.summary)^hash(event.dtstart)] = event
+        
+        logging.info('Updating website "%s" for user "%s"' % (website, calendar.user))
+        
+        for key, event_data in events_data.iteritems():
+            if not key in events:
+                Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart)
+            else:
+                save = False
+                event = events[key]
+                if event.summary != event_data.summary:
+                    event.summary = event_data.summary
+                    save = True
+                if event.dtstart != event_data.dtstart:
+                    event.dtstart = event_data.dtstart
+                    save = True
+                if save:
+                    event.save()
+        
+        for key, event in events.iteritems():
+            if not key in event_data:
+                event.deleted = True
+                event.save()
+                
+        website.running = False
+        website.updated = datetime.datetime.now()
+        website.status = 'Finished parsing website'
+        website.save()
+        logging.info('Parsed all events of website "%s" for user "%s"' % (website, calendar.user))
+        
+    except urllib2.URLError, e:
+        website.enabled = False
+        website.running = False
+        website.status = 'Error: %s' % e.reason
+        website.save()
+        raise deferred.PermanentTaskFailure(e)
+        
+    except Calendar.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+        
+    except Website.DoesNotExist, e:
+        raise deferred.PermanentTaskFailure(e)
+        
+"""
 def _parse_website_event(calendar_id, website_id, parse_id, event_html):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -398,6 +469,7 @@ def _parse_website_wait(calendar_id, website_id, parse_id):
         
     except Website.DoesNotExist, e:
         raise deferred.PermanentTaskFailure(e)
+"""
 
 def _parse_request_error(error):
     if 'body' in error:
