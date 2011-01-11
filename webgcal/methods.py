@@ -46,7 +46,6 @@ def _update_calendar(calendar_id):
     
         calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
-        calendar_service.AuthSubTokenInfo()
         
         calendar_remote = None
         
@@ -134,13 +133,14 @@ def _update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
             
         calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
-        calendar_service.AuthSubTokenInfo()
+        
+        sync_datetime = datetime.datetime.now()
+        sync_timeout = datetime.datetime.now()-datetime.timedelta(days=1)
         
         websites = calendar.websites.count()
         batch = gdata.calendar.CalendarEventFeed()
         
         requests = {}
-        timeout = datetime.datetime.now()-datetime.timedelta(days=1)
         events = website.events
         if cursor:
             events = events.filter(dtstart__gt=cursor)
@@ -152,7 +152,7 @@ def _update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
             if event.href and not events_user in event.href:
                 event.href = None
             
-            elif event.href and (event.deleted or event.synced < event.parsed or event.synced < timeout):
+            elif event.href and (event.deleted or event.synced < event.parsed or event.synced < sync_timeout):
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
@@ -204,6 +204,10 @@ def _update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                     batch.AddDelete(entry=entry)
                     requests[entry.batch_id.text] = event
                     logging.info('%s %s' % (entry.batch_id.text, event.summary))
+                    
+            elif event.synced < sync_timeout:
+                event.synced = sync_datetime
+                event.save()
         
         if requests:
             logging.info('Fetching event feed')
@@ -211,8 +215,6 @@ def _update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
             logging.info('Executing batch request')
             result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
             logging.info('Executed batch request')
-            
-            sync_datetime = datetime.datetime.now()
             
             for entry in result.entry:
                 if entry.batch_id and entry.batch_id.text in requests:
