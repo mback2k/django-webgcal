@@ -12,7 +12,7 @@
   {% if calendar_edit_form %}
   <form action="{% url webgcal.views.edit_calendar calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
   <fieldset>
-    <legend><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="" /> <strong>Edit Calendar:</strong></legend>
+    <legend><img src="{{ STATIC_URL }}icons/pencil.png" alt="" /> <strong>Edit Calendar:</strong></legend>
     {{ calendar_edit_form.as_yaml }}
     <div class="type-button">
       <input type="submit" name="submit" value="Save Calendar" />
@@ -24,7 +24,7 @@
   {% if website_edit_form %}
   <form action="{% url webgcal.views.edit_website calendar.id website.id %}" method="post" class="yform columnar">{% csrf_token %}
   <fieldset>
-    <legend><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="" /> <strong>Edit Website:</strong></legend>
+    <legend><img src="{{ STATIC_URL }}icons/pencil.png" alt="" /> <strong>Edit Website:</strong></legend>
     {{ website_edit_form.as_yaml }}
     <div class="type-button">
       <input type="submit" name="submit" value="Save Website" />
@@ -52,7 +52,7 @@
         <td><a href="{{ website.href }}" title="{{ website.name }}" rel="nofollow">{{ website.href|slice:":40" }}</a> ...</td>
         <td>{{ website.events.count }}</td>
         <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}</td>
-        <td>{% if website.running %}<img src="{{ STATICFILES_URL }}icons/loading.gif" alt="{{ website.status }}" title="{{ website.status }}" />{% else %}<a href="{% url webgcal.views.edit_website calendar.id website.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_website calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not website.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not website.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_website_ask calendar.id website.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
+        <td>{% if website.running %}<img src="{{ STATIC_URL }}icons/loading.gif" alt="{{ website.status }}" title="{{ website.status }}" />{% else %}<a href="{% url webgcal.views.edit_website calendar.id website.id %}" title="Edit"><img src="{{ STATIC_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_website calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATIC_URL }}icons/{% if not website.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not website.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_website_ask calendar.id website.id %}" title="Delete"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
       </tr>
       {% endfor %}
       {% else %}
@@ -65,7 +65,7 @@
   {% if website_create_form %}
   <form action="{% url webgcal.views.create_website calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
   <fieldset>
-    <legend><img src="{{ STATICFILES_URL }}icons/add.png" alt="" /> <strong>Add Website:</strong></legend>
+    <legend><img src="{{ STATIC_URL }}icons/add.png" alt="" /> <strong>Add Website:</strong></legend>
     {{ website_create_form.as_yaml }}
     <div class="type-button">
       <input type="submit" name="submit" value="Add Website" />
@@ -88,7 +88,7 @@
         <td>{{ calendar.name }}</td>
         <td><a href="{% url webgcal.views.show_calendar calendar.id %}" title="Show">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} websites</a></td>
         <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}</td>
-        <td>{% if calendar.running %}<img src="{{ STATICFILES_URL }}icons/loading.gif" alt="{{ calendar.status }}" title="{{ calendar.status }}" />{% else %}<a href="{% url webgcal.views.edit_calendar calendar.id %}" title="Edit"><img src="{{ STATICFILES_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_calendar calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATICFILES_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_calendar_ask calendar.id %}" title="Delete"><img src="{{ STATICFILES_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
+        <td>{% if calendar.running %}<img src="{{ STATIC_URL }}icons/loading.gif" alt="{{ calendar.status }}" title="{{ calendar.status }}" />{% else %}<a href="{% url webgcal.views.edit_calendar calendar.id %}" title="Edit"><img src="{{ STATIC_URL }}icons/pencil.png" alt="Edit" /></a><a href="{% url webgcal.views.switch_calendar calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}"><img src="{{ STATIC_URL }}icons/{% if not calendar.enabled %}connect{% else %}disconnect{% endif %}.png" alt="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}" /></a><a href="{% url webgcal.views.delete_calendar_ask calendar.id %}" title="Delete"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" /></a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -97,7 +97,7 @@
   {% if calendar_create_form %}
   <form action="{% url webgcal.views.create_calendar %}" method="post" class="yform columnar">{% csrf_token %}
   <fieldset>
-    <legend><img src="{{ STATICFILES_URL }}icons/add.png" alt="" /> <strong>Add Calendar:</strong></legend>
+    <legend><img src="{{ STATIC_URL }}icons/add.png" alt="" /> <strong>Add Calendar:</strong></legend>
     {{ calendar_create_form.as_yaml }}
     <div class="type-button">
       <input type="submit" name="submit" value="Add Calendar" />

@@ -3,12 +3,12 @@
 {% block title %}WebGCal{% endblock %}
 
 {% block extra-head %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}navigation/nav_slidingdoor.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}navigation/nav_slidingdoor.css" />
   {% if LANGUAGE_BIDI %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}add-ons/rtl-support/navigation/nav_slidingdoor-rtl.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/nav_slidingdoor-rtl.css" />
   {% endif %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}screen/basemod.css" />
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATICFILES_URL }}screen/content.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}screen/basemod.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}screen/content.css" />
 
   <meta name="generator" content="Google App Engine" />
   <meta name="language" content="en" />
@@ -20,8 +20,8 @@
   <meta name="revisit-after" content="1 days" />
   <meta name="google-site-verification" content="CIs69bW4XfyN1SR9Gc3_Xn7eDFFRnjUuQbdhW_W8BGg" />
 
-  <script type="text/javascript" src="{{ STATICFILES_URL }}jquery-1.4.2.min.js"></script>
-  <script type="text/javascript" src="{{ STATICFILES_URL }}jquery.datetime.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}jquery.datetime.js"></script>
   <script type="text/javascript">
     var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-2841986-9']); _gaq.push(['_trackPageview']);
   </script>
