@@ -7,9 +7,18 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from webgcal.forms import CalendarForm, WebsiteForm
 from webgcal.models import Calendar, Website, Event
 from webgcal.tokens import run_on_django
+from webgcal import methods
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
+
+def check_authsub(request):
+    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
+    
+    try:
+        calendar_service.AuthSubTokenInfo()
+    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
+        messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
 
 def show_home(request):
     calendars = Calendar.objects.count()
@@ -27,12 +36,7 @@ def show_dashboard(request):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     create_form = CalendarForm()
     
-    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
-    
-    try:
-        calendar_service.AuthSubTokenInfo()
-    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
+    check_authsub(request)
 
     template_values = {
         'calendars': calendars,
@@ -46,6 +50,8 @@ def show_calendar(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm()
+    
+    check_authsub(request)
 
     template_values = {
         'calendars': calendars,
@@ -103,6 +109,8 @@ def switch_calendar(request, calendar_id):
     
     messages.success(request, 'Switched calendar "%s" %s!' % (calendar, 'on' if calendar.enabled else 'off'))
     
+    check_authsub(request)
+    
     template_values = {
         'calendars': calendars,
         'calendar_create_form': create_form,
@@ -119,6 +127,8 @@ def delete_calendar(request, calendar_id):
     create_form = CalendarForm()
     
     messages.success(request, 'Deleted calendar "%s" from your Dashboard!' % calendar)
+    
+    check_authsub(request)
     
     template_values = {
         'calendars': calendars,
@@ -153,6 +163,7 @@ def create_website(request, calendar_id):
         website = create_form.save(commit=False)
         website.calendar = calendar
         website.save()
+        methods.parse_website(request, calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
@@ -195,6 +206,8 @@ def switch_website(request, calendar_id, website_id):
     create_form = WebsiteForm()
     
     messages.success(request, 'Switched website "%s" %s!' % (website, 'on' if website.enabled else 'off'))
+    
+    check_authsub(request)
     
     template_values = {
         'calendars': calendars,
