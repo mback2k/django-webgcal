@@ -2,7 +2,3 @@ cron:
 - description: start worker
   url: /cron/worker/start/
   schedule: every 1 hours synchronized
-
-- description: keep alive
-  url: /
-  schedule: every 2 minutes
