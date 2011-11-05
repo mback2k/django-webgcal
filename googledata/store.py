@@ -11,7 +11,7 @@ def run_on_django(gdata_service, request=None, store_tokens=True, single_user_mo
         pass
     else:
         from gdata.alt.appengine import run_on_appengine
-        run_on_appengine(gdata_service, deadline=deadline)
+        gdata_service = run_on_appengine(gdata_service, deadline=deadline)
 
     try:
         gdata_service._SetSessionId(None)
