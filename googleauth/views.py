@@ -11,13 +11,14 @@ import time
 import zlib
 import base64
 import pickle
+import os.path
 
 RNG = Random.new().read
 
-with open('googleauth/keypair/PRIVATE_KEY', 'r') as f:
+with open(os.path.join(os.path.dirname(__file__), 'keypair/PRIVATE_KEY'), 'r') as f:
   PRIVATE_KEY = RSA.importKey(f.read())
 
-with open('googleauth/keypair/REMOTE_KEY', 'r') as f:
+with open(os.path.join(os.path.dirname(__file__), 'keypair/REMOTE_KEY'), 'r') as f:
   REMOTE_KEY = RSA.importKey(f.read())
   
 def redirect_request(request):
