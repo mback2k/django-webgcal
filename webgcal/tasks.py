@@ -8,8 +8,8 @@ import hcalendar
 import gdata.service
 import gdata.calendar
 import gdata.calendar.service
+from googledata import run_on_django
 from celery.decorators import task
-from gdata.alt.django import run_on_django
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from webgcal.models import Calendar, Website, Event

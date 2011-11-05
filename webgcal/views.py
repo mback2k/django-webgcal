@@ -1,7 +1,7 @@
 import os.path
 import gdata.auth
 import gdata.calendar.service
-from gdata.alt.django import run_on_django
+from googledata import run_on_django
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
