@@ -18,9 +18,3 @@ urlpatterns = patterns('webgcal.views',
     (r'^authsub/request/$', 'authsub_request'),
     (r'^authsub/response/$', 'authsub_response'),
 )
-
-urlpatterns += patterns('webgcal.methods',
-    (r'^cron/worker/start/$', 'start_worker'),
-    (r'^taskqueue/calendar/(?P<calendar_id>\d+)/update/$', 'update_calendar'),
-    (r'^taskqueue/calendar/(?P<calendar_id>\d+)/website/(?P<website_id>\d+)/parse/$', 'parse_website'),
-)

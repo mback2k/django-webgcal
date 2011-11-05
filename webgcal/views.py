@@ -1,16 +1,16 @@
 import os.path
 import gdata.auth
 import gdata.calendar.service
+from gdata.alt.django import run_on_django
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
-from webgcal.forms import CalendarForm, WebsiteForm
-from webgcal.models import Calendar, Website, Event
-from webgcal.tokens import run_on_django
-from webgcal import methods
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
+from webgcal.forms import CalendarForm, WebsiteForm
+from webgcal.models import Calendar, Website, Event
+from webgcal import tasks
 
 def check_authsub(request):
     calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
@@ -163,7 +163,7 @@ def create_website(request, calendar_id):
         website = create_form.save(commit=False)
         website.calendar = calendar
         website.save()
-        methods.parse_website(request, calendar.id, website.id)
+        task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
