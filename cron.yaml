@@ -1,4 +1,0 @@
-cron:
-- description: start worker
-  url: /cron/worker/start/
-  schedule: every 1 hours synchronized
