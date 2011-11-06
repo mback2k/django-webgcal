@@ -79,7 +79,7 @@ def task_update_calendar(calendar_id):
                     
                     logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
                     
-        task_update_calendar_waitapply_async(args=[calendar_id], countdown=60)
+        task_update_calendar_wait.apply_async(args=[calendar_id], countdown=60)
         
         logging.info('Deferred sync of calendar "%s" for user %s"' % (calendar, calendar.user))
 
