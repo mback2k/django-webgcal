@@ -2,6 +2,7 @@ from django.core.cache import cache
 from models import TokenCollection
 import atom.http_interface
 import atom.token_store
+import base64
 import pickle
 
 def run_on_django(gdata_service, request=None, store_tokens=True, single_user_mode=False, deadline=10):
@@ -98,10 +99,10 @@ def save_auth_tokens(token_dict, user=None):
         user_tokens = None        
     
     if user_tokens:
-        user_tokens.pickled_tokens = pickled_tokens
+        user_tokens.pickled_tokens = base64.encodestring(pickled_tokens)
         return user_tokens.save()
     else:
-        user_tokens = TokenCollection(user=user, pickled_tokens=pickled_tokens)
+        user_tokens = TokenCollection(user=user, pickled_tokens=base64.encodestring(pickled_tokens))
         return user_tokens.save()
      
 
@@ -109,7 +110,7 @@ def load_auth_tokens(user=None):
     if user is None:
         return {}
         
-    pickled_tokens = cache.get('gdata_pickled_tokens:%s' % user, {})
+    pickled_tokens = cache.get('gdata_pickled_tokens:%s' % user)
     if pickled_tokens:
         try:
             return pickle.loads(pickled_tokens)
@@ -122,9 +123,10 @@ def load_auth_tokens(user=None):
         user_tokens = None
         
     if user_tokens:
-        cache.set('gdata_pickled_tokens:%s' % user, user_tokens.pickled_tokens)
+        pickled_tokens = base64.decodestring(user_tokens.pickled_tokens)
+        cache.set('gdata_pickled_tokens:%s' % user, pickled_tokens)
         try:
-            return pickle.loads(user_tokens.pickled_tokens)
+            return pickle.loads(pickled_tokens)
         except:
             pass
     
