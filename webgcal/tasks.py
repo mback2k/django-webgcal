@@ -387,7 +387,7 @@ def task_parse_website(calendar_id, website_id):
         
         for key, event_data in events_data.iteritems():
             if not key in events:
-                Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart)
+                Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, parsed=datetime.datetime.now())
             else:
                 save = False
                 event = events[key]
@@ -399,6 +399,7 @@ def task_parse_website(calendar_id, website_id):
                     save = True
                 if event.deleted or save:
                     event.deleted = False
+                    event.parsed = datetime.datetime.now()
                     event.save()
         
         logging.info('Deleting events of website "%s" for user "%s"' % (website, calendar.user))
