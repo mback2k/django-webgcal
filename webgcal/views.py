@@ -12,6 +12,9 @@ from webgcal.forms import CalendarForm, WebsiteForm
 from webgcal.models import Calendar, Website, Event
 from webgcal import tasks
 
+with open(os.path.join(os.path.dirname(__file__), 'secure/RSA_KEY'), 'r') as f:
+    RSA_KEY = f.read().strip()
+
 def check_authsub(request):
     calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
     
@@ -163,7 +166,7 @@ def create_website(request, calendar_id):
         website = create_form.save(commit=False)
         website.calendar = calendar
         website.save()
-        task_parse_website.delay(calendar.id, website.id)
+        tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
@@ -185,6 +188,7 @@ def edit_website(request, calendar_id, website_id):
         website = edit_form.save(commit=False)
         website.calendar = calendar
         website.save()
+        tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
     
     template_values = {
@@ -260,27 +264,32 @@ def authsub_request(request):
     
     try:
         calendar_service.AuthSubTokenInfo()
+    
     except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
         calendar_service.token_store.remove_all_tokens()
-        return HttpResponseRedirect(calendar_service.GenerateAuthSubURL(request.build_absolute_uri(reverse('webgcal.views.authsub_response')), 'http://www.google.com/calendar/feeds/', secure=True, session=True))
+        
+        absolute_url = request.build_absolute_uri(reverse('webgcal.views.authsub_response'))
+        redirect_url = calendar_service.GenerateAuthSubURL(absolute_url, 'http://www.google.com/calendar/feeds/', secure=True, session=True)
+        
+        return HttpResponseRedirect(redirect_url)
     
     return HttpResponseRedirect(reverse('webgcal.views.authsub_response'))
 
 @login_required
 def authsub_response(request):
     calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
-    
-    session_token = None
-    auth_token = gdata.auth.extract_auth_sub_token_from_url(request.build_absolute_uri(), rsa_key=file('%s/certificates/rsakey.pem' % os.path.dirname(__file__), 'r').read())
-    
+
+    absolute_url = request.build_absolute_uri()
+    auth_token = gdata.auth.extract_auth_sub_token_from_url(absolute_url, rsa_key=RSA_KEY)
+
     if auth_token:
-        session_token = calendar_service.upgrade_to_session_token(auth_token)
-    if session_token:
-        calendar_service.token_store.add_token(session_token) 
+        calendar_service.UpgradeToSessionToken(auth_token)
 
     try:
         calendar_service.AuthSubTokenInfo()
+
     except gdata.service.RequestError:
         return HttpResponseRedirect(reverse('webgcal.views.authsub_request'))
+
     else:
         return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
