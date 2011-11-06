@@ -1,15 +1,10 @@
 syntax: glob
-.project
-.pydevproject
-.settings
 *~
 *.orig
 *.pyc
 *.pyo
-*.swp
 *.tmp
 _generated_media
-.dynamic_media
+celerybeat-schedule
 desktop.ini
-settings_overrides.py
-nbproject
+webgcal.sqlite
