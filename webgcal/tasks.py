@@ -13,10 +13,10 @@ from webgcal.models import Calendar, Website, Event
 
 @task()
 def task_start_worker():
-    for calendar in Calendar.objects.all():
+    for calendar in Calendar.objects.filter(enabled=True):
     	task_update_website_wait.apply_async(args=[calendar.id], countdown=60)
     	
-        for website in calendar.websites:
+        for website in calendar.websites.filter(enabled=True):
         	task_parse_website.apply_async(args=[calendar.id, website.id])
 
 @task()
