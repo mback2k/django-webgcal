@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
-from django.contrib.auth import views
-from django.contrib.admin import sites
+import django.contrib.auth.views
+import django.contrib.admin.sites
+import views
 
-import views as v
+django.contrib.auth.views.login = views.view_login
+django.contrib.auth.views.logout = lambda request, **kwargs: views.view_logout(request)
 
-views.login = v.view_login
-views.logout = v.view_logout
-sites.AdminSite.login = lambda s, r: v.view_login(r)
+django.contrib.admin.sites.AdminSite.login = lambda site, request: views.view_login(request)
+django.contrib.admin.sites.AdminSite.logout = lambda site, request, **kwargs: views.view_logout(request)
 
 urlpatterns = patterns('django.contrib.auth.views',
     (r'^%s$' % getattr(settings, 'LOGIN_URL', '/login/')[1:], 'login'),
