@@ -1,0 +1,3 @@
+[submodule "googleauth"]
+	path = googleauth
+	url = git@github.com:mback2k/django-googleauth.git
