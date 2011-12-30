@@ -1,0 +1,9 @@
+*~
+*.orig
+*.pyc
+*.pyo
+*.tmp
+_generated_media
+celerybeat-schedule
+desktop.ini
+webgcal.sqlite
