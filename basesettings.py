@@ -96,7 +96,6 @@ INSTALLED_APPS = (
     'googleauth',
     'googledata',
     'yamlcss',
-    'jquery',
     'jdatetime',
     
     'webgcal',
