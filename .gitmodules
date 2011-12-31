@@ -7,3 +7,6 @@
 [submodule "googledata"]
 	path = googledata
 	url = git@github.com:mback2k/django-googledata.git
+[submodule "jdatetime"]
+	path = jdatetime
+	url = git@github.com:mback2k/django-jdatetime.git
