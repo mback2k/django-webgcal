@@ -25,8 +25,8 @@ def check_authsub(request):
 
 def show_home(request):
     users = User.objects.filter(is_active=True).count()
-    calendars = Calendar.objects.count()
-    websites = Website.objects.count()
+    calendars = Calendar.objects.filter(enabled=True).count()
+    websites = Website.objects.filter(enabled=True).count()
 
     template_values = {
         'users': users,
