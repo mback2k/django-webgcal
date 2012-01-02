@@ -9,7 +9,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
 from webgcal.forms import CalendarForm, WebsiteForm
-from webgcal.models import Calendar, Website, Event
+from webgcal.models import User, Calendar, Website, Event
 from webgcal import tasks
 
 with open(os.path.join(os.path.dirname(__file__), 'secure/RSA_KEY'), 'r') as f:
@@ -24,14 +24,16 @@ def check_authsub(request):
         messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
 
 def show_home(request):
+    users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.count()
     websites = Website.objects.count()
-    
+
     template_values = {
+        'users': users,
         'calendars': calendars,
         'websites': websites,
     }
-    
+
     return render_to_response('show_home.html', template_values, context_instance=RequestContext(request))
 
 @login_required
