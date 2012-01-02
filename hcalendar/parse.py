@@ -8,7 +8,11 @@ def parsePage(url):
     hcal = hCalendar(html)
     for cal in hcal:
         for event in cal:
-            print event.dtstart, event.summary
+            print '-'*79
+            for attr in dir(event):
+                print '%s: %s' % (attr, repr(getattr(event, attr)))
+
+parsePage('http://microformats.org/wiki/hcalendar')
 
 parsePage('http://en.wikipedia.org/wiki/List_of_House_episodes')
 parsePage('http://en.wikipedia.org/wiki/List_of_NCIS_episodes')

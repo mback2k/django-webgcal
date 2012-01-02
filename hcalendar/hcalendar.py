@@ -43,6 +43,9 @@ class vCalendar(object):
         return self.events
 
 class vEvent(object):
+    ATTR_DATETIME = ('dtstart', 'dtend', 'dtstamp', 'last_modified')
+    ATTR_CONTENT  = ('summary', 'description', 'location', 'category', 'status', 'duration', 'method', 'uid', 'url')
+
     def __init__(self, soup):
         self.soup = soup
         self.content = {}
@@ -50,11 +53,14 @@ class vEvent(object):
         
     def __str__(self):
         return str(self.soup)
-
+        
+    def __dir__(self):
+        return list(self.ATTR_CONTENT + self.ATTR_DATETIME)
+        
     def __getattr__(self, attr):
-        if attr in ['dtstart', 'dtend', 'dtstamp', 'last_modified']:
+        if attr in self.ATTR_DATETIME:
             return self.getDatetime(attr.replace('_', '-'))
-        elif attr in ['duration', 'summary', 'uid', 'method', 'category', 'url', 'description', 'status', 'class']:
+        elif attr in self.ATTR_CONTENT:
             return self.getContent(attr)
         raise AttributeError
 
@@ -78,6 +84,8 @@ class vEvent(object):
             for elem in soup:
                 if elem.name == 'abbr':
                     content += elem['title']
+                elif elem.name == 'time':
+                    content += elem['datetime']
                 elif elem.name in ['img', 'area']:
                     content += elem['alt']
                 else:
