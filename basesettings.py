@@ -1,6 +1,5 @@
 from celery.schedules import crontab
 import djcelery
-import djkombu
 import os.path
 
 djcelery.setup_loader()
@@ -91,7 +90,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     
     'djcelery',
-    'djkombu',
     
     'googleauth',
     'googledata',
@@ -157,11 +155,10 @@ LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-BROKER_TRANSPORT = 'djkombu.transport.DatabaseTransport'
-
 CELERY_RESULT_BACKEND = 'djcelery.backends.database.DatabaseBackend'
 CELERY_TRACK_STARTED = True
 CELERY_SEND_EVENTS = True
+CELERY_SEND_TASK_SENT_EVENT = True
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_SCHEDULE = {
