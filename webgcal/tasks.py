@@ -8,7 +8,7 @@ import gdata.service
 import gdata.calendar
 import gdata.calendar.service
 from googledata import run_on_django
-from celery.decorators import task
+from celery.task import task
 from webgcal.models import Calendar, Website, Event
 
 @task()
