@@ -14,10 +14,10 @@ from webgcal.models import Calendar, Website, Event
 @task()
 def task_start_worker():
     for calendar in Calendar.objects.filter(enabled=True):
-    	task_update_website_wait.apply_async(args=[calendar.id], countdown=60)
-    	
+        task_update_website_wait.apply_async(args=[calendar.id], countdown=60)
+
         for website in calendar.websites.filter(enabled=True):
-        	task_parse_website.apply_async(args=[calendar.id, website.id])
+            task_parse_website.apply_async(args=[calendar.id, website.id])
 
 @task()
 def task_update_calendar(calendar_id):
@@ -233,7 +233,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
         
         if events.count() > limit:
             task_update_calendar_sync.apply_async(args=[calendar_id, website_id, events[limit].dtstart-datetime.timedelta(seconds=1), limit], countdown=2)
-            
+
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
             
         else:
