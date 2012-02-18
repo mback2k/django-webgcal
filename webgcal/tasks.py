@@ -311,47 +311,6 @@ def task_update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
-"""
-@task()
-def task_parse_website(calendar_id, website_id, limit=20):
-    try:
-        calendar = Calendar.objects.get(id=calendar_id)
-        website = Website.objects.get(calendar=calendar, id=website_id)
-        
-        if not website.enabled:
-            return
-            
-        website.running = True
-        website.status = 'Parsing website'
-        website.save()
-        
-        logging.info('Parsing website "%s" for user "%s"' % (website, calendar.user))
-        
-        parse_id = random.randint(0, 1000000)
-        
-        website_html = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'})).read()
-        for calendar_data in hcalendar.hCalendar(website_html):
-            for event_index in range(0, len(calendar_data), limit):
-                event_html = ''.join(map(str, calendar_data[event_index:event_index+limit]))
-                task_parse_website_event.apply_async(args=[calendar_id, website_id, parse_id, event_html])
-        
-        task_parse_website_wait.apply_async(args=[calendar_id, website_id, parse_id], countdown=30)
-        
-        logging.info('Deferred event parsing of website "%s" for user %s"' % (website, calendar.user))
-        
-    except urllib2.URLError, e:
-        website.enabled = False
-        website.running = False
-        website.status = 'Error: %s' % e.reason
-        website.save()
-        
-    except Calendar.DoesNotExist, e:
-        pass
-        
-    except Website.DoesNotExist, e:
-        pass
-"""
-
 @task()
 def task_parse_website(calendar_id, website_id):
     try:
@@ -423,67 +382,7 @@ def task_parse_website(calendar_id, website_id):
         
     except Website.DoesNotExist, e:
         pass
-        
-"""
-@task()
-def task_parse_website_event(calendar_id, website_id, parse_id, event_html):
-    try:
-        calendar = Calendar.objects.get(id=calendar_id)
-        website = Website.objects.get(calendar=calendar, id=website_id)
-        
-        logging.info('Parsing events of website %s for user "%s"' % (website, calendar.user))
-        
-        parse_datetime = datetime.datetime.now()
-        
-        for calendar_data in hcalendar.hCalendar(event_html):
-            for event_data in calendar_data:
-                if event_data.summary and event_data.dtstart:
-                    try:
-                        event = Event.objects.get(website=website, summary=event_data.summary, dtstart=event_data.dtstart)
-                        event.parse = parse_id
-                        #event.parsed = parse_datetime # This should only be updated if fields change
-                        event.save()
-                    except Event.DoesNotExist:
-                        event = Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, parse=parse_id, parsed=parse_datetime)
-        
-    except Calendar.DoesNotExist, e:
-        pass
-        
-    except Website.DoesNotExist, e:
-        pass
-
-@task()
-def task_parse_website_wait(calendar_id, website_id, parse_id):
-    try:
-        calendar = Calendar.objects.get(id=calendar_id)
-        website = Website.objects.get(calendar=calendar, id=website_id)
-        
-        if not deferred.deferred(name='parse_website_event', reference_id=website_id):
-            logging.info('Deleting missing events of website "%s" for user "%s"' % (website, calendar.user))
-            
-            for event in Event.objects.filter(website=website).exclude(parse=parse_id):
-                event.deleted = True
-                event.save()
-                
-            logging.info('Deleted missing events of website "%s" for user "%s"' % (website, calendar.user))
-            
-            website.running = False
-            website.updated = datetime.datetime.now()
-            website.status = 'Finished parsing website'
-            website.save()
-            logging.info('Parsed all events of website "%s" for user "%s"' % (website, calendar.user))
-                            
-        else:
-            task_parse_website_wait.apply_async(args=[calendar_id, website_id, parse_id], countdown=30)
-        
-    except Calendar.DoesNotExist, e:
-        pass
-        
-    except Website.DoesNotExist, e:
-        pass
-"""
 
 def _parse_request_error(error):
     if 'body' in error:
         return hcalendar.BeautifulSoup.BeautifulSoup(error['body']).find('title').string.decode('utf-8')
-
