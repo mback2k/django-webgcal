@@ -29,7 +29,6 @@ def task_update_calendar(calendar_id):
             
         calendar.running = True
         calendar.status = 'Syncing calendar'
-        calendar.errors = 0
         calendar.save()
     
         logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, calendar.user))
@@ -117,7 +116,6 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
         
         website.running = True
         website.status = 'Syncing calendar'
-        website.errors = 0
         website.save()
         
         logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, calendar.user))
@@ -239,6 +237,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
         else:
             website.running = False
             website.status = 'Finished syncing website'
+            website.errors = 0
             website.save()
             logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
             
@@ -283,6 +282,7 @@ def task_update_calendar_wait(calendar_id):
             calendar.running = False
             calendar.updated = datetime.datetime.now()
             calendar.status = 'Finished syncing calendar'
+            calendar.errors = 0
             calendar.save()
             logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
             
