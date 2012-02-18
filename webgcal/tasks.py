@@ -19,7 +19,7 @@ def task_start_worker():
         for website in calendar.websites.filter(enabled=True):
             task_parse_website.apply_async(args=[calendar.id, website.id])
 
-@task()
+@task(default_retry_delay=60)
 def task_update_calendar(calendar_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -109,7 +109,7 @@ def task_update_calendar(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
-@task()
+@task(default_retry_delay=60)
 def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -274,7 +274,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
     except Website.DoesNotExist, e:
         pass
 
-@task()
+@task(default_retry_delay=30)
 def task_update_calendar_wait(calendar_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -292,7 +292,7 @@ def task_update_calendar_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
-@task()
+@task(default_retry_delay=30)
 def task_update_website_wait(calendar_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
@@ -311,7 +311,7 @@ def task_update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
-@task()
+@task(default_retry_delay=60)
 def task_parse_website(calendar_id, website_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
