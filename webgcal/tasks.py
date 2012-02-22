@@ -398,4 +398,5 @@ def task_parse_website(calendar_id, website_id):
 
 def _parse_request_error(error):
     if 'body' in error:
-        return hcalendar.BeautifulSoup.BeautifulSoup(error['body']).find('title').string.decode('utf-8')
+        from bs4 import BeautifulSoup
+        return BeautifulSoup(error['body']).find('title').string
