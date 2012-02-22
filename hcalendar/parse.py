@@ -2,10 +2,8 @@ from hcalendar import hCalendar
 import urllib2
 
 def parsePage(url):
-    req = urllib2.Request(url, None, {'User-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'})
-    fp = urllib2.urlopen(req)
-    html = fp.read()
-    hcal = hCalendar(html)
+    file = urllib2.urlopen(urllib2.Request(url, headers={'User-agent': 'WebGCal'}))
+    hcal = hCalendar(file)
     for cal in hcal:
         for event in cal:
             print '-'*79

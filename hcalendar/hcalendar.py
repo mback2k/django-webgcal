@@ -1,9 +1,9 @@
-from BeautifulSoup import MinimalSoup
 from dateutil.parser import parse
+from bs4 import BeautifulSoup
 
 class hCalendar(object):
-    def __init__(self, html):
-        self.soup = MinimalSoup(html)
+    def __init__(self, markup):
+        self.soup = BeautifulSoup(markup)
         self.cals = self.soup.findAll(attrs='vcalendar')
         if self.cals:
             self.cals = map(vCalendar, self.cals)
@@ -95,7 +95,7 @@ class vEvent(object):
 
     def _getContent(self, soup):
         if soup.string:
-            return str(soup.string).decode('utf-8').strip().strip('"')
+            return soup.string.strip().strip('"')
         contents = []
         for elem in soup.contents:
             contents.append(self._getContent(elem))
