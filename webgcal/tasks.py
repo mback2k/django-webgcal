@@ -382,6 +382,19 @@ def task_parse_website(calendar_id, website_id):
         
     except Website.DoesNotExist, e:
         pass
+        
+    except:
+        if website.errors < 15:
+            website.errors += 1
+            website.save()
+            task_parse_website.retry(exc=e)
+
+        else:
+            website.enabled = False
+            website.running = False
+            website.status = 'Error: Unable to parse website'
+            website.errors = 0
+            website.save()
 
 def _parse_request_error(error):
     if 'body' in error:
