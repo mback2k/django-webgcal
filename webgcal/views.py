@@ -182,7 +182,7 @@ def create_website(request, calendar_id):
 @login_required
 def edit_website(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     edit_form = WebsiteForm(instance=website, data=request.POST if request.method == 'POST' else None)
 
@@ -205,7 +205,7 @@ def edit_website(request, calendar_id, website_id):
 @login_required
 def switch_website(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.enabled = not(website.enabled)
     website.save()
@@ -227,7 +227,7 @@ def switch_website(request, calendar_id, website_id):
 @login_required
 def delete_website(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.delete()
     create_form = WebsiteForm()
@@ -245,7 +245,7 @@ def delete_website(request, calendar_id, website_id):
 @login_required
 def delete_website_ask(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     create_form = WebsiteForm()
     
