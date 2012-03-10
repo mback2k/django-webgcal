@@ -147,8 +147,10 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                 except gdata.service.RequestError, e:
                     if e.args[0]['status'] in [401, 403, 404]:
                         event.href = None
+                    else:
+                        raise e
             
-            if not event.href:            
+            if not event.href:
                 if not event.deleted and website.enabled:
                     entry = gdata.calendar.CalendarEventEntry()
                     if websites > 1:
