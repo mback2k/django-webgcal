@@ -1,50 +1,47 @@
 {% extends "base.html" %}
 
 {% block navigation %}
-  <div class="hlist"><ul>
-    <li><a href="{% url webgcal.views.show_home %}" title="Home">Home</a></li>
-    <li class="active"><strong>Dashboard</strong></li>
-  </ul></div>
+  <li><a href="{% url webgcal.views.show_home %}" title="Home">Home</a></li>
+  <li class="active"><strong>Dashboard</strong></li>
 {% endblock %}
 
 {% block content %}
   {% if calendar %}
   {% if calendar_edit_form %}
-  <form action="{% url webgcal.views.edit_calendar calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
-  <fieldset>
-    <legend><img src="{{ STATIC_URL }}icons/pencil.png" alt="" /> <strong>Edit Calendar:</strong></legend>
+  <form action="{% url webgcal.views.edit_calendar calendar.id %}" method="post" class="ym-form ym-columnar">
+    {% csrf_token %}
+    <h6>Edit Calendar:</h6>
     {{ calendar_edit_form.as_yaml }}
-    <div class="type-button">
-      <input type="submit" name="submit" value="Save Calendar" />
-      <a href="{% url webgcal.views.show_dashboard %}" title="Close"><input type="button" name="close" value="Close" /></a>
+    <div class="ym-fbox-button">
+      <input class="ym-button ym-save" type="submit" name="submit" value="Save Calendar" />
+      <a class="ym-button ym-next" href="{% url webgcal.views.show_dashboard %}" title="Go Back">Go Back</a>
     </div>
-  </fieldset>
   </form>
   {% else %}
   {% if website_edit_form %}
-  <form action="{% url webgcal.views.edit_website calendar.id website.id %}" method="post" class="yform columnar">{% csrf_token %}
-  <fieldset>
-    <legend><img src="{{ STATIC_URL }}icons/pencil.png" alt="" /> <strong>Edit Website:</strong></legend>
+  <form action="{% url webgcal.views.edit_website calendar.id website.id %}" method="post" class="ym-form ym-columnar">
+    {% csrf_token %}
+    <h6>Edit Website:</h6>
     {{ website_edit_form.as_yaml }}
-    <div class="type-button">
-      <input type="submit" name="submit" value="Save Website" />
-      <a href="{% url webgcal.views.show_calendar calendar.id %}" title="Close"><input type="button" name="close" value="Close" /></a>
+    <div class="ym-fbox-button">
+      <input class="ym-button ym-save" type="submit" name="submit" value="Save Website" />
+      <a class="ym-button ym-next" href="{% url webgcal.views.show_calendar calendar.id %}" title="Go Back">Go Back</a>
     </div>
-  </fieldset>
   </form>
   {% endif %}
-  <table class="full">
+  <a class="ym-button ym-next float-right" href="{% url webgcal.views.show_dashboard %}" title="Go Back">Go Back</a>
+  <h3>Websites of {{ calendar.name }}</h3>
+  <table class="bordertable">
     <thead>
-      <tr><th scope="col" colspan="5">Websites of {{ calendar.name }}:</th></tr>
-    </thead>
-    <tbody>
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Website</th>
         <th scope="col">Events</th>
         <th scope="col">Last Update</th>
-        <th class="right"><a href="{% url webgcal.views.show_dashboard %}" title="Close">Close</a></th>
+        <th scope="col">Manage</th>
       </tr>
+    </thead>
+    <tbody>
       {% if calendar.websites %}
       {% for website in calendar.websites %}
       <tr {% if not website.enabled %}style="background: #fff8f8;"{% endif %}>
@@ -63,26 +60,28 @@
     </tbody>
   </table>
   {% if website_create_form %}
-  <form action="{% url webgcal.views.create_website calendar.id %}" method="post" class="yform columnar">{% csrf_token %}
-  <fieldset>
-    <legend><img src="{{ STATIC_URL }}icons/add.png" alt="" /> <strong>Add Website:</strong></legend>
+  <form action="{% url webgcal.views.create_website calendar.id %}" method="post" class="ym-form ym-columnar">
+    {% csrf_token %}
+    <h6>Add Website:</h6>
     {{ website_create_form.as_yaml }}
-    <div class="type-button">
-      <input type="submit" name="submit" value="Add Website" />
+    <div class="ym-fbox-button">
+      <input class="ym-button ym-save" type="submit" name="submit" value="Add Website" />
+      <a class="ym-button ym-next" href="{% url webgcal.views.show_dashboard %}" title="Go Back">Go Back</a>
     </div>
-  </fieldset>
   </form>
   {% endif %}
   {% endif %}
   {% endif %}
-  <table class="full">
-    <tbody>
+  <table class="bordertable">
+    <thead>
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Websites</th>
         <th scope="col">Last Update</th>
         <th scope="col">Manage</th>
       </tr>
+    </thead>
+    <tbody>
       {% for calendar in calendars %}
       <tr {% if not calendar.enabled %}style="background: #fff8f8;"{% endif %}>
         <td>{{ calendar.name }}</td>
@@ -93,16 +92,15 @@
       {% endfor %}
     </tbody>
   </table>
-  <div class="info">The websites are currently parsed every hour and after all parsing is done the Google Calendar will be updated in small batches.</div>
+  <div class="box info">The websites are currently parsed every hour and after all parsing is done the Google Calendar will be updated in small batches.</div>
   {% if calendar_create_form %}
-  <form action="{% url webgcal.views.create_calendar %}" method="post" class="yform columnar">{% csrf_token %}
-  <fieldset>
-    <legend><img src="{{ STATIC_URL }}icons/add.png" alt="" /> <strong>Add Calendar:</strong></legend>
+  <form action="{% url webgcal.views.create_calendar %}" method="post" class="ym-form ym-columnar">
+    {% csrf_token %}
+    <h6>Add Calendar:</h6>
     {{ calendar_create_form.as_yaml }}
-    <div class="type-button">
-      <input type="submit" name="submit" value="Add Calendar" />
+    <div class="ym-fbox-button">
+      <input class="ym-button ym-save" type="submit" name="submit" value="Add Calendar" />
     </div>
-  </fieldset>
   </form>
   {% endif %}
 {% endblock %}

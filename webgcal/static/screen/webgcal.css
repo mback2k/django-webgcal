@@ -1,0 +1,37 @@
+@charset "UTF-8";
+
+@media all {
+  textarea, pre, code, kbd, samp, var, tt {
+    font-family: "Consolas", "Lucida Console", "Andale Mono", "Bitstream Vera Sans Mono", "Courier New", "Courier";
+  }
+  body {
+    font-family: "Arial", "Helvetica", "sans-serif";
+  }
+
+  header {
+    background-color: #6B8E23;
+  }
+  nav, .ym-hlist {
+    background-color: #556B2F;
+  }
+
+  a {
+    color: #6B8E23;
+  }
+  a:hover, a:focus {
+    background-color: #6B8E23;
+    color: #FFF;
+  }
+
+  table .ym-button {
+    margin-top: 0;
+  }
+  .box .ym-button {
+    margin-top: -0.5em;
+  }
+
+  img.status {
+    background: none;
+    margin-bottom: -2px;
+  }
+}

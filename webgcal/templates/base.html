@@ -3,14 +3,16 @@
 {% block title %}WebGCal{% endblock %}
 
 {% block extra-head %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}navigation/nav_slidingdoor.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}navigation/hlist.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}forms/gray-theme.css" />
   {% if LANGUAGE_BIDI %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/nav_slidingdoor-rtl.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/hlist-rtl.css" />
   {% endif %}
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}screen/basemod.css" />
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}screen/content.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}screen/typography.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ STATIC_URL }}screen/screen-FULLPAGE-layout.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}screen/webgcal.css" />
 
-  <meta name="generator" content="Google App Engine" />
+  <meta name="generator" content="Django" />
   <meta name="language" content="en" />
   <meta name="distribution" content="global" />
   <meta name="audience" content="all" />
@@ -37,12 +39,9 @@
 {% endblock %}
 
 {% block header %}
-  <h3>WebGCal</h3>
-  <h4>Add hCalendar events to your Google Calendar</h4>
+  <h1>WebGCal</h1>
 {% endblock %}
 
 {% block footer %}
-  <div id="footer">
-    Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://www.djangoproject.com/">Django</a>, <a href="http://www.celeryproject.org/">Celery</a> and <a href="http://pypi.python.org/pypi/kombu/">Kombu</a> | <a href="https://github.com/mback2k/django-webgcal/">Source Code</a> on <a href="https://github.com/">Github</a>
-  </div>
+  Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://www.djangoproject.com/">Django</a>, <a href="http://www.celeryproject.org/">Celery</a> and <a href="http://www.redis.io/">Redis</a> | <a href="https://github.com/mback2k/django-webgcal/">Source Code</a> on <a href="https://github.com/">Github</a>
 {% endblock %}

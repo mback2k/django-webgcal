@@ -147,9 +147,10 @@ def delete_calendar_ask(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     create_form = CalendarForm()
-    
-    messages.warning(request, 'Do you want to delete calendar "%s"? <a href="%s" title="Yes">Yes</a>' % (calendar, reverse('webgcal.views.delete_calendar', kwargs={'calendar_id': calendar_id})))
-    
+
+    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal.views.delete_calendar', kwargs={'calendar_id': calendar_id})    
+    messages.warning(request, '%sDo you want to delete calendar "%s"?' % (button, calendar))
+
     template_values = {
         'calendars': calendars,
         'calendar_create_form': create_form,
@@ -248,9 +249,10 @@ def delete_website_ask(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     create_form = WebsiteForm()
-    
-    messages.warning(request, 'Do you want to delete website "%s"? <a href="%s" title="Yes">Yes</a>' % (website, reverse('webgcal.views.delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})))
-    
+
+    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal.views.delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})    
+    messages.warning(request, '%sDo you want to delete website "%s"?' % (button, website))
+
     template_values = {
         'calendars': calendars,
         'calendar': calendar,

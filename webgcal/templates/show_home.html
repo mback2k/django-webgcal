@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 
 {% block navigation %}
-  <div class="hlist"><ul>
-    <li class="active"><strong>Home</strong></li>
-    {% if user.is_authenticated %}<li><a href="{% url webgcal.views.show_dashboard %}" title="Dashboard">Dashboard</a></li>{% endif %}
-  </ul></div>
+  <li class="active"><strong>Home</strong></li>
+  {% if user.is_authenticated %}<li><a href="{% url webgcal.views.show_dashboard %}" title="Dashboard">Dashboard</a></li>{% endif %}
 {% endblock %}
 
 {% block content %}
