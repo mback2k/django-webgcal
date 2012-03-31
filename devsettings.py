@@ -15,6 +15,11 @@ DATABASES = {
     }
 }
 
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
+
 INSTALLED_APPS += ('djkombu',)
 BROKER_TRANSPORT = 'djkombu.transport.DatabaseTransport'
 
