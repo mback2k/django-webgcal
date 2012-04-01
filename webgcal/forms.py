@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pytz
 from django import forms
 from webgcal.models import Calendar, Website
 
@@ -16,7 +17,11 @@ class WebsiteForm(forms.ModelForm):
     href = forms.URLField(required=True,
         label='Link', help_text='Type in a website link.',
         verify_exists=True, validator_user_agent='WebGCal')
+    timezone = forms.ChoiceField(required=True,
+        label='Timezone', help_text='Select default timezone.',
+        choices=map(lambda x: (x, x), pytz.common_timezones),
+        initial='UTC')
 
     class Meta:
         model = Website
-        fields = ['name', 'href']
+        fields = ['name', 'href', 'timezone']

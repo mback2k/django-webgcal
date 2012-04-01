@@ -1,4 +1,5 @@
 import atom
+import pytz
 import random
 import urllib2
 import logging
@@ -345,13 +346,14 @@ def task_parse_website(calendar_id, website_id):
         logging.info('Parsing website "%s" for user "%s"' % (website, calendar.user))
         
         events_data = {}
+        website_tz = pytz.timezone(website.timezone)
         website_file = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'}))
         for calendar_data in hcalendar.hCalendar(website_file):
             for event_data in calendar_data:
                 if event_data.dtstart and not timezone.is_aware(event_data.dtstart):
-                    event_data.dtstart = timezone.make_aware(event_data.dtstart, timezone.utc)
+                    event_data.dtstart = timezone.make_aware(event_data.dtstart, website_tz)
                 if event_data.dtend and not timezone.is_aware(event_data.dtend):
-                    event_data.dtend = timezone.make_aware(event_data.dtend, timezone.utc)
+                    event_data.dtend = timezone.make_aware(event_data.dtend, website_tz)
                 if event_data.summary and event_data.dtstart:
                     events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
         
