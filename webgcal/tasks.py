@@ -112,7 +112,14 @@ def task_update_calendar(calendar_id):
 def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
+
+        if not calendar.enabled:
+            return
+
         website = Website.objects.get(calendar=calendar, id=website_id)
+
+        if not website.enabled:
+            return
         
         website.running = True
         website.status = 'Syncing calendar'
@@ -317,6 +324,10 @@ def task_update_website_wait(calendar_id):
 def task_parse_website(calendar_id, website_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
+
+        if not calendar.enabled:
+            return
+
         website = Website.objects.get(calendar=calendar, id=website_id)
         
         if not website.enabled:
