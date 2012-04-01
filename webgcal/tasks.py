@@ -167,7 +167,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                     if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z')), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     else:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     entry.transparency = gdata.calendar.Transparency()
@@ -190,7 +190,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                     if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z')), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     else:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     entry.transparency = gdata.calendar.Transparency()
