@@ -34,4 +34,7 @@
     background: none;
     margin-bottom: -2px;
   }
+
+  .ym-enable:before { content: "\2611"; }
+  .ym-disable:before { content: "\2610"; }
 }
