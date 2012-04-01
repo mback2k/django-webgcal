@@ -9,6 +9,7 @@ import gdata.calendar
 import gdata.calendar.service
 from googledata import run_on_django
 from celery.task import task
+from django.utils import timezone
 from webgcal.models import Calendar, Website, Event
 
 @task()
@@ -130,8 +131,8 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
         calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
         
-        sync_datetime = datetime.datetime.now()
-        sync_timeout = datetime.datetime.now()-datetime.timedelta(days=1)
+        sync_datetime = timezone.now()
+        sync_timeout = timezone.now()-datetime.timedelta(days=1)
         
         websites = calendar.websites.count()
         batch = gdata.calendar.CalendarEventFeed()
@@ -293,7 +294,7 @@ def task_update_calendar_wait(calendar_id):
         
         if not calendar.websites.filter(running=True).count():
             calendar.running = False
-            calendar.updated = datetime.datetime.now()
+            calendar.updated = timezone.now()
             calendar.status = 'Finished syncing calendar'
             calendar.errors = 0
             calendar.save()
@@ -347,6 +348,10 @@ def task_parse_website(calendar_id, website_id):
         website_file = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'}))
         for calendar_data in hcalendar.hCalendar(website_file):
             for event_data in calendar_data:
+                if event_data.dtstart and not timezone.is_aware(event_data.dtstart):
+                    event_data.dtstart = timezone.make_aware(event_data.dtstart, timezone.utc)
+                if event_data.dtend and not timezone.is_aware(event_data.dtend):
+                    event_data.dtend = timezone.make_aware(event_data.dtend, timezone.utc)
                 if event_data.summary and event_data.dtstart:
                     events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
         
@@ -360,7 +365,7 @@ def task_parse_website(calendar_id, website_id):
         
         for key, event_data in events_data.iteritems():
             if not key in events:
-                Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, dtend=event_data.dtend, parsed=datetime.datetime.now())
+                Event.objects.create(website=website, summary=event_data.summary, dtstart=event_data.dtstart, dtend=event_data.dtend, parsed=timezone.now())
             else:
                 save = False
                 event = events[key]
@@ -375,7 +380,7 @@ def task_parse_website(calendar_id, website_id):
                     save = True
                 if event.deleted or save:
                     event.deleted = False
-                    event.parsed = datetime.datetime.now()
+                    event.parsed = timezone.now()
                     event.save()
         
         logging.info('Deleting events of website "%s" for user "%s"' % (website, calendar.user))
@@ -386,7 +391,7 @@ def task_parse_website(calendar_id, website_id):
                 event.save()
                 
         website.running = False
-        website.updated = datetime.datetime.now()
+        website.updated = timezone.now()
         website.status = 'Finished parsing website'
         website.save()
         logging.info('Parsed all events of website "%s" for user "%s"' % (website, calendar.user))
