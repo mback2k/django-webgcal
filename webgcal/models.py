@@ -50,6 +50,7 @@ class Event(models.Model):
     
     summary = models.CharField(_('summary'), max_length=250)
     dtstart = models.DateTimeField(_('dtstart'))
+    dtend = models.DateTimeField(_('dtstart'), blank=True, null=True)
 
     def __unicode__(self):
         return self.summary
