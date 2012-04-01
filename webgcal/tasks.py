@@ -320,7 +320,7 @@ def task_update_website_wait(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
-@task(default_retry_delay=60)
+@task(default_retry_delay=60, max_retries=15)
 def task_parse_website(calendar_id, website_id):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
