@@ -112,7 +112,7 @@ def task_update_calendar(calendar_id):
         pass
 
 @task(default_retry_delay=60, max_retries=15)
-def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
+def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
 
@@ -125,41 +125,68 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
             return
         
         website.running = True
-        website.status = 'Syncing calendar'
+        website.status = 'Syncing website (%d/%d)' % (website.events.filter(id__lt=cursor).count() if cursor else 0, website.events.count())
         website.save()
         
         logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, calendar.user))
             
         calendar_service = run_on_django(gdata.calendar.service.CalendarService(), deadline=30)
         calendar_service.token_store.user = calendar.user
+        calendar_events = calendar_service.GetCalendarEventFeed(calendar.feed)
         
         sync_datetime = timezone.now()
         sync_timeout = timezone.now()-datetime.timedelta(days=1)
         
         websites = calendar.websites.count()
-        batch = gdata.calendar.CalendarEventFeed()
-        
-        requests = {}
         events = website.events.filter(Q(href='') | Q(deleted=True) | Q(synced__lt=F('parsed')) | Q(synced__lt=sync_timeout))
+
         if cursor:
             events = events.filter(id__gte=cursor)
         try:
             events_user = calendar.feed.split('/')[5]
         except:
-            events_user = '/foo@bar/'
+            events_user = None
+
+        entries = {}
+        requests = {}
+        batch = gdata.calendar.CalendarEventFeed()
+
         for event in events[:limit]:
-            if not events_user in event.href:  
-                event.href = None
+            if not events_user or not events_user in event.href:  
+                event.href = ''
+                event.save()
 
             else:
-                try:
-                    entry = calendar_service.GetCalendarEventEntry(event.href)
-                except gdata.service.RequestError, e:
-                    if e.args[0]['status'] in [401, 403, 404]:
-                        event.href = None
-                    else:
-                        raise e
+                batch_id = 'query-request-%d' % event.id
+                batch.AddQuery(url_string=event.href, batch_id_string=batch_id)
+                requests[batch_id] = event
+                logging.info('%s %s' % (batch_id, event.summary))
 
+        if requests:
+            logging.info('Executing batch request')
+            result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
+            logging.info('Executed batch request')
+            
+            for entry in result.entry:
+                if entry.batch_id and entry.batch_id.text in requests:
+                    event = requests[entry.batch_id.text]
+                    if int(entry.batch_status.code) == 200:
+                        entries[event.id] = entry
+                    elif int(entry.batch_status.code) == 404: 
+                        event.href = ''
+                        event.save()
+                    elif int(entry.batch_status.code) >= 500:
+                        logging.error('Event %d:' % event.id)
+                        logging.error(entry)
+                else:
+                    if entry.batch_id and entry.batch_id.text:
+                        logging.warning('Batch %s:' % entry.batch_id.text)
+                    logging.warning(entry)
+
+        requests = {}
+        batch = gdata.calendar.CalendarEventFeed()
+
+        for event in events[:limit]:
             if not event.href:
                 if not event.deleted and website.enabled:
                     entry = gdata.calendar.CalendarEventEntry()
@@ -184,7 +211,8 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                 else:
                     event.delete()
 
-            elif event.deleted or event.synced < event.parsed:
+            elif event.id in entries and (event.deleted or event.synced < event.parsed):
+                entry = entries[event.id]
                 if not event.deleted and website.enabled:
                     if websites > 1:
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
@@ -215,34 +243,35 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                 event.save()
         
         if requests:
-            logging.info('Fetching event feed')
-            calendar_events = calendar_service.GetCalendarEventFeed(calendar.feed)
             logging.info('Executing batch request')
             result = calendar_service.ExecuteBatch(batch, calendar_events.GetBatchLink().href)
             logging.info('Executed batch request')
             
             for entry in result.entry:
                 if entry.batch_id and entry.batch_id.text in requests:
-                    if entry.batch_status.code in ['200', '201']:
+                    event = requests[entry.batch_id.text]
+                    if int(entry.batch_status.code) in (200, 201):
                         logging.info('%s %s %s' % (entry.batch_id.text, entry.batch_status.code, entry.batch_status.reason))
-                        event = requests[entry.batch_id.text]
                         if entry.batch_operation.type == gdata.BATCH_DELETE:
                             if event.deleted:
                                 event.delete()
                             else:
-                                event.href = None
+                                event.href = ''
                                 event.synced = sync_datetime
                                 event.save()
                         else:
                             event.href = entry.id.text
                             event.synced = sync_datetime
                             event.save()
-                    elif entry.batch_status.code == '400':
-                        event.href = None
+                    elif int(entry.batch_status.code) == 404:
+                        event.href = ''
                         event.save()
-                    elif not entry.batch_status.code == '409':
+                    elif int(entry.batch_status.code) >= 500:
+                        logging.error('Event %d:' % event.id)
                         logging.error(entry)
                 else:
+                    if entry.batch_id and entry.batch_id.text:
+                        logging.warning('Batch %s:' % entry.batch_id.text)
                     logging.warning(entry)
         
         if events.count() > limit:
