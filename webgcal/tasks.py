@@ -396,7 +396,7 @@ def task_parse_website(calendar_id, website_id):
     except Website.DoesNotExist, e:
         pass
         
-    except:
+    except Exception, e:
         if website.errors < 15:
             website.errors += 1
             website.save()
