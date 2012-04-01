@@ -11,6 +11,7 @@ import gdata.calendar.service
 from googledata import run_on_django
 from celery.task import task
 from django.utils import timezone
+from django.db.models import Q, F
 from webgcal.models import Calendar, Website, Event
 
 @task()
@@ -139,18 +140,18 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
         batch = gdata.calendar.CalendarEventFeed()
         
         requests = {}
-        events = website.events
+        events = website.events.filter(Q(href='') | Q(deleted=True) | Q(synced__lt=F('parsed')) | Q(synced__lt=sync_timeout))
         if cursor:
-            events = events.filter(dtstart__gt=cursor)
+            events = events.filter(id__gte=cursor)
         try:
             events_user = calendar.feed.split('/')[5]
         except:
             events_user = '/foo@bar/'
         for event in events[:limit]:
-            if event.href and not events_user in event.href:
+            if not events_user in event.href:  
                 event.href = None
-            
-            elif event.href and (event.deleted or event.synced < event.parsed or event.synced < sync_timeout):
+
+            else:
                 try:
                     entry = calendar_service.GetCalendarEventEntry(event.href)
                 except gdata.service.RequestError, e:
@@ -158,7 +159,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                         event.href = None
                     else:
                         raise e
-            
+
             if not event.href:
                 if not event.deleted and website.enabled:
                     entry = gdata.calendar.CalendarEventEntry()
@@ -245,7 +246,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=10):
                     logging.warning(entry)
         
         if events.count() > limit:
-            task_update_calendar_sync.apply_async(args=[calendar_id, website_id, events[limit].dtstart-datetime.timedelta(seconds=1), limit], countdown=2)
+            task_update_calendar_sync.apply_async(args=[calendar_id, website_id, events[limit].id, limit], countdown=2)
 
             logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
             

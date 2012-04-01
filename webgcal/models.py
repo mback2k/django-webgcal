@@ -40,7 +40,7 @@ class Website(models.Model):
         
     @cache_property
     def events(self):
-        return self.event_set.order_by('dtstart')
+        return self.event_set.order_by('id')
 
 class Event(models.Model):
     website = models.ForeignKey(Website)
