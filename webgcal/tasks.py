@@ -212,7 +212,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     if event.status:
                         entry.status = gdata.calendar.EventStatus(text=event.status.upper())
                     if event.description:
-                        entry.content = atom.data.Content(text=event.description)
+                        entry.content = atom.Content(text=event.description)
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
@@ -244,7 +244,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     if event.status:
                         entry.status = gdata.calendar.EventStatus(text=event.status.upper())
                     if event.description:
-                        entry.content = atom.data.Content(text=event.description)
+                        entry.content = atom.Content(text=event.description)
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
