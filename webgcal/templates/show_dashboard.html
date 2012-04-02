@@ -11,7 +11,7 @@
   <form action="{% url webgcal.views.edit_calendar calendar.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
     <h6>Edit Calendar:</h6>
-    {{ calendar_edit_form.as_yaml }}
+    {{ calendar_edit_form|yamlform }}
     <div class="ym-fbox-button">
       <input class="ym-button ym-save" type="submit" name="submit" value="Save Calendar" />
       <a class="ym-button ym-next" href="{% url webgcal.views.show_dashboard %}" title="Go Back">Go Back</a>
@@ -22,7 +22,7 @@
   <form action="{% url webgcal.views.edit_website calendar.id website.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
     <h6>Edit Website:</h6>
-    {{ website_edit_form.as_yaml }}
+    {{ website_edit_form|yamlform }}
     <div class="ym-fbox-button">
       <input class="ym-button ym-save" type="submit" name="submit" value="Save Website" />
       <a class="ym-button ym-next" href="{% url webgcal.views.show_calendar calendar.id %}" title="Go Back">Go Back</a>
@@ -67,7 +67,7 @@
   <form action="{% url webgcal.views.create_website calendar.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
     <h6>Add Website:</h6>
-    {{ website_create_form.as_yaml }}
+    {{ website_create_form|yamlform }}
     <div class="ym-fbox-button">
       <input class="ym-button ym-save" type="submit" name="submit" value="Add Website" />
       <a class="ym-button ym-next" href="{% url webgcal.views.show_dashboard %}" title="Go Back">Go Back</a>
@@ -106,7 +106,7 @@
   <form action="{% url webgcal.views.create_calendar %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
     <h6>Add Calendar:</h6>
-    {{ calendar_create_form.as_yaml }}
+    {{ calendar_create_form|yamlform }}
     <div class="ym-fbox-button">
       <input class="ym-button ym-save" type="submit" name="submit" value="Add Calendar" />
     </div>
