@@ -110,18 +110,10 @@ def switch_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     calendar.enabled = not(calendar.enabled)
     calendar.save()
-    create_form = CalendarForm()
     
     messages.success(request, 'Switched calendar "%s" %s!' % (calendar, 'on' if calendar.enabled else 'off'))
     
-    check_authsub(request)
-    
-    template_values = {
-        'calendars': calendars,
-        'calendar_create_form': create_form,
-    }
-
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
 
 @login_required
 def delete_calendar(request, calendar_id):
@@ -210,20 +202,10 @@ def switch_website(request, calendar_id, website_id):
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.enabled = not(website.enabled)
     website.save()
-    create_form = WebsiteForm()
     
     messages.success(request, 'Switched website "%s" %s!' % (website, 'on' if website.enabled else 'off'))
     
-    check_authsub(request)
-    
-    template_values = {
-        'calendars': calendars,
-        'calendar': calendar,
-        'website': website,
-        'website_create_form': create_form,
-    }
-
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
 
 @login_required
 def delete_website(request, calendar_id, website_id):
