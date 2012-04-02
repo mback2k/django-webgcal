@@ -200,6 +200,12 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     else:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
+                    if event.location:
+                        entry.where = [gdata.calendar.Where(value_string=event.location)]
+                    if event.status:
+                        entry.status = gdata.calendar.EventStatus(text=event.status.upper())
+                    if event.description:
+                        entry.content = atom.data.Content(text=event.description)
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
@@ -226,6 +232,12 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     else:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
+                    if event.location:
+                        entry.where = [gdata.calendar.Where(value_string=event.location)]
+                    if event.status:
+                        entry.status = gdata.calendar.EventStatus(text=event.status.upper())
+                    if event.description:
+                        entry.content = atom.data.Content(text=event.description)
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
