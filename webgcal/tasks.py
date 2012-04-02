@@ -172,15 +172,13 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     event = requests[entry.batch_id.text]
                     if int(entry.batch_status.code) == 200:
                         entries[event.id] = entry
-                    elif int(entry.batch_status.code) == 404: 
+                    elif int(entry.batch_status.code) == 404:
                         event.href = ''
                         event.save()
                     elif int(entry.batch_status.code) >= 500:
                         logging.error('Event %d:' % event.id)
                         logging.error(entry)
                 else:
-                    if entry.batch_id and entry.batch_id.text:
-                        logging.warning('Batch %s:' % entry.batch_id.text)
                     logging.warning(entry)
 
         requests = {}
@@ -194,8 +192,10 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
                     else:
                         entry.title = atom.Title(text=event.summary)
-                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
+                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not entry.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
+                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and entry.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     else:
@@ -218,8 +218,10 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
                     else:
                         entry.title = atom.Title(text=event.summary)
-                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0:
+                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not entry.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
+                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and entry.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
                     else:
@@ -270,8 +272,6 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         logging.error('Event %d:' % event.id)
                         logging.error(entry)
                 else:
-                    if entry.batch_id and entry.batch_id.text:
-                        logging.warning('Batch %s:' % entry.batch_id.text)
                     logging.warning(entry)
         
         if events.count() > limit:
