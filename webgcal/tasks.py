@@ -192,9 +192,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
                     else:
                         entry.title = atom.Title(text=event.summary)
-                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not entry.dtend:
+                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
-                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and entry.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
+                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and event.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
@@ -218,9 +218,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                         entry.title = atom.Title(text=u'%s: %s' % (website.name, event.summary))
                     else:
                         entry.title = atom.Title(text=event.summary)
-                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not entry.dtend:
+                    if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtstart+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
-                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and entry.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
+                    elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and event.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
