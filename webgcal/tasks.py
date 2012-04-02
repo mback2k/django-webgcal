@@ -401,15 +401,11 @@ def task_parse_website(calendar_id, website_id):
             else:
                 save = False
                 event = events[key]
-                if event.summary != event_data.summary:
-                    event.summary = event_data.summary
-                    save = True
-                if event.dtstart != event_data.dtstart:
-                    event.dtstart = event_data.dtstart
-                    save = True
-                if event.dtend != event_data.dtend:
-                    event.dtend = event_data.dtend
-                    save = True
+                for attr in ('uid', 'summary', 'description', 'location', 'status', 'dtstart', 'dtend', 'dtstamp'):
+                    value = getattr(event_data, attr, None)
+                    if value != getattr(event, attr, None):
+                        setattr(event, attr, value)
+                        save = True
                 if event.deleted or save:
                     event.deleted = False
                     event.parsed = timezone.now()

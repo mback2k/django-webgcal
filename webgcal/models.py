@@ -48,10 +48,16 @@ class Event(models.Model):
     parsed = models.DateTimeField(_('date parsed'), default=datetime.date.min)
     synced = models.DateTimeField(_('date synced'), default=datetime.date.min)
     deleted = models.BooleanField(_('deleted'), default=False)
-    
-    summary = models.CharField(_('summary'), max_length=250)
+
+    uid = models.TextField(_('uid'), blank=True, null=True)
+    summary = models.TextField(_('summary'))
+    description = models.TextField(_('description'), blank=True, null=True)
+    location = models.TextField(_('location'), blank=True, null=True)
+    category = models.TextField(_('category'), blank=True, null=True)
+    status = models.TextField(_('status'), blank=True, null=True)
     dtstart = models.DateTimeField(_('dtstart'))
     dtend = models.DateTimeField(_('dtend'), blank=True, null=True)
+    dtstamp = models.DateTimeField(_('dtstamp'), blank=True, null=True)
 
     def __unicode__(self):
         return self.summary
