@@ -156,7 +156,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                 event.href = ''
                 event.save()
 
-            else:
+            elif event.href:
                 batch_id = 'query-request-%d' % event.id
                 batch.AddQuery(url_string=event.href, batch_id_string=batch_id)
                 requests[batch_id] = event
