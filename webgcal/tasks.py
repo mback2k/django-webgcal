@@ -288,6 +288,8 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     elif int(entry.batch_status.code) == 404:
                         event.href = ''
                         event.save()
+                    elif int(entry.batch_status.code) == 409:
+                        event.delete()
                     elif int(entry.batch_status.code) >= 500:
                         logging.error('Event %d:' % event.id)
                         logging.error(entry)
