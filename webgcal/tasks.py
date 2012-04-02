@@ -159,15 +159,16 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
         batch = gdata.calendar.CalendarEventFeed()
 
         for event in events[:limit]:
-            if not events_user or not events_user in event.href:  
-                event.href = ''
-                event.save()
+            if event.href:
+                if not events_user or not events_user in event.href:
+                    event.href = ''
+                    event.save()
 
-            elif event.href:
-                batch_id = 'query-request-%d' % event.id
-                batch.AddQuery(url_string=event.href, batch_id_string=batch_id)
-                requests[batch_id] = event
-                logging.info('%s %s' % (batch_id, event.summary))
+                else:
+                    batch_id = 'query-request-%d' % event.id
+                    batch.AddQuery(url_string=event.href, batch_id_string=batch_id)
+                    requests[batch_id] = event
+                    logging.info('%s %s' % (batch_id, event.summary))
 
         if requests:
             logging.info('Executing batch request')
