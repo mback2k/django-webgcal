@@ -43,7 +43,7 @@ class vCalendar(object):
 
 class vEvent(object):
     ATTR_CONTENT  = ('summary', 'description', 'location', 'category', 'status', 'method', 'uid', 'url')
-    ATTR_DATETIME = ('dtstart', 'dtend', 'dtstamp')
+    ATTR_DATETIME = ('dtstart', 'dtend', 'dtstamp', 'last_modified')
     ATTR_DURATION = ('duration',)
     ATTR_RELATION = {'duration': 'dtstart'}
     ATTR_FALLBACK = {'dtend': 'duration'}
