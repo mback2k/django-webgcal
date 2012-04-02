@@ -58,6 +58,7 @@ class Event(models.Model):
     dtstart = models.DateTimeField(_('dtstart'))
     dtend = models.DateTimeField(_('dtend'), blank=True, null=True)
     dtstamp = models.DateTimeField(_('dtstamp'), blank=True, null=True)
+    last_modified = models.DateTimeField(_('last_modified'), blank=True, null=True)
 
     def __unicode__(self):
         return self.summary

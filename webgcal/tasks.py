@@ -380,10 +380,10 @@ def task_parse_website(calendar_id, website_id):
         website_file = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'}))
         for calendar_data in hcalendar.hCalendar(website_file):
             for event_data in calendar_data:
-                if event_data.dtstart and not timezone.is_aware(event_data.dtstart):
-                    event_data.dtstart = timezone.make_aware(event_data.dtstart, website_tz)
-                if event_data.dtend and not timezone.is_aware(event_data.dtend):
-                    event_data.dtend = timezone.make_aware(event_data.dtend, website_tz)
+                for attr in ('dtstart', 'dtend', 'dtstamp', 'last_modified'):
+                    value = getattr(event_data, attr)
+                    if value and not timezone.is_aware(value):
+                        setattr(event_data, attr, timezone.make_aware(value, website_tz))
                 if event_data.summary and event_data.dtstart:
                     events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
         
@@ -401,7 +401,7 @@ def task_parse_website(calendar_id, website_id):
             else:
                 save = False
                 event = events[key]
-                for attr in ('uid', 'summary', 'description', 'location', 'category', 'status', 'dtstart', 'dtend', 'dtstamp'):
+                for attr in ('uid', 'summary', 'description', 'location', 'category', 'status', 'dtstart', 'dtend', 'dtstamp', 'last_modified'):
                     value = getattr(event_data, attr, None)
                     if value != getattr(event, attr, None):
                         setattr(event, attr, value)
