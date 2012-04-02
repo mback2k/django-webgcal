@@ -197,9 +197,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and event.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     else:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
@@ -223,9 +223,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
                     elif event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and event.dtend.hour == 0  and event.dtend.minute == 0 and event.dtend.second == 0:
                         entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%d'), end_time=(event.dtend+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]
                     elif event.dtend:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'), end_time=event.dtend.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     else:
-                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:%SZ%z'))]
+                        entry.when = [gdata.calendar.When(start_time=event.dtstart.strftime('%Y-%m-%dT%H:%M:00Z%z'))]
                     entry.transparency = gdata.calendar.Transparency()
                     entry.transparency.value = 'TRANSPARENT'
                     entry.uid = gdata.calendar.UID(value='webgcal-%d' % event.id)
