@@ -41,50 +41,36 @@ class vCalendar(object):
     def getEvents(self):
         return self.events
 
-class vEvent(object):
-    ATTR_CONTENT  = ('summary', 'description', 'location', 'category', 'status', 'method', 'uid', 'url')
-    ATTR_DATETIME = ('dtstart', 'dtend', 'dtstamp', 'last_modified')
-    ATTR_DURATION = ('duration',)
-    ATTR_RELATION = {'duration': 'dtstart'}
-    ATTR_FALLBACK = {'dtend': 'duration'}
-
+class vObject(object):
     REGEX_DATE = re.compile(r'P(\d{4})-(\d{2})-(\d{2})')
     REGEX_DATETIME = re.compile(r'P(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})')
+
+    ATTR_RELATION = {}
 
     def __init__(self, soup):
         self._soup = soup
         self._content = {}
         self._datetime = {}
         self._duration = {}
-        
+
     def __str__(self):
         return str(self._soup)
-        
-    def __dir__(self):
-        return list(self.ATTR_CONTENT + self.ATTR_DATETIME)
-        
-    def __getattr__(self, attr):
-        if attr in self.ATTR_DATETIME:
-            value = self.getDatetime(attr.replace('_', '-'))
-        elif attr in self.ATTR_DURATION:
-            value = self.getDuration(attr.replace('_', '-'))
-        elif attr in self.ATTR_CONTENT:
-            value = self.getContent(attr)
-        if not value and attr in self.ATTR_FALLBACK:
-            value = getattr(self, self.ATTR_FALLBACK[attr])
-        if not attr in list(self.ATTR_CONTENT + self.ATTR_DATETIME + self.ATTR_DURATION):
-            raise AttributeError
-        return value
 
     def getDatetime(self, attr):
         if not attr in self._datetime:
             content = self.getContent(attr)
             if content:
+                content = content.replace(' ', 'T')
                 if not 'T' in content:
-                    value = isodate.parse_date(content)
+                    if ':' in content:
+                        value = isodate.parse_time(content)
+                    else:
+                        value = isodate.parse_date(content)
                 else:
                     value = isodate.parse_datetime(content)
-                if isinstance(value, datetime.date):
+                if isinstance(value, datetime.time):
+                    self._datetime[attr] = datetime.datetime.min.replace(hour=value.hour, minute=value.minute, second=value.second, microsecond=value.microsecond, tzinfo=value.tzinfo)
+                elif isinstance(value, datetime.date):
                     self._datetime[attr] = datetime.datetime(value.year, value.month, value.day)
                 else:
                     self._datetime[attr] = value
@@ -110,34 +96,107 @@ class vEvent(object):
                 self._duration[attr] = None
         return self._duration[attr]
 
-    def getContent(self, attr):
+    def getContent(self, attr, sep=None, all=False):
         if not attr in self._content:
             soup = self._soup.find(attrs=attr)
             if not soup:
                 return None
-            subs = soup.findAll(attrs='value')
-            soup = subs if subs else [soup]
-            content = ''
-            for elem in soup:
-                if elem.name == 'a' and 'href' in elem.attrs:
-                    content += elem['href']
-                elif elem.name == 'abbr' and 'title' in elem.attrs:
-                    content += elem['title']
-                elif elem.name == 'time' and 'datetime' in elem.attrs:
-                    content += elem['datetime']
-                elif elem.name in ['img', 'area'] and 'alt' in elem.attrs:
-                    content += elem['alt']
-                else:
-                    content += self._getContent(elem)
-            self._content[attr] = content
+            self._content[attr] = self._getContent(soup, sep, all)
         return self._content[attr]
 
-    def _getContent(self, soup):
+    def _getContent(self, soup=None, sep=None, all=False):
+        if not soup:
+            soup = self._soup
+        subs = soup.findAll(attrs='value')
+        soup = subs if subs else [soup]
+        contents = []
+        for elem in soup:
+            if elem.name == 'a' and 'href' in elem.attrs:
+                contents.append(elem['href'])
+            elif elem.name == 'abbr' and 'title' in elem.attrs:
+                contents.append(elem['title'])
+            elif elem.name == 'time' and 'datetime' in elem.attrs:
+                contents.append(elem['datetime'])
+            elif elem.name in ['img', 'area'] and 'alt' in elem.attrs:
+                contents.append(elem['alt'])
+            else:
+                contents.append(self.__getContent(elem, all))
+        if not contents:
+            return ''
+        if sep:
+            return sep.join(contents)
+        return ''.join(contents)
+
+    def __getContent(self, soup=None, all=False):
+        if not soup:
+            soup = self._soup
         if soup.string:
             return soup.string.strip().strip('"')
         contents = []
         for elem in soup.contents:
-            contents.append(self._getContent(elem))
+            contents.append(self.__getContent(elem, all))
         if not contents:
             return ''
+        if all:
+            return ''.join(contents)
         return max(contents, key=len)
+
+class vEvent(vObject):
+    ATTR_CONTENT  = ('summary', 'description', 'location', 'category', 'status', 'method', 'uid', 'url')
+    ATTR_DATETIME = ('dtstart', 'dtend', 'dtstamp', 'last_modified', 'rdate', 'exdate')
+    ATTR_DURATION = ('duration',)
+    ATTR_RULE     = ('rrule', 'exrule')
+
+    ATTR_RELATION = {'duration': 'dtstart'}
+    ATTR_FALLBACK = {'dtend': 'duration'}
+
+    def __dir__(self):
+        return list(self.ATTR_CONTENT + self.ATTR_DATETIME + self.ATTR_RULE)
+
+    def __getattr__(self, attr):
+        if attr in self.ATTR_RULE:
+            rrule = self._soup.find(attrs=attr)
+            value = str(vRule(rrule)) if rrule else None
+        elif attr in self.ATTR_DATETIME:
+            value = self.getDatetime(attr.replace('_', '-'))
+        elif attr in self.ATTR_DURATION:
+            value = self.getDuration(attr.replace('_', '-'))
+        elif attr in self.ATTR_CONTENT:
+            value = self.getContent(attr)
+        if not value and attr in self.ATTR_FALLBACK:
+            value = getattr(self, self.ATTR_FALLBACK[attr])
+        if not attr in list(self.ATTR_CONTENT + self.ATTR_DATETIME + self.ATTR_DURATION + self.ATTR_RULE):
+            raise AttributeError
+        return value
+
+class vRule(vObject):
+    ATTR_KEYS = ('freq', 'interval', 'until', 'count', 'wkst', 'bysetpos', 'bymonth', 'byweekno', 'byyearday', 'bymonthday', 'byday', 'byhour', 'byminute', 'bysecond')
+    ATTR_TRIM = {'byday': 2}
+
+    def __str__(self):
+        freq = getattr(self, 'freq')
+        if freq:
+            rrule = self._getRule(freq)
+        else:
+            rrule = self._getContent()
+        return rrule.upper()
+
+    def __dir__(self):
+        return list(self.ATTR_KEYS)
+
+    def __getattr__(self, attr):
+        if attr in self.ATTR_KEYS:
+            value = self.getContent(attr, ',')
+        else:
+            raise AttributeError
+        if attr in self.ATTR_TRIM and value:
+            value = value[:self.ATTR_TRIM[attr]]
+        return value
+
+    def _getRule(self, freq):
+        rrule = 'FREQ=%s' % freq
+        for key in self.ATTR_KEYS[1:]:
+            value = getattr(self, key)
+            if value:
+                rrule += ';%s=%s' % (key, value)
+        return rrule
