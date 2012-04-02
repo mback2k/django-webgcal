@@ -111,6 +111,13 @@ def task_update_calendar(calendar_id):
     except Calendar.DoesNotExist, e:
         pass
 
+    except Exception, e:
+        calendar.enabled = False
+        calendar.running = False
+        calendar.status = 'Error: Fatal error'
+        calendar.errors = 0
+        calendar.save()
+
 @task(default_retry_delay=60, max_retries=15)
 def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
     try:
@@ -329,6 +336,13 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
 
     except Website.DoesNotExist, e:
         pass
+
+    except Exception, e:
+        website.enabled = False
+        website.running = False
+        website.status = 'Error: Fatal error'
+        website.errors = 0
+        website.save()
 
 @task(default_retry_delay=30)
 def task_update_calendar_wait(calendar_id):
