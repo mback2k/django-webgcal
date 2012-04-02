@@ -401,7 +401,7 @@ def task_parse_website(calendar_id, website_id):
             else:
                 save = False
                 event = events[key]
-                for attr in ('uid', 'summary', 'description', 'location', 'status', 'dtstart', 'dtend', 'dtstamp'):
+                for attr in ('uid', 'summary', 'description', 'location', 'category', 'status', 'dtstart', 'dtend', 'dtstamp'):
                     value = getattr(event_data, attr, None)
                     if value != getattr(event, attr, None):
                         setattr(event, attr, value)
