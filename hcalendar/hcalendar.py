@@ -68,9 +68,9 @@ class vObject(object):
                         value = isodate.parse_date(content)
                 else:
                     value = isodate.parse_datetime(content)
-                if isinstance(value, datetime.time):
+                if type(value) is datetime.time:
                     self._datetime[attr] = datetime.datetime.min.replace(hour=value.hour, minute=value.minute, second=value.second, microsecond=value.microsecond, tzinfo=value.tzinfo)
-                elif isinstance(value, datetime.date):
+                elif type(value) is datetime.date:
                     self._datetime[attr] = datetime.datetime(value.year, value.month, value.day)
                 else:
                     self._datetime[attr] = value
