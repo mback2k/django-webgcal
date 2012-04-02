@@ -413,14 +413,19 @@ def task_parse_website(calendar_id, website_id):
                     value = getattr(event_data, attr)
                     if value and not timezone.is_aware(value):
                         setattr(event_data, attr, timezone.make_aware(value, website_tz))
-                if event_data.summary and event_data.dtstart:
+                if event_data.uid:
+                    events_data[event_data.uid] = event_data
+                elif event_data.summary and event_data.dtstart:
                     events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
         
         logging.info('Parsed website "%s" for user "%s"' % (website, calendar.user))
         
         events = {}
         for event in website.events:
-            events[hash(event.summary)^hash(event.dtstart)] = event
+            if event.uid:
+                events[event.uid] = event
+            else:
+                events[hash(event.summary)^hash(event.dtstart)] = event
         
         logging.info('Updating events of website "%s" for user "%s"' % (website, calendar.user))
         
