@@ -3,14 +3,14 @@
 {% block title %}WebGCal{% endblock %}
 
 {% block extra-head %}
-  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}navigation/hlist.css" />
-  <link rel="stylesheet" type="text/css" media="screen, projection" href="{{ STATIC_URL }}forms/gray-theme.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}navigation/hlist.css" />
   {% if LANGUAGE_BIDI %}
-  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/hlist-rtl.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/hlist-rtl.css" />
   {% endif %}
-  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}screen/typography.css" />
-  <link rel="stylesheet" type="text/css" media="screen" href="{{ STATIC_URL }}screen/screen-FULLPAGE-layout.css" />
-  <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}screen/webgcal.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}forms/gray-theme.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/typography.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/screen-FULLPAGE-layout.css" />
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/webgcal.css" />
 
   <meta name="generator" content="Django" />
   <meta name="robots" content="index, follow, noarchive" />
