@@ -1,8 +1,10 @@
 {% extends "yaml.html" %}
+{% load compress %}
 
 {% block title %}WebGCal{% endblock %}
 
 {% block css %}
+{% compress css %}
 {{ block.super }}
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}navigation/hlist.css" />
   {% if LANGUAGE_BIDI %}
@@ -12,12 +14,15 @@
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/typography.css" />
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/screen-FULLPAGE-layout.css" />
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/webgcal.css" />
+{% endcompress %}
 {% endblock %}
 
 {% block js %}
+{% compress js %}
 {{ block.super }}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.datetime.js"></script>
+{% endcompress %}
 {% endblock %}}
 
 {% block extra-head %}
