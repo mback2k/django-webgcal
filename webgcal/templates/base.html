@@ -22,6 +22,15 @@
 {{ block.super }}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.datetime.js"></script>
+  <script type="text/javascript">
+    var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-2841986-9']); _gaq.push(['_trackPageview']);
+  </script>
+  <script type="text/javascript">
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = 'https://ssl.google-analytics.com/ga.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+    })();
+  </script>
 {% endcompress %}
 {% endblock %}}
 
@@ -31,19 +40,6 @@
   <meta name="keywords" content="calendar,icalendar,hcalendar,google" />
   <meta name="revisit-after" content="1 days" />
   <meta name="google-site-verification" content="VSCgr9QgLsfBKZcLKIee8oP5Vay4hLuhwFcCBnEyAI4" />
-
-  <script type="text/javascript">
-    var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-2841986-9']); _gaq.push(['_trackPageview']);
-  </script>
-{% endblock %}
-
-{% block extra-bottom %}
-  <script type="text/javascript">
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = 'https://ssl.google-analytics.com/ga.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
-    })();
-  </script>
 {% endblock %}
 
 {% block header %}
