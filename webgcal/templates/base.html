@@ -2,7 +2,8 @@
 
 {% block title %}WebGCal{% endblock %}
 
-{% block extra-head %}
+{% block css %}
+{{ block.super }}
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}navigation/hlist.css" />
   {% if LANGUAGE_BIDI %}
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}add-ons/rtl-support/navigation/hlist-rtl.css" />
@@ -11,15 +12,21 @@
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/typography.css" />
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/screen-FULLPAGE-layout.css" />
   <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}screen/webgcal.css" />
+{% endblock %}
 
+{% block js %}
+{{ block.super }}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.datetime.js"></script>
+{% endblock %}}
+
+{% block extra-head %}
   <meta name="generator" content="Django" />
   <meta name="robots" content="index, follow, noarchive" />
   <meta name="keywords" content="calendar,icalendar,hcalendar,google" />
   <meta name="revisit-after" content="1 days" />
   <meta name="google-site-verification" content="VSCgr9QgLsfBKZcLKIee8oP5Vay4hLuhwFcCBnEyAI4" />
 
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.datetime.js"></script>
   <script type="text/javascript">
     var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-2841986-9']); _gaq.push(['_trackPageview']);
   </script>
