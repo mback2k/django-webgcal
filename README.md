@@ -45,9 +45,9 @@ It is recommended to perform the installations using the pip command.
 
 The next step is to get all source from github.com:
 
-    git clone git://github.com/mback2k/django-webgcal.git webgcal
+    git clone git://github.com/mback2k/django-webgcal.git django_webgcal
     
-    cd webgcal
+    cd django_webgcal
     
     git submodule init
     git submodule update
