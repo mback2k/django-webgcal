@@ -5,6 +5,7 @@ Dependencies
 ------------
 - Django             [https://www.djangoproject.com/]
 - Celery             [http://www.celeryproject.org/]
+- pytz               [http://pytz.sourceforge.net/]
 - isodate            [http://pypi.python.org/pypi/isodate/]
 - Google Data API    [https://code.google.com/p/gdata-python-client/]
 - Beautiful Soup 4   [http://www.crummy.com/software/BeautifulSoup/]
@@ -63,6 +64,6 @@ Please take a look at the [Django documentation](https://docs.djangoproject.com/
 Executing Tasks
 ---------------
 Besides running the webserver, you need to run celeryd and celerybeat.
-You can do this by executing the following commands from your server's shell:
+You can do this by executing the following command from your server's shell:
 
     python manage.py celeryd -B -E
