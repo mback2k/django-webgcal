@@ -1,3 +1,4 @@
+import bs4
 import atom
 import pytz
 import random
@@ -489,6 +490,15 @@ def task_parse_website(calendar_id, website_id):
             website.save()
 
 def _parse_request_error(error):
-    if 'body' in error:
-        from bs4 import BeautifulSoup
-        return BeautifulSoup(error['body']).find('title').string
+    if not 'body' in error:
+        return None
+
+    soup = bs4.BeautifulSoup(error['body'])
+    if not soup:
+        return None
+
+    title = soup.find('title')
+    if not title:
+        return None
+
+    return title.string
