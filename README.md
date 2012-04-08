@@ -60,7 +60,11 @@ After that you need to collect and compress the static files using:
 
 Now you need to setup your webserver to serve the Django project.
 Please take a look at the [Django documentation](https://docs.djangoproject.com/en/1.4/topics/install/) for more information.
-    
+
+You can run a development server using the following command:
+
+    python manage.py runserver --settings=devsettings
+
 Executing Tasks
 ---------------
 Besides running the webserver, you need to run celeryd and celerybeat.
