@@ -17,5 +17,5 @@ urlpatterns = patterns('webgcal.views',
     (r'^dashboard/calendar/(?P<calendar_id>\d+)/website/(?P<website_id>\d+)/delete/ask/$', 'delete_website_ask'),
     (r'^authsub/request/$', 'authsub_request'),
     (r'^authsub/response/$', 'authsub_response'),
-    (r'^test/calendar/list/$', 'test_calendar_list'),
+    (r'^test/(?P<resource>\w+)/(?P<method>\w+)/$', 'test_resource_method'),
 )

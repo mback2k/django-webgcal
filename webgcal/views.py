@@ -301,7 +301,7 @@ def authsub_response(request):
 
 
 @login_required
-def test_calendar_list(request):
+def test_resource_method(request, resource, method):
     social_auth = get_social_auth(request)
     if not social_auth:
         return HttpResponseForbidden()
@@ -327,6 +327,8 @@ def test_calendar_list(request):
 
     from apiclient.discovery import build
     service = build('calendar', 'v3', http=http)
-    result = service.calendarList().list().execute()
+    resource = getattr(service, resource)()
+    method = getattr(resource, method)()
+    result = method.execute()
 
     return HttpResponse('%s' % result, mimetype='text/plain')
