@@ -31,6 +31,13 @@ def check_social_auth(request):
         return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
     return None
 
+def get_social_auth(request):
+    if request.user.is_authenticated():
+        for social_auth in request.user.social_auth.all():
+            if social_auth.provider == 'google-oauth2':
+                return social_auth
+    return None
+
 def show_home(request):
     check = check_social_auth(request)
     if check:
@@ -291,3 +298,35 @@ def authsub_response(request):
 
     else:
         return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
+
+
+@login_required
+def test_calendar_list(request):
+    social_auth = get_social_auth(request)
+    if not social_auth:
+        return HttpResponseForbidden()
+
+    from django.conf import settings
+    from social_auth.backends.google import GoogleOAuth2
+    client_id = getattr(settings, GoogleOAuth2.SETTINGS_KEY_NAME)
+    client_secret = getattr(settings, GoogleOAuth2.SETTINGS_SECRET_NAME)
+
+    from oauth2client.client import OAuth2Credentials
+    credentials = OAuth2Credentials(
+        access_token=social_auth.extra_data['access_token'],
+        client_id=client_id,
+        client_secret=client_secret,
+        refresh_token=social_auth.extra_data['refresh_token'],
+        token_expiry=None,
+        token_uri=GoogleOAuth2.ACCESS_TOKEN_URL,
+        user_agent='WebGCal/0.1')
+
+    import httplib2
+    http = httplib2.Http()
+    http = credentials.authorize(http)
+
+    from apiclient.discovery import build
+    service = build('calendar', 'v3', http=http)
+    result = service.calendarList().list().execute()
+
+    return HttpResponse('%s' % result, mimetype='text/plain')
