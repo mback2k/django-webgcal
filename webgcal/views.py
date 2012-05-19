@@ -23,7 +23,19 @@ def check_authsub(request):
     except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
         messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
 
+def check_social_auth(request):
+    if request.user.is_authenticated():
+        for social_auth in request.user.social_auth.all():
+            if social_auth.provider == 'google-oauth2':
+                return None
+        return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
+    return None
+
 def show_home(request):
+    check = check_social_auth(request)
+    if check:
+        return check
+
     users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.filter(enabled=True).count()
     websites = Website.objects.filter(enabled=True).count()
