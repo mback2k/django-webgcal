@@ -10,7 +10,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
 from webgcal.forms import CalendarForm, WebsiteForm
 from webgcal.models import User, Calendar, Website, Event
-from webgcal import tasks
+from webgcal import tasks, google
 
 with open(os.path.join(os.path.dirname(__file__), 'secure/RSA_KEY'), 'r') as f:
     RSA_KEY = f.read().strip()
@@ -21,7 +21,8 @@ def check_authsub(request):
     try:
         calendar_service.AuthSubTokenInfo()
     except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        messages.warning(request, '<a href="%s">Please connect to your Google Calendar</a>' % reverse('webgcal.views.authsub_request'))
+        button = '<a class="ym-button ym-next float-right" href="%s" title="Connect">Connect</a>' % reverse('webgcal.views.authsub_request')
+        messages.warning(request, '%sPlease connect to your Google Calendar' % button)
 
 def check_social_auth(request):
     if request.user.is_authenticated():
@@ -31,17 +32,18 @@ def check_social_auth(request):
         return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
     return None
 
-def get_social_auth(request):
-    if request.user.is_authenticated():
-        for social_auth in request.user.social_auth.all():
-            if social_auth.provider == 'google-oauth2':
-                return social_auth
-    return None
-
 def show_home(request):
     check = check_social_auth(request)
     if check:
         return check
+
+    social_auth = google.get_social_auth(request.user)
+    if social_auth:
+        credentials = google.get_credentials(social_auth)
+        service = google.get_calendar_service(credentials)
+        if not google.check_calendar_access(service):
+            button = '<a class="ym-button ym-next float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+            messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
 
     users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.filter(enabled=True).count()
@@ -302,31 +304,15 @@ def authsub_response(request):
 
 @login_required
 def test_resource_method(request, resource, method):
-    social_auth = get_social_auth(request)
+    social_auth = google.get_social_auth(request.user)
     if not social_auth:
         return HttpResponseForbidden()
 
-    from django.conf import settings
-    from social_auth.backends.google import GoogleOAuth2
-    client_id = getattr(settings, GoogleOAuth2.SETTINGS_KEY_NAME)
-    client_secret = getattr(settings, GoogleOAuth2.SETTINGS_SECRET_NAME)
+    credentials = google.get_credentials(social_auth)
+    service = google.get_calendar_service(credentials)
+    if not google.check_calendar_access(service):
+        return HttpResponseForbidden()
 
-    from oauth2client.client import OAuth2Credentials
-    credentials = OAuth2Credentials(
-        access_token=social_auth.extra_data['access_token'],
-        client_id=client_id,
-        client_secret=client_secret,
-        refresh_token=social_auth.extra_data['refresh_token'],
-        token_expiry=None,
-        token_uri=GoogleOAuth2.ACCESS_TOKEN_URL,
-        user_agent='WebGCal/0.1')
-
-    import httplib2
-    http = httplib2.Http()
-    http = credentials.authorize(http)
-
-    from apiclient.discovery import build
-    service = build('calendar', 'v3', http=http)
     resource = getattr(service, resource)()
     method = getattr(resource, method)()
     result = method.execute()
