@@ -186,5 +186,5 @@ CELERYBEAT_SCHEDULE = {
 }
 
 GOOGLE_OAUTH2_USE_UNIQUE_USER_ID = True
-GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline'}
+GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline', 'approval_prompt': 'force'}
 GOOGLE_OAUTH_EXTRA_SCOPE = ['https://www.googleapis.com/auth/calendar']
