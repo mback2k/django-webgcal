@@ -13,6 +13,7 @@ Dependencies
 - django_compressor  [https://github.com/jezdez/django_compressor]
 - django-social-auth [https://github.com/omab/django-social-auth]
 - django-appengine-auth [https://github.com/mback2k/django-appengine-auth]
+- python-hcalendar   [https://github.com/mback2k/python-hcalendar]
 
 Submodules
 ----------

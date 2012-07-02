@@ -7,6 +7,3 @@
 [submodule "jdatetime"]
 	path = jdatetime
 	url = git://github.com/mback2k/django-jdatetime.git
-[submodule "hcalendar"]
-	path = hcalendar
-	url = git://github.com/mback2k/python-hcalendar.git
