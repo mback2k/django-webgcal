@@ -88,6 +88,7 @@ INSTALLED_APPS = (
 
     'djcelery',
     'social_auth',
+    'appengine_auth',
 
     'googleauth',
     'googledata',
@@ -103,6 +104,7 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
+    'appengine_auth.backends.GoogleAppEngineOAuthBackend',
     'social_auth.backends.google.GoogleOAuth2Backend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -184,6 +186,9 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0),
     },
 }
+
+GOOGLE_APPENGINE_OAUTH_SERVER = 'oauth-profile.appspot.com'
+GOOGLE_APPENGINE_OAUTH_USE_UNIQUE_USER_ID = True
 
 GOOGLE_OAUTH2_USE_UNIQUE_USER_ID = True
 GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline', 'approval_prompt': 'force'}
