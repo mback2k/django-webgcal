@@ -11,7 +11,11 @@ Dependencies
 - Beautiful Soup 4   [http://www.crummy.com/software/BeautifulSoup/]
 - django-celery      [https://github.com/ask/django-celery]
 - django_compressor  [https://github.com/jezdez/django_compressor]
-- django-googleauth  [https://github.com/mback2k/django-googleauth]
+- django-social-auth [https://github.com/omab/django-social-auth]
+- django-appengine-auth [https://github.com/mback2k/django-appengine-auth]
+
+Submodules
+----------
 - django-googledata  [https://github.com/mback2k/django-googledata]
 - django-jdatetime   [https://github.com/mback2k/django-jdatetime]
 - django-yamlcss     [https://github.com/mback2k/django-yamlcss]
