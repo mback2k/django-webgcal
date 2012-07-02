@@ -90,7 +90,6 @@ INSTALLED_APPS = (
     'social_auth',
     'appengine_auth',
 
-    'googleauth',
     'googledata',
     'yamlcss',
     'jdatetime',
@@ -169,7 +168,7 @@ LOGGING = {
     },
 }
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/login/google-appengine-oauth/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
