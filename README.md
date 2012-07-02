@@ -75,3 +75,8 @@ Besides running the webserver, you need to run celeryd and celerybeat.
 You can do this by executing the following command from your server's shell:
 
     python manage.py celeryd -B -E
+
+License
+-------
+* Released under MIT License
+* Copyright (c) 2012 Marc Hoersken <info@marc-hoersken.de>
