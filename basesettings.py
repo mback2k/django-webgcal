@@ -168,10 +168,11 @@ LOGGING = {
     },
 }
 
-LOGIN_URL = '/login/google-appengine-oauth/'
-LOGOUT_URL = '/logout/'
+LOGIN_BACKEND = 'google-appengine-oauth'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/login/%s/' % LOGIN_BACKEND
+LOGOUT_URL = '/logout/?next=%s' % LOGOUT_REDIRECT_URL
 
 CELERY_RESULT_BACKEND = 'djcelery.backends.database.DatabaseBackend'
 CELERY_TRACK_STARTED = True
