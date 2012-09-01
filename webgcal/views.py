@@ -318,3 +318,7 @@ def test_resource_method(request, resource, method):
     result = method.execute()
 
     return HttpResponse('%s' % result, mimetype='text/plain')
+
+def redirect_login(request):
+    from django.conf import settings
+    return HttpResponseRedirect(settings.LOGIN_URL)

@@ -18,4 +18,5 @@ urlpatterns = patterns('webgcal.views',
     (r'^authsub/request/$', 'authsub_request'),
     (r'^authsub/response/$', 'authsub_response'),
     (r'^test/(?P<resource>\w+)/(?P<method>\w+)/$', 'test_resource_method'),
+    (r'^login/$', 'redirect_login')
 )
