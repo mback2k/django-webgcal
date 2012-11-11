@@ -26,10 +26,8 @@ def check_authsub(request):
 
 def check_social_auth(request):
     if request.user.is_authenticated():
-        for social_auth in request.user.social_auth.all():
-            if social_auth.provider == 'google-oauth2':
-                return None
-        return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
+        if not request.user.social_auth.filter(provider='google-oauth2').count():
+            return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
     return None
 
 def show_home(request):
@@ -40,7 +38,8 @@ def show_home(request):
     social_auth = google.get_social_auth(request.user)
     if social_auth:
         credentials = google.get_credentials(social_auth)
-        service = google.get_calendar_service(credentials)
+        session = google.get_session(credentials)
+        service = google.get_calendar_service(session)
         if not google.check_calendar_access(service):
             button = '<a class="ym-button ym-next float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
             messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
