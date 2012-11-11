@@ -2,19 +2,18 @@ from django.contrib import admin
 from webgcal.models import Calendar, Website, Event
 
 class CalendarAdmin(admin.ModelAdmin):
-    fields = ('user', 'name', 'href')
-    list_display = ('user', 'name', 'updated')
+    fields = ('name', 'user', 'google_id')
+    list_display = ('name', 'user', 'updated')
     ordering = ('name',)
 
 class WebsiteAdmin(admin.ModelAdmin):
-    fields = ('calendar', 'name', 'href')
-    list_display = ('calendar', 'name', 'updated')
+    fields = ('name', 'calendar', 'href')
+    list_display = ('name', 'calendar', 'updated')
     ordering = ('name',)
 
 class EventAdmin(admin.ModelAdmin):
-    fields = ('website', 'summary', 'dtstart')
-    list_display = ('website', 'summary', 'dtstart', 'parsed', 'synced')
-    ordering = ('dtstart',)
+    fields = ('summary', 'website', 'google_id', 'dtstart', 'dtend')
+    list_display = ('summary', 'website', 'parsed', 'synced')
 
 admin.site.register(Calendar, CalendarAdmin)
 admin.site.register(Website, WebsiteAdmin)
