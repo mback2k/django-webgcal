@@ -408,7 +408,7 @@ def task_parse_website(calendar_id, website_id):
         
         events_data = {}
         website_tz = pytz.timezone(website.timezone)
-        website_file = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal'}))
+        website_file = urllib2.urlopen(urllib2.Request(website.href, headers={'User-agent': 'WebGCal/0.1'}))
         for calendar_data in hcalendar.hCalendar(website_file):
             for event_data in calendar_data:
                 for attr in ('dtstart', 'dtend', 'dtstamp', 'last_modified'):
