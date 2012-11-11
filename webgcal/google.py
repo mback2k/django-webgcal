@@ -2,13 +2,15 @@ import httplib2
 from apiclient.discovery import build
 from oauth2client.client import OAuth2Credentials, AccessTokenRefreshError
 from social_auth.backends.google import GoogleOAuth2
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 def get_social_auth(user):
     if user.is_authenticated():
-        for social_auth in user.social_auth.all():
-            if social_auth.provider == 'google-oauth2':
-                return social_auth
+        try:
+            return user.social_auth.get(provider='google-oauth2')
+        except ObjectDoesNotExist:
+            pass
     return None
 
 def get_credentials(social_auth):
