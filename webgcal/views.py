@@ -309,7 +309,8 @@ def test_resource_method(request, resource, method):
         return HttpResponseForbidden()
 
     credentials = google.get_credentials(social_auth)
-    service = google.get_calendar_service(credentials)
+    session = google.get_session(credentials)
+    service = google.get_calendar_service(session)
     if not google.check_calendar_access(service):
         return HttpResponseForbidden()
 

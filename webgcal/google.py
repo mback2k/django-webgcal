@@ -25,11 +25,13 @@ def get_credentials(social_auth):
         user_agent='WebGCal/0.1')
     return credentials
 
-def get_calendar_service(credentials):
+def get_session(credentials):
     http = httplib2.Http()
-    http = credentials.authorize(http)
+    session = credentials.authorize(http)
+    return session
 
-    service = build('calendar', 'v3', http=http)
+def get_calendar_service(session):
+    service = build('calendar', 'v3', http=session)
     return service
 
 def check_calendar_access(calendar_service):
