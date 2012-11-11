@@ -10,12 +10,13 @@ import gdata.service
 import gdata.calendar
 import gdata.calendar.service
 from googledata import run_on_django
-from celery.task import task
+from celery.schedules import crontab
+from celery.task import task, periodic_task
 from django.utils import timezone
 from django.db.models import Q, F
 from webgcal.models import Calendar, Website, Event
 
-@task()
+@periodic_task(run_every=crontab(minute=0))
 def task_start_worker():
     for calendar in Calendar.objects.filter(enabled=True):
         task_update_website_wait.apply_async(args=[calendar.id], countdown=60)

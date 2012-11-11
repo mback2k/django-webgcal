@@ -181,12 +181,6 @@ CELERY_SEND_EVENTS = True
 CELERY_SEND_TASK_SENT_EVENT = True
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERYBEAT_SCHEDULE = {
-    'start-workers': {
-        'task': 'webgcal.tasks.task_start_worker',
-        'schedule': crontab(minute=0),
-    },
-}
 
 GOOGLE_APPENGINE_OAUTH_SERVER = 'oauth-profile.appspot.com'
 GOOGLE_APPENGINE_OAUTH_USE_UNIQUE_USER_ID = True
