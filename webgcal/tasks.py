@@ -123,6 +123,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
         entries = {}
 
         def query_event(request_id, response, exception):
+            if exception:
+                return logging.exception(exception)
+
             request_id = long(request_id, 16)
             if not response:
                 event = Event.objects.get(id=request_id)
@@ -152,6 +155,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
 
         def update_event(request_id, response, exception):
+            if exception:
+                return logging.exception(exception)
+
             request_id = long(request_id, 16)
             if not response:
                 event = Event.objects.get(id=request_id)
