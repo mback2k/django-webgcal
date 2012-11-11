@@ -91,7 +91,6 @@ INSTALLED_APPS = (
     'social_auth',
     'appengine_auth',
 
-    'googledata',
     'yamlcss',
     'jdatetime',
 

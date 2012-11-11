@@ -1,9 +1,6 @@
 [submodule "yamlcss"]
 	path = yamlcss
 	url = git://github.com/mback2k/django-yamlcss.git
-[submodule "googledata"]
-	path = googledata
-	url = git://github.com/mback2k/django-googledata.git
 [submodule "jdatetime"]
 	path = jdatetime
 	url = git://github.com/mback2k/django-jdatetime.git
