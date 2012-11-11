@@ -19,6 +19,7 @@ def show_home(request):
     if check:
         return check
 
+    """
     social_auth = google.get_social_auth(request.user)
     if social_auth:
         credentials = google.get_credentials(social_auth)
@@ -27,6 +28,7 @@ def show_home(request):
         if not google.check_calendar_access(service):
             button = '<a class="ym-button ym-next float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
             messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
+    """
 
     users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.filter(enabled=True).count()
