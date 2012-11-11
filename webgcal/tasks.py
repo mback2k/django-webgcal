@@ -84,7 +84,7 @@ def task_update_calendar(calendar_id):
 
 
 @task(default_retry_delay=60, max_retries=15)
-def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=25):
+def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
     try:
         calendar = Calendar.objects.get(id=calendar_id)
 
