@@ -9,8 +9,6 @@ class Calendar(models.Model):
     user = models.ForeignKey(User, related_name='calendars')
     name = models.CharField(_('name'), max_length=100)
     google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
-    href = models.URLField(_('link'), verify_exists=False)
-    feed = models.URLField(_('link'), verify_exists=False)
     updated = models.DateTimeField(_('date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
@@ -43,7 +41,6 @@ class Website(models.Model):
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')
     google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
-    href = models.URLField(_('link'), verify_exists=False)
     parsed = models.DateTimeField(_('date parsed'), default=datetime.date.min)
     synced = models.DateTimeField(_('date synced'), default=datetime.date.min)
     deleted = models.BooleanField(_('deleted'), default=False)
