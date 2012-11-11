@@ -76,6 +76,7 @@ def task_update_calendar(calendar_id):
         pass
 
     except Exception, e:
+        logging.exception(e)
         calendar.enabled = False
         calendar.running = False
         calendar.status = 'Error: Fatal error'
@@ -228,6 +229,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
         pass
 
     except Exception, e:
+        logging.exception(e)
         website.enabled = False
         website.running = False
         website.status = 'Error: Fatal error'
@@ -365,6 +367,7 @@ def task_parse_website(calendar_id, website_id):
         pass
 
     except Exception, e:
+        logging.exception(e)
         if website.errors < 15:
             website.errors += 1
             website.save()
