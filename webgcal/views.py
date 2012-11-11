@@ -1,7 +1,3 @@
-import os.path
-import gdata.auth
-import gdata.calendar.service
-from googledata import run_on_django
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
@@ -11,18 +7,6 @@ from django.contrib import messages
 from webgcal.forms import CalendarForm, WebsiteForm
 from webgcal.models import User, Calendar, Website, Event
 from webgcal import tasks, google
-
-with open(os.path.join(os.path.dirname(__file__), 'secure/RSA_KEY'), 'r') as f:
-    RSA_KEY = f.read().strip()
-
-def check_authsub(request):
-    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
-    
-    try:
-        calendar_service.AuthSubTokenInfo()
-    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        button = '<a class="ym-button ym-next float-right" href="%s" title="Connect">Connect</a>' % reverse('webgcal.views.authsub_request')
-        messages.warning(request, '%sPlease connect to your Google Calendar' % button)
 
 def check_social_auth(request):
     if request.user.is_authenticated():
@@ -60,8 +44,6 @@ def show_home(request):
 def show_dashboard(request):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     create_form = CalendarForm()
-    
-    check_authsub(request)
 
     template_values = {
         'calendars': calendars,
@@ -75,8 +57,6 @@ def show_calendar(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm()
-    
-    check_authsub(request)
 
     template_values = {
         'calendars': calendars,
@@ -144,9 +124,7 @@ def delete_calendar(request, calendar_id):
     create_form = CalendarForm()
     
     messages.success(request, 'Deleted calendar "%s" from your Dashboard!' % calendar)
-    
-    check_authsub(request)
-    
+
     template_values = {
         'calendars': calendars,
         'calendar_create_form': create_form,
@@ -263,61 +241,6 @@ def delete_website_ask(request, calendar_id, website_id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
-
-@login_required
-def authsub_request(request):
-    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
-    
-    try:
-        calendar_service.AuthSubTokenInfo()
-    
-    except (gdata.service.NonAuthSubToken, gdata.service.RequestError):
-        calendar_service.token_store.remove_all_tokens()
-        
-        absolute_url = request.build_absolute_uri(reverse('webgcal.views.authsub_response'))
-        redirect_url = calendar_service.GenerateAuthSubURL(absolute_url, 'http://www.google.com/calendar/feeds/', secure=True, session=True)
-        
-        return HttpResponseRedirect(redirect_url)
-    
-    return HttpResponseRedirect(reverse('webgcal.views.authsub_response'))
-
-@login_required
-def authsub_response(request):
-    calendar_service = run_on_django(gdata.calendar.service.CalendarService(), request)
-
-    absolute_url = request.build_absolute_uri()
-    auth_token = gdata.auth.extract_auth_sub_token_from_url(absolute_url, rsa_key=RSA_KEY)
-
-    if auth_token:
-        calendar_service.UpgradeToSessionToken(auth_token)
-
-    try:
-        calendar_service.AuthSubTokenInfo()
-
-    except gdata.service.RequestError:
-        return HttpResponseRedirect(reverse('webgcal.views.authsub_request'))
-
-    else:
-        return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
-
-
-@login_required
-def test_resource_method(request, resource, method):
-    social_auth = google.get_social_auth(request.user)
-    if not social_auth:
-        return HttpResponseForbidden()
-
-    credentials = google.get_credentials(social_auth)
-    session = google.get_session(credentials)
-    service = google.get_calendar_service(session)
-    if not google.check_calendar_access(service):
-        return HttpResponseForbidden()
-
-    resource = getattr(service, resource)()
-    method = getattr(resource, method)()
-    result = method.execute()
-
-    return HttpResponse('%s' % result, mimetype='text/plain')
 
 def redirect_login(request):
     from django.conf import settings
