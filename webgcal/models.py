@@ -3,11 +3,10 @@ import datetime
 from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
-from webgcal.decorators import cache_property
 from django.utils.translation import ugettext_lazy as _
 
 class Calendar(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='calendars')
     name = models.CharField(_('name'), max_length=100)
     google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
     href = models.URLField(_('link'), verify_exists=False)
@@ -18,15 +17,14 @@ class Calendar(models.Model):
     status = models.TextField(_('status'), blank=True, null=True)
     errors = models.IntegerField(_('errors'), default=0)
     
+    class Meta:
+        ordering = ('name',)
+    
     def __unicode__(self):
         return self.name
-        
-    @cache_property
-    def websites(self):
-        return self.website_set.order_by('name')
-        
+
 class Website(models.Model):
-    calendar = models.ForeignKey(Calendar)
+    calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('name'), max_length=100)
     href = models.URLField(_('link'), verify_exists=False)
     timezone = models.CharField(_('timezone'), max_length=50, default='UTC')
@@ -36,15 +34,14 @@ class Website(models.Model):
     status = models.TextField(_('status'), blank=True, null=True)
     errors = models.IntegerField(_('errors'), default=0)
     
+    class Meta:
+        ordering = ('name',)
+    
     def __unicode__(self):
         return self.name
-        
-    @cache_property
-    def events(self):
-        return self.event_set.order_by('id')
 
 class Event(models.Model):
-    website = models.ForeignKey(Website)
+    website = models.ForeignKey(Website, related_name='events')
     google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
     href = models.URLField(_('link'), verify_exists=False)
     parsed = models.DateTimeField(_('date parsed'), default=datetime.date.min)
