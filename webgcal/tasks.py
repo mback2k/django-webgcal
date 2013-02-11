@@ -5,6 +5,7 @@ import logging
 import datetime
 import hcalendar
 from apiclient.http import BatchHttpRequest
+from apiclient.errors import HttpError
 from celery.schedules import crontab
 from celery.task import task, periodic_task
 from django.utils import timezone
@@ -45,7 +46,10 @@ def task_update_calendar(calendar_id):
             return
 
         if calendar.google_id:
-            calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
+            try:
+                calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
+            except HttpError:
+                calendarItem = None
         else:
             calendarItem = None
 
@@ -125,24 +129,21 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
         def query_event(request_id, response, exception):
             if exception:
-                return logging.exception(exception)
+                logging.exception(exception)
 
             request_id = long(request_id, 16)
-            if not response:
-                event = Event.objects.get(id=request_id)
-                if event.deleted:
-                    event.delete()
+            if response:
+                if 'error' in response and response['error']['code'] == 404:
+                    event = Event.objects.get(id=request_id)
+                    if event.deleted:
+                        event.delete()
+                    else:
+                        event.google_id = None
+                        event.save()
+                elif 'kind' in response and response['kind'] == 'calendar#event':
+                    entries[request_id] = response
                 else:
-                    event.google_id = None
-                    event.save()
-            elif 'error' in response and response['error']['code'] == 404:
-                event = Event.objects.get(id=request_id)
-                event.google_id = None
-                event.save()
-            elif 'kind' in response and response['kind'] == 'calendar#event':
-                entries[request_id] = response
-            else:
-                logging.debug('query %s: %s' % (request_id, response))
+                    logging.debug('query %s: %s' % (request_id, response))
 
         batch = BatchHttpRequest(callback=query_event)
 
@@ -157,27 +158,24 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
         def update_event(request_id, response, exception):
             if exception:
-                return logging.exception(exception)
+                logging.exception(exception)
 
             request_id = long(request_id, 16)
-            if not response:
-                event = Event.objects.get(id=request_id)
-                if event.deleted:
-                    event.delete()
-                else:
-                    event.google_id = None
+            if response:
+                if 'error' in response and response['error']['code'] == 404:
+                    event = Event.objects.get(id=request_id)
+                    if event.deleted:
+                        event.delete()
+                    else:
+                        event.google_id = None
+                        event.save()
+                elif 'kind' in response and response['kind'] == 'calendar#event':
+                    event = Event.objects.get(id=request_id)
+                    event.google_id = response['id']
+                    event.synced = sync_datetime
                     event.save()
-            elif 'error' in response and response['error']['code'] == 404:
-                event = Event.objects.get(id=request_id)
-                event.google_id = None
-                event.save()
-            elif 'kind' in response and response['kind'] == 'calendar#event':
-                event = Event.objects.get(id=request_id)
-                event.google_id = response['id']
-                event.synced = sync_datetime
-                event.save()
-            else:
-                logging.debug('update %s: %s' % (request_id, response))
+                else:
+                    logging.debug('update %s: %s' % (request_id, response))
 
         batch = BatchHttpRequest(callback=update_event)
 
