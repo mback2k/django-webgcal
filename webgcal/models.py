@@ -24,7 +24,7 @@ class Calendar(models.Model):
 class Website(models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('name'), max_length=100)
-    href = models.URLField(_('link'), verify_exists=False)
+    href = models.URLField(_('link'))
     timezone = models.CharField(_('timezone'), max_length=50, default='UTC')
     updated = models.DateTimeField(_('date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('enabled'), default=True)
