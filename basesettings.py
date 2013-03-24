@@ -144,6 +144,11 @@ TEMPLATE_DIRS = (os.path.join(os.path.dirname(__file__), 'templates'),)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
     'handlers': {
         'stream': {
             'level': 'WARNING',
@@ -151,18 +156,19 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['stream'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': True,
         },
         'django.request': {
             'handlers': ['stream', 'mail_admins'],
-            'level': 'INFO',
+            'level': 'WARNING',
             'propagate': True,
         },
     },
