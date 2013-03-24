@@ -15,8 +15,7 @@ class WebsiteForm(forms.ModelForm):
     name = forms.CharField(required=True,
         label='Name', help_text='Type in a website name.')
     href = forms.URLField(required=True,
-        label='Link', help_text='Type in a website link.',
-        verify_exists=True, validator_user_agent='WebGCal')
+        label='Link', help_text='Type in a website link.')
     timezone = forms.ChoiceField(required=True,
         label='Timezone', help_text='Select default timezone.',
         choices=map(lambda x: (x, x), pytz.common_timezones),
