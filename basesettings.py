@@ -161,12 +161,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['stream'],
+        'celery': {
+            'handlers': ['stream', 'mail_admins'],
             'level': 'WARNING',
             'propagate': True,
         },
-        'django.request': {
+        'django': {
             'handlers': ['stream', 'mail_admins'],
             'level': 'WARNING',
             'propagate': True,
