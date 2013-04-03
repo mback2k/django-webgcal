@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from django.contrib import admin
-from webgcal.models import Calendar, Website, Event
+from .models import Calendar, Website, Event
 
 class CalendarAdmin(admin.ModelAdmin):
     fields = ('name', 'user', 'google_id')

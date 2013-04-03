@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
-from webgcal.forms import CalendarForm, WebsiteForm
-from webgcal.models import User, Calendar, Website, Event
-from webgcal import tasks, google
+from .forms import CalendarForm, WebsiteForm
+from .models import User, Calendar, Website, Event
+from . import tasks, google
 
 def check_social_auth(request):
     if request.user.is_authenticated():
@@ -77,7 +78,7 @@ def create_calendar(request):
         calendar = create_form.save(commit=False)
         calendar.user = request.user
         calendar.save()
-        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
+        return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
         'calendars': calendars,
@@ -96,7 +97,7 @@ def edit_calendar(request, calendar_id):
         calendar = edit_form.save(commit=False)
         calendar.user = request.user
         calendar.save()
-        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
+        return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
     
     template_values = {
         'calendars': calendars,
@@ -115,7 +116,7 @@ def switch_calendar(request, calendar_id):
     
     messages.success(request, 'Switched calendar "%s" %s!' % (calendar, 'on' if calendar.enabled else 'off'))
     
-    return HttpResponseRedirect(reverse('webgcal.views.show_dashboard'))
+    return HttpResponseRedirect(reverse('webgcal:show_dashboard'))
 
 @login_required
 def delete_calendar(request, calendar_id):
@@ -140,7 +141,7 @@ def delete_calendar_ask(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     create_form = CalendarForm()
 
-    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal.views.delete_calendar', kwargs={'calendar_id': calendar_id})    
+    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_calendar', kwargs={'calendar_id': calendar_id})    
     messages.warning(request, '%sDo you want to delete calendar "%s"?' % (button, calendar))
 
     template_values = {
@@ -162,7 +163,7 @@ def create_website(request, calendar_id):
         website.calendar = calendar
         website.save()
         tasks.task_parse_website.delay(calendar.id, website.id)
-        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
+        return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
     template_values = {
         'calendars': calendars,
@@ -184,7 +185,7 @@ def edit_website(request, calendar_id, website_id):
         website.calendar = calendar
         website.save()
         tasks.task_parse_website.delay(calendar.id, website.id)
-        return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
+        return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
     
     template_values = {
         'calendars': calendars,
@@ -205,7 +206,7 @@ def switch_website(request, calendar_id, website_id):
     
     messages.success(request, 'Switched website "%s" %s!' % (website, 'on' if website.enabled else 'off'))
     
-    return HttpResponseRedirect(reverse('webgcal.views.show_calendar', kwargs={'calendar_id': calendar.id}))
+    return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
 @login_required
 def delete_website(request, calendar_id, website_id):
@@ -232,7 +233,7 @@ def delete_website_ask(request, calendar_id, website_id):
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     create_form = WebsiteForm()
 
-    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal.views.delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})    
+    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})    
     messages.warning(request, '%sDo you want to delete website "%s"?' % (button, website))
 
     template_values = {

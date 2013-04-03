@@ -1,17 +1,18 @@
-import bs4
-import pytz
-import urllib2
-import logging
-import datetime
-import hcalendar
+# -*- coding: utf-8 -*-
 from apiclient.http import BatchHttpRequest
 from apiclient.errors import HttpError
 from celery.schedules import crontab
 from celery.task import task, periodic_task
 from django.utils import timezone
 from django.db.models import Q, F
-from webgcal.models import Calendar, Website, Event
-from webgcal import google
+from .models import Calendar, Website, Event
+from . import google
+import hcalendar
+import datetime
+import logging
+import urllib2
+import pytz
+import bs4
 
 @periodic_task(run_every=crontab(minute=0))
 def task_start_worker():

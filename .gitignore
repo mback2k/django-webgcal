@@ -6,7 +6,4 @@
 _generated_media
 celerybeat-schedule
 devdatabase.sqlite
-settings.py
 desktop.ini
-
-webgcal/secure/

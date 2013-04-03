@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import datetime
 from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+import datetime
 
 class Calendar(models.Model):
     user = models.ForeignKey(User, related_name='calendars')

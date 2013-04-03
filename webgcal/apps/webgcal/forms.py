@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import pytz
 from django import forms
-from webgcal.models import Calendar, Website
+from .models import Calendar, Website
+import pytz
 
 class CalendarForm(forms.ModelForm):
     name = forms.CharField(required=True,

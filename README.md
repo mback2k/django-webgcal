@@ -7,7 +7,7 @@ Dependencies
 - Celery             [http://www.celeryproject.org/]
 - pytz               [http://pytz.sourceforge.net/]
 - isodate            [http://pypi.python.org/pypi/isodate/]
-- Google Data API    [https://code.google.com/p/gdata-python-client/]
+- Google API         [https://code.google.com/p/google-api-python-client/]
 - Beautiful Soup 4   [http://www.crummy.com/software/BeautifulSoup/]
 - django-celery      [https://github.com/ask/django-celery]
 - django_compressor  [https://github.com/jezdez/django_compressor]
@@ -17,11 +17,10 @@ Dependencies
 
 Submodules
 ----------
-- django-googledata  [https://github.com/mback2k/django-googledata]
 - django-jdatetime   [https://github.com/mback2k/django-jdatetime]
 - django-yamlcss     [https://github.com/mback2k/django-yamlcss]
 
-Message Broker 
+Message Broker (during development)
 --------------
 - Kombu              [http://pypi.python.org/pypi/kombu/]
 - django-kombu       [https://github.com/ask/django-kombu]
@@ -38,11 +37,11 @@ The following Django settings are required to run WebGCal:
 - DEFAULT_FROM_EMAIL
 - SECRET_KEY
 
-All other settings are pre-configured inside basesettings.py, which can be imported using the following line in your settings.py:
+All other settings are pre-configured inside settings/base.py, which can be imported using the following line in your settings/{env}.py:
 
-    from basesettings import *
+    from .base import *
 
-A basic development environment can be launched using the pre-configured devsettings.py.
+A basic development environment can be launched using the pre-configured settings/dev.py.
 
 Installation
 ------------
@@ -51,9 +50,9 @@ It is recommended to perform the installations using the pip command.
 
 The next step is to get all source from github.com:
 
-    git clone git://github.com/mback2k/django-webgcal.git django_webgcal
+    git clone git://github.com/mback2k/django-webgcal.git webgcal
     
-    cd django_webgcal
+    cd webgcal
     
     git submodule init
     git submodule update
@@ -64,11 +63,11 @@ After that you need to collect and compress the static files using:
     python manage.py compress --force
 
 Now you need to setup your webserver to serve the Django project.
-Please take a look at the [Django documentation](https://docs.djangoproject.com/en/1.4/topics/install/) for more information.
+Please take a look at the [Django documentation](https://docs.djangoproject.com/en/1.5/topics/install/) for more information.
 
 You can run a development server using the following command:
 
-    python manage.py runserver --settings=devsettings
+    python manage.py runserver
 
 Executing Tasks
 ---------------
@@ -80,4 +79,4 @@ You can do this by executing the following command from your server's shell:
 License
 -------
 * Released under MIT License
-* Copyright (c) 2012 Marc Hoersken <info@marc-hoersken.de>
+* Copyright (c) 2012-2013 Marc Hoersken <info@marc-hoersken.de>
