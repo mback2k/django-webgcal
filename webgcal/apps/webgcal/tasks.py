@@ -146,15 +146,40 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             elif exception:
                 logging.exception(exception)
 
-        batch = BatchHttpRequest(callback=query_event)
+        if events.exclude(google_id=None).exists():
+            batch = BatchHttpRequest(callback=query_event)
 
-        for event in events[:limit]:
-            if event.google_id:
+            for event in events.exclude(google_id=None)[:limit]:
                 batch.add(service.events().get(calendarId=calendar.google_id, eventId=event.google_id), request_id=hex(event.id))
 
-        logging.info('Executing batch query request')
-        batch.execute(http=session)
-        logging.info('Executed batch query request')
+            logging.info('Executing batch query request')
+            batch.execute(http=session)
+            logging.info('Executed batch query request')
+
+
+        def verify_event(request_id, response, exception):
+            if response:
+                request_id = long(request_id, 16)
+
+                if 'kind' in response and response['kind'] == 'calendar#events':
+                    event = Event.objects.get(id=request_id)
+                    if 'items' in response and len(response['items']) == 1:
+                        event.google_id = response['items'][0]['id']
+                        event.save()
+                    elif event.deleted:
+                        event.delete()
+            elif exception:
+                logging.exception(exception)
+
+        if events.filter(google_id=None).exists():
+            batch = BatchHttpRequest(callback=verify_event)
+
+            for event in events.filter(google_id=None)[:limit]:
+                batch.add(service.events().list(calendarId=calendar.google_id, iCalUID='webgcal-%d' % event.id), request_id=hex(event.id))
+
+            logging.info('Executing batch verify request')
+            batch.execute(http=session)
+            logging.info('Executed batch verify request')
 
 
         def update_event(request_id, response, exception):
@@ -178,36 +203,36 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             elif exception:
                 logging.exception(exception)
 
+        if events.exists():
+            batch = BatchHttpRequest(callback=update_event)
 
-        batch = BatchHttpRequest(callback=update_event)
+            for event in events[:limit]:
+                if not event.google_id:
+                    if not event.deleted and website.enabled:
+                        eventBody = make_event_body(calendar, website, event)
 
-        for event in events[:limit]:
-            if not event.google_id:
-                if not event.deleted and website.enabled:
-                    eventBody = make_event_body(calendar, website, event)
+                        batch.add(service.events().insert(calendarId=calendar.google_id, body=eventBody), request_id=hex(event.id))
 
-                    batch.add(service.events().insert(calendarId=calendar.google_id, body=eventBody), request_id=hex(event.id))
+                    else:
+                        event.delete()
 
-                else:
-                    event.delete()
+                elif event.id in entries and (event.deleted or event.synced < event.parsed):
+                    eventBody = entries[event.id]
+                    if not event.deleted and website.enabled:
+                        eventBody = make_event_body(calendar, website, event, eventBody)
 
-            elif event.id in entries and (event.deleted or event.synced < event.parsed):
-                eventBody = entries[event.id]
-                if not event.deleted and website.enabled:
-                    eventBody = make_event_body(calendar, website, event, eventBody)
+                        batch.add(service.events().update(calendarId=calendar.google_id, eventId=event.google_id, body=eventBody), request_id=hex(event.id))
 
-                    batch.add(service.events().update(calendarId=calendar.google_id, eventId=event.google_id, body=eventBody), request_id=hex(event.id))
+                    else:
+                        batch.add(service.events().delete(calendarId=calendar.google_id, eventId=event.google_id), request_id=hex(event.id))
 
-                else:
-                    batch.add(service.events().delete(calendarId=calendar.google_id, eventId=event.google_id), request_id=hex(event.id))
+                elif event.synced < sync_timeout:
+                    event.synced = sync_datetime
+                    event.save()
 
-            elif event.synced < sync_timeout:
-                event.synced = sync_datetime
-                event.save()
-
-        logging.info('Executing batch update request')
-        batch.execute(http=session)
-        logging.info('Executed batch update request')
+            logging.info('Executing batch update request')
+            batch.execute(http=session)
+            logging.info('Executed batch update request')
 
 
         if events.count() > limit:
