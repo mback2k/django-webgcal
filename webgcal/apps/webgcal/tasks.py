@@ -129,11 +129,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
         entries = {}
 
         def query_event(request_id, response, exception):
-            if exception:
-                logging.exception(exception)
-
-            request_id = long(request_id, 16)
             if response:
+                request_id = long(request_id, 16)
+
                 if 'error' in response and response['error']['code'] == 404:
                     event = Event.objects.get(id=request_id)
                     if event.deleted:
@@ -145,6 +143,8 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                     entries[request_id] = response
                 else:
                     logging.debug('query %s: %s' % (request_id, response))
+            elif exception:
+                logging.exception(exception)
 
         batch = BatchHttpRequest(callback=query_event)
 
@@ -152,17 +152,15 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             if event.google_id:
                 batch.add(service.events().get(calendarId=calendar.google_id, eventId=event.google_id), request_id=hex(event.id))
 
-        logging.info('Executing batch request')
+        logging.info('Executing batch query request')
         batch.execute(http=session)
-        logging.info('Executed batch request')
+        logging.info('Executed batch query request')
 
 
         def update_event(request_id, response, exception):
-            if exception:
-                logging.exception(exception)
-
-            request_id = long(request_id, 16)
             if response:
+                request_id = long(request_id, 16)
+
                 if 'error' in response and response['error']['code'] == 404:
                     event = Event.objects.get(id=request_id)
                     if event.deleted:
@@ -177,6 +175,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                     event.save()
                 else:
                     logging.debug('update %s: %s' % (request_id, response))
+            elif exception:
+                logging.exception(exception)
+
 
         batch = BatchHttpRequest(callback=update_event)
 
@@ -204,9 +205,9 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                 event.synced = sync_datetime
                 event.save()
 
-        logging.info('Executing batch request')
+        logging.info('Executing batch update request')
         batch.execute(http=session)
-        logging.info('Executed batch request')
+        logging.info('Executed batch update request')
 
 
         if events.count() > limit:
