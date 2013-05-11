@@ -30,19 +30,9 @@
     (function() {
       var ssl = document.location.protocol == 'https:';
       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = (ssl ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var pw = document.createElement('script'); pw.type = 'text/javascript'; pw.src = (ssl ? 'https://' : 'http://') + 'piwik.uxnr.de/piwik.js';
-      pw.onload = function () {
-        try {
-          var piwikTracker = Piwik.getTracker("https://piwik.uxnr.de/piwik.php", 4);
-          piwikTracker.trackPageView();
-          piwikTracker.enableLinkTracking();
-        } catch( err ) {}
-      };
-
       var s = document.getElementsByTagName('script'); s = s[s.length-1];
       var p = s.parentNode;
       p.insertBefore(ga, s);
-      p.insertBefore(pw, s);
     })();
   </script>
 {% endcompress %}
@@ -62,5 +52,4 @@
 
 {% block footer %}
   <p>Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://www.djangoproject.com/">Django</a>, <a href="http://www.celeryproject.org/">Celery</a> and <a href="http://www.redis.io/">Redis</a> | <a href="https://github.com/mback2k/django-webgcal/">Source Code</a> on <a href="https://github.com/">Github</a></p>
-  <noscript><p><img src="https://piwik.uxnr.de/piwik.php?idsite=4" style="border:0" alt="" /></p></noscript>
 {% endblock %}
