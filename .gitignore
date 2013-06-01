@@ -3,7 +3,7 @@
 *.pyc
 *.pyo
 *.tmp
-_generated_media
+_static
 celerybeat-schedule
 devdatabase.sqlite
 desktop.ini
