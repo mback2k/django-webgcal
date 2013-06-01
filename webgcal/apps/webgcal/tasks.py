@@ -132,7 +132,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             if response:
                 request_id = long(request_id, 16)
 
-                if 'error' in response and response['error']['code'] == 404:
+                if 'error' in response and response['error']['code'] == 404: # notFound
                     event = Event.objects.get(id=request_id)
                     if event.deleted:
                         event.delete()
@@ -186,13 +186,20 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             if response:
                 request_id = long(request_id, 16)
 
-                if 'error' in response and response['error']['code'] == 404:
+                if 'error' in response and response['error']['code'] == 404: # notFound
                     event = Event.objects.get(id=request_id)
                     if event.deleted:
                         event.delete()
                     else:
                         event.google_id = None
                         event.save()
+                elif 'error' in response and response['error']['code'] == 409: # duplicate
+                    event = Event.objects.get(id=request_id)
+                    event.deleted = True
+                    event.save()
+                elif 'error' in response and response['error']['code'] == 410: # deleted
+                    event = Event.objects.get(id=request_id)
+                    event.delete()
                 elif 'kind' in response and response['kind'] == 'calendar#event':
                     event = Event.objects.get(id=request_id)
                     event.google_id = response['id']
