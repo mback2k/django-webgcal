@@ -130,29 +130,27 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
         entries = {}
 
-        def delete_event(event_id):
-            event = Event.objects.get(id=event_id)
-            if event.deleted:
-                event.delete()
-            else:
-                event.google_id = None
-                event.save()
 
         def query_event(request_id, response, exception):
             event_id = long(request_id, 16)
-            if response:
-                if 'error' in response and response['error']['code'] == 404: # notFound
-                    delete_event(event_id)
-                elif 'kind' in response and response['kind'] == 'calendar#event':
-                    entries[event_id] = response
-                else:
-                    logging.debug('query %s: %s' % (event_id, response))
-            elif exception:
+            event = Event.objects.get(id=event_id)
+
+            if exception:
+                Error.assign(event).save()
+
                 if isinstance(exception, HttpError):
-                    if exception.resp.status == 404:
-                        delete_event(event_id)
-                logging.exception(exception)
-                Error.assign(calendar).save()
+                    if exception.resp.status == 404: # notFound
+                        if event.deleted:
+                            event.delete()
+                        else:
+                            event.google_id = None
+                            event.save()
+                    elif exception.resp.status == 410: # deleted
+                        event.delete()
+
+            elif response and 'kind' in response and response['kind'] == 'calendar#event':
+                entries[event_id] = response
+
 
         if events.exclude(google_id=None).exists():
             batch = BatchHttpRequest(callback=query_event)
@@ -166,19 +164,19 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
 
         def verify_event(request_id, response, exception):
-            if response:
-                request_id = long(request_id, 16)
+            event_id = long(request_id, 16)
+            event = Event.objects.get(id=event_id)
 
-                if 'kind' in response and response['kind'] == 'calendar#events':
-                    event = Event.objects.get(id=request_id)
-                    if 'items' in response and len(response['items']) == 1:
-                        event.google_id = response['items'][0]['id']
-                        event.save()
-                    elif event.deleted:
-                        event.delete()
-            elif exception:
-                logging.exception(exception)
-                Error.assign(calendar).save()
+            if exception:
+                Error.assign(event).save()
+
+            elif response and 'kind' in response and response['kind'] == 'calendar#events':
+                if 'items' in response and len(response['items']) == 1:
+                    event.google_id = response['items'][0]['id']
+                    event.save()
+                elif event.deleted:
+                    event.delete()
+
 
         if events.filter(google_id=None).exists():
             batch = BatchHttpRequest(callback=verify_event)
@@ -192,33 +190,30 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
 
         def update_event(request_id, response, exception):
-            if response:
-                request_id = long(request_id, 16)
+            event_id = long(request_id, 16)
+            event = Event.objects.get(id=event_id)
 
-                if 'error' in response and response['error']['code'] == 404: # notFound
-                    event = Event.objects.get(id=request_id)
-                    if event.deleted:
-                        event.delete()
-                    else:
-                        event.google_id = None
+            if exception:
+                Error.assign(event).save()
+
+                if isinstance(exception, HttpError):
+                    if exception.resp.status == 404: # notFound
+                        if event.deleted:
+                            event.delete()
+                        else:
+                            event.google_id = None
+                            event.save()
+                    elif exception.resp.status == 409: # duplicate
+                        event.deleted = True
                         event.save()
-                elif 'error' in response and response['error']['code'] == 409: # duplicate
-                    event = Event.objects.get(id=request_id)
-                    event.deleted = True
-                    event.save()
-                elif 'error' in response and response['error']['code'] == 410: # deleted
-                    event = Event.objects.get(id=request_id)
-                    event.delete()
-                elif 'kind' in response and response['kind'] == 'calendar#event':
-                    event = Event.objects.get(id=request_id)
-                    event.google_id = response['id']
-                    event.synced = sync_datetime
-                    event.save()
-                else:
-                    logging.debug('update %s: %s' % (request_id, response))
-            elif exception:
-                logging.exception(exception)
-                Error.assign(calendar).save()
+                    elif exception.resp.status == 410: # deleted
+                        event.delete()
+
+            elif response and 'kind' in response and response['kind'] == 'calendar#event':
+                event.google_id = response['id']
+                event.synced = sync_datetime
+                event.save()
+
 
         if events.exists():
             batch = BatchHttpRequest(callback=update_event)
