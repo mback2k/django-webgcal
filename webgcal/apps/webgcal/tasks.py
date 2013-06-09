@@ -128,22 +128,27 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
         entries = {}
 
-        def query_event(request_id, response, exception):
-            if response:
-                request_id = long(request_id, 16)
+        def delete_event(event_id):
+            event = Event.objects.get(id=event_id)
+            if event.deleted:
+                event.delete()
+            else:
+                event.google_id = None
+                event.save()
 
+        def query_event(request_id, response, exception):
+            event_id = long(request_id, 16)
+            if response:
                 if 'error' in response and response['error']['code'] == 404: # notFound
-                    event = Event.objects.get(id=request_id)
-                    if event.deleted:
-                        event.delete()
-                    else:
-                        event.google_id = None
-                        event.save()
+                    delete_event(event_id)
                 elif 'kind' in response and response['kind'] == 'calendar#event':
-                    entries[request_id] = response
+                    entries[event_id] = response
                 else:
-                    logging.debug('query %s: %s' % (request_id, response))
+                    logging.debug('query %s: %s' % (event_id, response))
             elif exception:
+                if isinstance(exception, HttpError):
+                    if exception.resp.status == 404:
+                        delete_event(event_id)
                 logging.exception(exception)
 
         if events.exclude(google_id=None).exists():
