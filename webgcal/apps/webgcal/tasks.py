@@ -5,6 +5,7 @@ from celery.schedules import crontab
 from celery.task import task, periodic_task
 from django.utils import timezone
 from django.db.models import Q, F
+from ...libs.keeperr.models import Error
 from .models import Calendar, Website, Event
 from . import google
 import hcalendar
@@ -82,6 +83,7 @@ def task_update_calendar(calendar_id):
 
     except Exception, e:
         logging.exception(e)
+        Error.assign(calendar).save()
         calendar.enabled = False
         calendar.running = False
         calendar.status = 'Error: Fatal error'
@@ -150,6 +152,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                     if exception.resp.status == 404:
                         delete_event(event_id)
                 logging.exception(exception)
+                Error.assign(calendar).save()
 
         if events.exclude(google_id=None).exists():
             batch = BatchHttpRequest(callback=query_event)
@@ -175,6 +178,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                         event.delete()
             elif exception:
                 logging.exception(exception)
+                Error.assign(calendar).save()
 
         if events.filter(google_id=None).exists():
             batch = BatchHttpRequest(callback=verify_event)
@@ -214,6 +218,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
                     logging.debug('update %s: %s' % (request_id, response))
             elif exception:
                 logging.exception(exception)
+                Error.assign(calendar).save()
 
         if events.exists():
             batch = BatchHttpRequest(callback=update_event)
@@ -267,6 +272,7 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
 
     except Exception, e:
         logging.exception(e)
+        Error.assign(website).save()
         website.enabled = False
         website.running = False
         website.status = 'Error: Fatal error'
@@ -405,6 +411,8 @@ def task_parse_website(calendar_id, website_id):
 
     except Exception, e:
         logging.exception(e)
+        Error.assign(website).save()
+
         if website.errors < 15:
             website.errors += 1
             website.save()
