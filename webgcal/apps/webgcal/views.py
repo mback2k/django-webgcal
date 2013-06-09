@@ -144,7 +144,7 @@ def delete_calendar_ask(request, calendar_id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
-@permission_required('webgcal.edit_website')
+@permission_required('webgcal.edit_calendar')
 def sync_calendar_now(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
 
