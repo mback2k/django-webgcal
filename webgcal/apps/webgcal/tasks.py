@@ -136,17 +136,17 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             event = Event.objects.get(id=event_id)
 
             if exception:
-                Error.assign(event).save()
-
                 if isinstance(exception, HttpError):
                     if exception.resp.status == 404: # notFound
                         if event.deleted:
-                            event.delete()
+                            return event.delete()
                         else:
                             event.google_id = None
-                            event.save()
+                            return event.save()
                     elif exception.resp.status == 410: # deleted
-                        event.delete()
+                        return event.delete()
+
+                Error.assign(event).save()
 
             elif response and 'kind' in response and response['kind'] == 'calendar#event':
                 entries[event_id] = response
@@ -194,20 +194,20 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
             event = Event.objects.get(id=event_id)
 
             if exception:
-                Error.assign(event).save()
-
                 if isinstance(exception, HttpError):
                     if exception.resp.status == 404: # notFound
                         if event.deleted:
-                            event.delete()
+                            return event.delete()
                         else:
                             event.google_id = None
-                            event.save()
+                            return event.save()
                     elif exception.resp.status == 409: # duplicate
                         event.deleted = True
-                        event.save()
+                        return event.save()
                     elif exception.resp.status == 410: # deleted
-                        event.delete()
+                        return event.delete()
+
+                Error.assign(event).save()
 
             elif response and 'kind' in response and response['kind'] == 'calendar#event':
                 event.google_id = response['id']
