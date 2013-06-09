@@ -144,6 +144,16 @@ def delete_calendar_ask(request, calendar_id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
+@permission_required('webgcal.edit_website')
+def sync_calendar_now(request, calendar_id):
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
+
+    tasks.task_update_calendar.delay(calendar.id)
+
+    messages.info(request, 'Queued syncing of calendar "%s" ...' % calendar)
+
+    return HttpResponseRedirect(reverse('webgcal:show_dashboard'))
+
 
 @login_required
 def create_website(request, calendar_id):
@@ -154,7 +164,6 @@ def create_website(request, calendar_id):
         website = create_form.save(commit=False)
         website.calendar = calendar
         website.save()
-        tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
@@ -177,7 +186,6 @@ def edit_website(request, calendar_id, website_id):
         website = edit_form.save(commit=False)
         website.calendar = calendar
         website.save()
-        tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
@@ -229,6 +237,17 @@ def delete_website_ask(request, calendar_id, website_id):
     }
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+
+@permission_required('webgcal.edit_website')
+def parse_website_now(request, calendar_id, website_id):
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+
+    tasks.task_parse_website.delay(calendar.id, website.id)
+
+    messages.info(request, 'Queued parsing of website "%s" ...' % website)
+
+    return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
 
 def redirect_login(request):
