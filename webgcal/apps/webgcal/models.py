@@ -13,7 +13,6 @@ class Calendar(models.Model):
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
     status = models.TextField(_('status'), blank=True, null=True)
-    errors = models.IntegerField(_('errors'), default=0)
     
     class Meta:
         ordering = ('name',)
@@ -30,7 +29,6 @@ class Website(models.Model):
     enabled = models.BooleanField(_('enabled'), default=True)
     running = models.BooleanField(_('running'), default=False)
     status = models.TextField(_('status'), blank=True, null=True)
-    errors = models.IntegerField(_('errors'), default=0)
     
     class Meta:
         ordering = ('name',)

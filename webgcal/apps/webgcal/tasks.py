@@ -87,7 +87,6 @@ def task_update_calendar(calendar_id):
         calendar.enabled = False
         calendar.running = False
         calendar.status = 'Error: Fatal error'
-        calendar.errors = 0
         calendar.save()
 
 
@@ -255,7 +254,6 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
         else:
             website.running = False
             website.status = 'Finished syncing website'
-            website.errors = 0
             website.save()
             logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, calendar.user))
 
@@ -271,7 +269,6 @@ def task_update_calendar_sync(calendar_id, website_id, cursor=None, limit=500):
         website.enabled = False
         website.running = False
         website.status = 'Error: Fatal error'
-        website.errors = 0
         website.save()
 
 
@@ -284,7 +281,6 @@ def task_update_calendar_wait(calendar_id):
             calendar.running = False
             calendar.updated = timezone.now()
             calendar.status = 'Finished syncing calendar'
-            calendar.errors = 0
             calendar.save()
             logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, calendar.user))
 
@@ -407,18 +403,10 @@ def task_parse_website(calendar_id, website_id):
     except Exception, e:
         logging.exception(e)
         Error.assign(website).save()
-
-        if website.errors < 15:
-            website.errors += 1
-            website.save()
-            task_parse_website.retry(exc=e)
-
-        else:
-            website.enabled = False
-            website.running = False
-            website.status = 'Error: Unable to parse website'
-            website.errors = 0
-            website.save()
+        website.enabled = False
+        website.running = False
+        website.status = 'Error: Unable to parse website'
+        website.save()
 
 
 def make_event_body(calendar, website, event, eventBody = {}):
