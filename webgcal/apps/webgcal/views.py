@@ -71,7 +71,6 @@ def show_calendar(request, calendar_id):
 
 @login_required
 def create_calendar(request):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     create_form = CalendarForm(data=request.POST)
 
     if create_form.is_valid():
@@ -79,6 +78,8 @@ def create_calendar(request):
         calendar.user = request.user
         calendar.save()
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
+
+    calendars = Calendar.objects.filter(user=request.user).order_by('name')
 
     template_values = {
         'calendars': calendars,
@@ -89,7 +90,6 @@ def create_calendar(request):
 
 @login_required
 def edit_calendar(request, calendar_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     edit_form = CalendarForm(instance=calendar, data=request.POST if request.method == 'POST' else None)
 
@@ -98,6 +98,8 @@ def edit_calendar(request, calendar_id):
         calendar.user = request.user
         calendar.save()
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
+
+    calendars = Calendar.objects.filter(user=request.user).order_by('name')
 
     template_values = {
         'calendars': calendars,
@@ -109,7 +111,6 @@ def edit_calendar(request, calendar_id):
 
 @login_required
 def switch_calendar(request, calendar_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
     calendar.enabled = not(calendar.enabled)
     calendar.save()
@@ -120,20 +121,12 @@ def switch_calendar(request, calendar_id):
 
 @login_required
 def delete_calendar(request, calendar_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
-    Website.objects.filter(calendar=calendar).delete()
     calendar.delete()
-    create_form = CalendarForm()
 
     messages.success(request, 'Deleted calendar "%s" from your Dashboard!' % calendar)
 
-    template_values = {
-        'calendars': calendars,
-        'calendar_create_form': create_form,
-    }
-
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('webgcal:show_dashboard'))
 
 @login_required
 def delete_calendar_ask(request, calendar_id):
@@ -154,7 +147,6 @@ def delete_calendar_ask(request, calendar_id):
 
 @login_required
 def create_website(request, calendar_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm(data=request.POST)
 
@@ -164,6 +156,8 @@ def create_website(request, calendar_id):
         website.save()
         tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
+
+    calendars = Calendar.objects.filter(user=request.user).order_by('name')
 
     template_values = {
         'calendars': calendars,
@@ -175,7 +169,6 @@ def create_website(request, calendar_id):
 
 @login_required
 def edit_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     edit_form = WebsiteForm(instance=website, data=request.POST if request.method == 'POST' else None)
@@ -186,6 +179,8 @@ def edit_website(request, calendar_id, website_id):
         website.save()
         tasks.task_parse_website.delay(calendar.id, website.id)
         return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
+
+    calendars = Calendar.objects.filter(user=request.user).order_by('name')
 
     template_values = {
         'calendars': calendars,
@@ -198,7 +193,6 @@ def edit_website(request, calendar_id, website_id):
 
 @login_required
 def switch_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.enabled = not(website.enabled)
@@ -210,21 +204,13 @@ def switch_website(request, calendar_id, website_id):
 
 @login_required
 def delete_website(request, calendar_id, website_id):
-    calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
     website.delete()
-    create_form = WebsiteForm()
 
     messages.success(request, 'Deleted website "%s" from your Dashboard!' % website)
 
-    template_values = {
-        'calendars': calendars,
-        'calendar': calendar,
-        'website_create_form': create_form,
-    }
-
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
 @login_required
 def delete_website_ask(request, calendar_id, website_id):
