@@ -7,7 +7,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
 from .forms import CalendarForm, WebsiteForm
 from .models import User, Calendar, Website, Event
-from . import tasks, google
+from .subtasks.website import task_parse_website
+from .subtasks.calendar import task_sync_calendar
+from . import google
 
 def check_social_auth(request):
     if request.user.is_authenticated():
@@ -148,7 +150,7 @@ def delete_calendar_ask(request, calendar_id):
 def sync_calendar_now(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
 
-    tasks.task_update_calendar.delay(calendar.id)
+    task_sync_calendar.delay(request.user.id, calendar.id)
 
     messages.info(request, 'Queued syncing of calendar "%s" ...' % calendar)
 
@@ -243,7 +245,7 @@ def parse_website_now(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
 
-    tasks.task_parse_website.delay(calendar.id, website.id)
+    task_parse_website.delay(request.user.id, website.id)
 
     messages.info(request, 'Queued parsing of website "%s" ...' % website)
 
