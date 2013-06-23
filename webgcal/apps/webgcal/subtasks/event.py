@@ -36,24 +36,26 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
 
     logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, user))
 
-    social_auth = google.get_social_auth(calendar.user)
-    if not social_auth:
-        return
-
-    credentials = google.get_credentials(social_auth)
-    session = google.get_session(credentials)
-    service = google.get_calendar_service(session)
-    if not google.check_calendar_access(service):
-        return
-
-    sync_datetime = timezone.now()
-    sync_timeout = sync_datetime - datetime.timedelta(days=1)
-
-    events = website.events.filter(Q(google_id=None) | Q(deleted=True) | Q(synced__lt=F('parsed')) | Q(synced__lt=sync_timeout))
-    if cursor:
-        events = events.filter(id__gte=cursor)
-
     try:
+        social_auth = google.get_social_auth(user)
+        if not social_auth:
+            return
+
+        credentials = google.get_credentials(social_auth)
+        session = google.get_session(credentials)
+        service = google.get_calendar_service(session)
+        if not google.check_calendar_access(service):
+            return
+
+
+        sync_datetime = timezone.now()
+        sync_timeout = sync_datetime - datetime.timedelta(days=1)
+
+        events = website.events.filter(Q(google_id=None) | Q(deleted=True) | Q(synced__lt=F('parsed')) | Q(synced__lt=sync_timeout))
+        if cursor:
+            events = events.filter(id__gte=cursor)
+
+
         entries = {}
 
         def query_event(request_id, response, exception):
@@ -186,6 +188,14 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
             website.save()
 
             logging.info('Finished sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
+
+    except HttpError, e:
+        logging.exception(e)
+        Error.assign(website).save()
+        website.enabled = e.resp.status == 403
+        website.running = False
+        website.status = u'HTTP: %s' % e.resp.reason
+        website.save()
 
     except Exception, e:
         logging.exception(e)

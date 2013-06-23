@@ -22,16 +22,6 @@ def task_sync_calendar(user_id, calendar_id):
     if not calendar.enabled:
         return
 
-    social_auth = google.get_social_auth(user)
-    if not social_auth:
-        return
-
-    credentials = google.get_credentials(social_auth)
-    session = google.get_session(credentials)
-    service = google.get_calendar_service(session)
-    if not google.check_calendar_access(service):
-        return
-
     calendar.running = True
     calendar.status = 'Syncing calendar'
     calendar.save()
@@ -39,6 +29,16 @@ def task_sync_calendar(user_id, calendar_id):
     logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, user))
 
     try:
+        social_auth = google.get_social_auth(user)
+        if not social_auth:
+            return
+
+        credentials = google.get_credentials(social_auth)
+        session = google.get_session(credentials)
+        service = google.get_calendar_service(session)
+        if not google.check_calendar_access(service):
+            return
+
         if calendar.google_id:
             try:
                 calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
@@ -61,6 +61,14 @@ def task_sync_calendar(user_id, calendar_id):
                 task_sync_website.apply_async(args=[user.id, calendar.id, website.id], task_id='sync-website-%d-%d-%d' % (user.id, calendar.id, website.id))
 
                 logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
+
+    except HttpError, e:
+        logging.exception(e)
+        Error.assign(calendar).save()
+        calendar.enabled = e.resp.status == 403
+        calendar.running = False
+        calendar.status = u'HTTP: %s' % e.resp.reason
+        calendar.save()
 
     except Exception, e:
         logging.exception(e)
