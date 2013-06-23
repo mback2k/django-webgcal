@@ -7,12 +7,12 @@ import datetime
 
 class Calendar(models.Model):
     user = models.ForeignKey(User, related_name='calendars')
-    name = models.CharField(_('name'), max_length=100)
-    google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
-    updated = models.DateTimeField(_('date updated'), blank=True, null=True)
-    enabled = models.BooleanField(_('enabled'), default=True)
-    running = models.BooleanField(_('running'), default=False)
-    status = models.TextField(_('status'), blank=True, null=True)
+    name = models.CharField(_('Name'), max_length=100)
+    google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
+    updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
+    enabled = models.BooleanField(_('Enabled'), default=True)
+    running = models.BooleanField(_('Running'), default=False)
+    status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
         ordering = ('name',)
@@ -22,13 +22,13 @@ class Calendar(models.Model):
 
 class Website(models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
-    name = models.CharField(_('name'), max_length=100)
-    href = models.URLField(_('link'))
-    timezone = models.CharField(_('timezone'), max_length=50, default='UTC')
-    updated = models.DateTimeField(_('date updated'), blank=True, null=True)
-    enabled = models.BooleanField(_('enabled'), default=True)
-    running = models.BooleanField(_('running'), default=False)
-    status = models.TextField(_('status'), blank=True, null=True)
+    name = models.CharField(_('Name'), max_length=100)
+    href = models.URLField(_('Link'))
+    timezone = models.CharField(_('Timezone'), max_length=50, default='UTC')
+    updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
+    enabled = models.BooleanField(_('Enabled'), default=True)
+    running = models.BooleanField(_('Running'), default=False)
+    status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
         ordering = ('name',)
@@ -38,21 +38,21 @@ class Website(models.Model):
 
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')
-    google_id = models.CharField(_('google id'), max_length=200, blank=True, null=True)
-    parsed = models.DateTimeField(_('date parsed'), default=datetime.date.min)
-    synced = models.DateTimeField(_('date synced'), default=datetime.date.min)
-    deleted = models.BooleanField(_('deleted'), default=False)
+    google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
+    parsed = models.DateTimeField(_('Date parsed'), default=datetime.date.min)
+    synced = models.DateTimeField(_('Date synced'), default=datetime.date.min)
+    deleted = models.BooleanField(_('Deleted'), default=False)
 
-    uid = models.TextField(_('uid'), blank=True, null=True)
-    summary = models.TextField(_('summary'))
-    description = models.TextField(_('description'), blank=True, null=True)
-    location = models.TextField(_('location'), blank=True, null=True)
-    category = models.TextField(_('category'), blank=True, null=True)
-    status = models.TextField(_('status'), blank=True, null=True)
-    dtstart = models.DateTimeField(_('dtstart'))
-    dtend = models.DateTimeField(_('dtend'), blank=True, null=True)
-    dtstamp = models.DateTimeField(_('dtstamp'), blank=True, null=True)
-    last_modified = models.DateTimeField(_('last_modified'), blank=True, null=True)
+    uid = models.TextField(_('UID'), blank=True, null=True)
+    summary = models.TextField(_('Summary'))
+    description = models.TextField(_('Description'), blank=True, null=True)
+    location = models.TextField(_('Location'), blank=True, null=True)
+    category = models.TextField(_('Category'), blank=True, null=True)
+    status = models.TextField(_('Status'), blank=True, null=True)
+    dtstart = models.DateTimeField(_('DTStart'))
+    dtend = models.DateTimeField(_('DTEnd'), blank=True, null=True)
+    dtstamp = models.DateTimeField(_('DTStamp'), blank=True, null=True)
+    last_modified = models.DateTimeField(_('Last modified'), blank=True, null=True)
 
     def __unicode__(self):
         return self.summary
