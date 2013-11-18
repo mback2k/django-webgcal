@@ -65,7 +65,7 @@ def task_sync_calendar(user_id, calendar_id):
     except HttpError, e:
         logging.exception(e)
         Error.assign(calendar).save()
-        calendar.enabled = e.resp.status == 403
+        calendar.enabled = e.resp.status in (403, 503)
         calendar.running = False
         calendar.status = u'HTTP: %s' % e.resp.reason
         calendar.save()

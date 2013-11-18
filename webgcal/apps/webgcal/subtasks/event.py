@@ -192,7 +192,7 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     except HttpError, e:
         logging.exception(e)
         Error.assign(website).save()
-        website.enabled = e.resp.status == 403
+        website.enabled = e.resp.status in (403, 503)
         website.running = False
         website.status = u'HTTP: %s' % e.resp.reason
         website.save()
