@@ -4,12 +4,12 @@ from .models import Calendar, Website, Event
 
 class CalendarAdmin(admin.ModelAdmin):
     fields = ('name', 'user', 'google_id')
-    list_display = ('name', 'user', 'updated')
+    list_display = ('name', 'user', 'updated', 'enabled', 'running')
     ordering = ('name',)
 
 class WebsiteAdmin(admin.ModelAdmin):
     fields = ('name', 'calendar', 'href')
-    list_display = ('name', 'calendar', 'updated')
+    list_display = ('name', 'calendar', 'updated', 'enabled', 'running')
     ordering = ('name',)
 
 class EventAdmin(admin.ModelAdmin):
