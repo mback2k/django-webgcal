@@ -9,19 +9,8 @@ import logging
 
 @task(default_retry_delay=120, max_retries=5)
 def task_sync_calendar(user_id, calendar_id):
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return
-
-    try:
-        calendar = Calendar.objects.get(user=user, id=calendar_id)
-    except Calendar.DoesNotExist:
-        return
-
-    if not calendar.enabled:
-        return
-
+    user = User.objects.get(id=user_id, is_active=True)
+    calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True, running=False)
     calendar.running = True
     calendar.status = 'Syncing calendar'
     calendar.save()

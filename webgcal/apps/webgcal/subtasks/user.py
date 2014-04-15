@@ -9,10 +9,7 @@ import logging
 
 @task()
 def task_check_user(user_id):
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return
+    user = User.objects.get(id=user_id, is_active=True)
 
     try:
         social_auth = google.get_social_auth(user)
@@ -24,6 +21,7 @@ def task_check_user(user_id):
         service = google.get_calendar_service(session)
         if not google.check_calendar_access(service):
             return
+
     except HttpError, e:
         logging.exception(e)
         Error.assign(user).save()

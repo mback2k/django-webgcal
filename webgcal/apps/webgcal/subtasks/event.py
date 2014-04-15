@@ -12,24 +12,9 @@ import logging
 
 @task(default_retry_delay=120, max_retries=5)
 def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return
-
-    try:
-        calendar = Calendar.objects.get(user=user, id=calendar_id)
-    except Calendar.DoesNotExist:
-        return
-
-    if not calendar.enabled:
-        return
-
-    try:
-        website = Website.objects.get(calendar__user=user, calendar=calendar, id=website_id)
-    except Website.DoesNotExist:
-        return
-
+    user = User.objects.get(id=user_id, is_active=True)
+    calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True, running=True)
+    website = Website.objects.get(calendar__user=user, calendar=calendar, id=website_id)
     website.running = True
     website.status = 'Syncing website (%d/%d)' % (website.events.filter(id__lt=cursor).count() if cursor else 0, website.events.count())
     website.save()

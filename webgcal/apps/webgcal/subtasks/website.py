@@ -11,19 +11,8 @@ import pytz
 
 @task(default_retry_delay=120, max_retries=5)
 def task_parse_website(user_id, website_id):
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return
-
-    try:
-        website = Website.objects.get(calendar__user=user, id=website_id)
-    except Website.DoesNotExist:
-        return
-
-    if not website.enabled:
-        return
-
+    user = User.objects.get(id=user_id, is_active=True)
+    website = Website.objects.get(calendar__user=user, id=website_id, enabled=True, running=False)
     website.running = True
     website.status = 'Parsing website'
     website.save()
