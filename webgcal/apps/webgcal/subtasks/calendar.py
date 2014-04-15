@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from apiclient.errors import HttpError
 from celery.task import task
+from django.db import transaction
 from ....libs.keeperr.models import Error
 from ..models import User, Calendar
 from .. import google
@@ -15,41 +16,8 @@ def task_sync_calendar(user_id, calendar_id):
     calendar.status = 'Syncing calendar'
     calendar.save()
 
-    logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, user))
-
     try:
-        social_auth = google.get_social_auth(user)
-        if not social_auth:
-            return
-
-        credentials = google.get_credentials(social_auth)
-        session = google.get_session(credentials)
-        service = google.get_calendar_service(session)
-        if not google.check_calendar_access(service):
-            return
-
-        if calendar.google_id:
-            try:
-                calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
-            except HttpError:
-                calendarItem = None
-        else:
-            calendarItem = None
-
-        if not calendarItem:
-            calendarBody = make_calendar_body(calendar)
-            calendarItem = service.calendars().insert(body=calendarBody).execute()
-
-            calendar.google_id = calendarItem['id']
-            calendar.save()
-
-            logging.info('Inserted calendar "%s" for user "%s"' % (calendar.name, user))
-
-        if calendar.google_id:
-            for website in calendar.websites.all():
-                task_sync_website.apply_async(args=[user.id, calendar.id, website.id], task_id='sync-website-%d-%d-%d' % (user.id, calendar.id, website.id))
-
-                logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
+        sync_calendar(user, calendar)
 
     except HttpError, e:
         logging.exception(e)
@@ -67,6 +35,49 @@ def task_sync_calendar(user_id, calendar_id):
         calendar.status = 'Error: Fatal error'
         calendar.save()
 
+    if calendar.enabled and calendar.running and calendar.google_id:
+        for website in calendar.websites.filter(running=False):
+            website.running = True
+            website.status = 'Waiting for sync'
+            website.save()
+
+            task_sync_website.apply_async(args=[user.id, calendar.id, website.id], task_id='sync-website-%d-%d-%d' % (user.id, calendar.id, website.id))
+
+            logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
+
+@transaction.atomic
+def sync_calendar(user, calendar):
+    logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, user))
+
+    social_auth = google.get_social_auth(user)
+    if not social_auth:
+        raise RuntimeWarning('No social auth available for user "%s"' % user)
+
+    credentials = google.get_credentials(social_auth)
+    session = google.get_session(credentials)
+    service = google.get_calendar_service(session)
+    if not google.check_calendar_access(service):
+        raise RuntimeWarning('No calendar access available for user "%s"' % user)
+
+    try:
+        if calendar.google_id:
+            calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
+        else:
+            calendarItem = None
+    except HttpError, e:
+        if e.resp.status == 404:
+            calendarItem = None
+        else:
+            raise e
+
+    if not calendarItem:
+        calendarBody = make_calendar_body(calendar)
+        calendarItem = service.calendars().insert(body=calendarBody).execute()
+
+        calendar.google_id = calendarItem['id']
+        calendar.save()
+
+        logging.info('Inserted calendar "%s" for user "%s"' % (calendar.name, user))
 
 def make_calendar_body(calendar, calendarBody = {}):
     calendarBody['summary'] = calendar.name
