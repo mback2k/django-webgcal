@@ -92,7 +92,7 @@ def create_calendar(request):
 
 @login_required
 def edit_calendar(request, calendar_id):
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, task_id=None)
     edit_form = CalendarForm(instance=calendar, data=request.POST if request.method == 'POST' else None)
 
     if edit_form.is_valid():
@@ -113,7 +113,7 @@ def edit_calendar(request, calendar_id):
 
 @login_required
 def switch_calendar(request, calendar_id):
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, task_id=None)
     calendar.enabled = not(calendar.enabled)
     calendar.save()
 
@@ -123,7 +123,7 @@ def switch_calendar(request, calendar_id):
 
 @login_required
 def delete_calendar(request, calendar_id):
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, task_id=None)
     calendar.delete()
 
     messages.success(request, 'Deleted calendar "%s" from your Dashboard!' % calendar)
@@ -133,7 +133,7 @@ def delete_calendar(request, calendar_id):
 @login_required
 def delete_calendar_ask(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, running=False)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, task_id=None)
     create_form = CalendarForm()
 
     button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_calendar', kwargs={'calendar_id': calendar_id})
@@ -148,9 +148,11 @@ def delete_calendar_ask(request, calendar_id):
 
 @permission_required('webgcal.edit_calendar')
 def sync_calendar_now(request, calendar_id):
-    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
+    calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id, task_id=None)
+    calendar.task_id = 'sync-calendar-%d-%d' % (request.user.id, calendar.id)
+    calendar.save()
 
-    task_sync_calendar.delay(request.user.id, calendar.id)
+    task_sync_calendar.apply_async(args=[request.user.id, calendar.id], task_id=calendar.task_id)
 
     messages.info(request, 'Queued syncing of calendar "%s" ...' % calendar)
 
@@ -181,7 +183,7 @@ def create_website(request, calendar_id):
 @login_required
 def edit_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, task_id=None)
     edit_form = WebsiteForm(instance=website, data=request.POST if request.method == 'POST' else None)
 
     if edit_form.is_valid():
@@ -204,7 +206,7 @@ def edit_website(request, calendar_id, website_id):
 @login_required
 def switch_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, task_id=None)
     website.enabled = not(website.enabled)
     website.save()
 
@@ -215,7 +217,7 @@ def switch_website(request, calendar_id, website_id):
 @login_required
 def delete_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, task_id=None)
     website.delete()
 
     messages.success(request, 'Deleted website "%s" from your Dashboard!' % website)
@@ -226,7 +228,7 @@ def delete_website(request, calendar_id, website_id):
 def delete_website_ask(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, task_id=None)
     create_form = WebsiteForm()
 
     button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})
@@ -243,9 +245,11 @@ def delete_website_ask(request, calendar_id, website_id):
 @permission_required('webgcal.edit_website')
 def parse_website_now(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    website = get_object_or_404(Website, calendar=calendar, id=website_id, running=False)
+    website = get_object_or_404(Website, calendar=calendar, id=website_id, task_id=None)
+    website.task_id = 'parse-website-%d-%d' % (request.user.id, website.id)
+    website.save()
 
-    task_parse_website.delay(request.user.id, website.id)
+    task_parse_website.apply_async(args=[request.user.id, website.id], task_id=website.task_id)
 
     messages.info(request, 'Queued parsing of website "%s" ...' % website)
 

@@ -5,16 +5,16 @@ from django.db import transaction
 from ....libs.keeperr.models import Error
 from ..models import User, Website, Event
 from .calendar import task_sync_calendar
+from .utils import clean_task_result
 import hcalendar
 import logging
 import urllib2
 import pytz
 
-@task(default_retry_delay=120, max_retries=5)
-def task_parse_website(user_id, website_id):
+@task(bind=True, default_retry_delay=120, max_retries=5)
+def task_parse_website(self, user_id, website_id):
     user = User.objects.get(id=user_id, is_active=True)
-    website = Website.objects.get(calendar__user=user, id=website_id, enabled=True, running=False)
-    website.running = True
+    website = Website.objects.get(calendar__user=user, id=website_id, enabled=True, task_id=self.request.id)
     website.status = 'Parsing website'
     website.save()
 
@@ -28,16 +28,16 @@ def task_parse_website(user_id, website_id):
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = False
-        website.running = False
+        website.task_id = None
         website.status = 'Error: Unable to parse website'
         website.save()
 
-    if not website.calendar.running and not website.calendar.websites.filter(running=True).exists():
-        website.calendar.running = True
-        website.calendar.status = 'Waiting for sync'
+    if website.calendar.enabled and not website.calendar.running and not website.calendar.websites.exclude(task_id=None).exists():
+        website.calendar.task_id = 'sync-calendar-%d-%d' % (user.id, website.calendar.id)
         website.calendar.save()
 
-        task_sync_calendar.apply_async(args=[user.id, website.calendar.id], task_id='sync-calendar-%d-%d' % (user.id, website.calendar.id))
+        clean_task_result(website.calendar.task_id)
+        task_sync_calendar.apply_async(args=[user.id, website.calendar.id], task_id=website.calendar.task_id)
 
         logging.info('Deferred sync of calendar "%s" for user "%s"' % (website.calendar, user))
 
@@ -100,8 +100,8 @@ def parse_website(user, website):
             event.deleted = True
             event.save()
 
-    website.running = False
     website.updated = timezone.now()
+    website.task_id = None
     website.status = 'Finished parsing website'
     website.save()
 

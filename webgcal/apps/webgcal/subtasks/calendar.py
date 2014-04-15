@@ -6,13 +6,13 @@ from ....libs.keeperr.models import Error
 from ..models import User, Calendar
 from .. import google
 from .event import task_sync_website
+from .utils import clean_task_result
 import logging
 
-@task(default_retry_delay=120, max_retries=5)
-def task_sync_calendar(user_id, calendar_id):
+@task(bind=True, default_retry_delay=120, max_retries=5)
+def task_sync_calendar(self, user_id, calendar_id):
     user = User.objects.get(id=user_id, is_active=True)
-    calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True, running=False)
-    calendar.running = True
+    calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True, task_id=self.request.id)
     calendar.status = 'Syncing calendar'
     calendar.save()
 
@@ -23,7 +23,7 @@ def task_sync_calendar(user_id, calendar_id):
         logging.exception(e)
         Error.assign(calendar).save()
         calendar.enabled = e.resp.status in (403, 503)
-        calendar.running = False
+        calendar.task_id = None
         calendar.status = u'HTTP: %s' % e.resp.reason
         calendar.save()
 
@@ -31,17 +31,17 @@ def task_sync_calendar(user_id, calendar_id):
         logging.exception(e)
         Error.assign(calendar).save()
         calendar.enabled = False
-        calendar.running = False
+        calendar.task_id = None
         calendar.status = 'Error: Fatal error'
         calendar.save()
 
     if calendar.enabled and calendar.running and calendar.google_id:
-        for website in calendar.websites.filter(running=False):
-            website.running = True
-            website.status = 'Waiting for sync'
+        for website in calendar.websites.filter(task_id=None):
+            website.task_id = 'sync-website-%d-%d-%d' % (user.id, calendar.id, website.id)
             website.save()
 
-            task_sync_website.apply_async(args=[user.id, calendar.id, website.id], task_id='sync-website-%d-%d-%d' % (user.id, calendar.id, website.id))
+            clean_task_result(website.task_id)
+            task_sync_website.apply_async(args=[user.id, calendar.id, website.id], task_id=website.task_id)
 
             logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
 

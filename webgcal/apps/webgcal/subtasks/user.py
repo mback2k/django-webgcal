@@ -21,7 +21,10 @@ def task_check_user(user_id):
         return
 
     for website in Website.objects.filter(calendar__user=user):
-        task_parse_website.apply_async(args=[user.id, website.id], task_id='parse-website-%d-%d' % (user.id, website.id))
+        website.task_id = 'parse-website-%d-%d' % (user.id, website.id)
+        website.save()
+
+        task_parse_website.apply_async(args=[user.id, website.id], task_id=website.task_id)
 
         logging.info('Deferred parsing of website "%s" for user "%s"' % (website, user))
 

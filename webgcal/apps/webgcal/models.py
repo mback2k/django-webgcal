@@ -3,6 +3,7 @@ from django.db import models
 from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from celery.result import BaseAsyncResult
 import datetime
 
 class Calendar(models.Model):
@@ -11,7 +12,7 @@ class Calendar(models.Model):
     google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
-    running = models.BooleanField(_('Running'), default=False)
+    task_id = models.TextField(_('Task ID'), blank=True, null=True)
     status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
@@ -20,6 +21,25 @@ class Calendar(models.Model):
     def __unicode__(self):
         return self.name
 
+    @property
+    def task(self):
+        task_id = self.task_id
+        if task_id:
+            return BaseAsyncResult(task_id)
+        return None
+
+    @property
+    def running(self):
+        task = self.task
+        if task:
+            if task.ready():
+                task.forget()
+                self.task_id = None
+                self.save(update_fields=['task_id'])
+            else:
+                return True
+        return False
+
 class Website(models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('Name'), max_length=100)
@@ -27,7 +47,7 @@ class Website(models.Model):
     timezone = models.CharField(_('Timezone'), max_length=50, default='UTC')
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
-    running = models.BooleanField(_('Running'), default=False)
+    task_id = models.TextField(_('Task ID'), blank=True, null=True)
     status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
@@ -35,6 +55,25 @@ class Website(models.Model):
     
     def __unicode__(self):
         return self.name
+
+    @property
+    def task(self):
+        task_id = self.task_id
+        if task_id:
+            return BaseAsyncResult(task_id)
+        return None
+
+    @property
+    def running(self):
+        task = self.task
+        if task:
+            if task.ready():
+                task.forget()
+                self.task_id = None
+                self.save(update_fields=['task_id'])
+            else:
+                return True
+        return False
 
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')
