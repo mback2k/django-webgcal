@@ -10,6 +10,7 @@ Dependencies
 - Google API         [https://code.google.com/p/google-api-python-client/]
 - Beautiful Soup 4   [http://www.crummy.com/software/BeautifulSoup/]
 - django-celery      [https://github.com/ask/django-celery]
+- django-celery-model [https://github.com/mback2k/django-celery-model]
 - django_compressor  [https://github.com/jezdez/django_compressor]
 - django-social-auth [https://github.com/omab/django-social-auth]
 - django-appengine-auth [https://github.com/mback2k/django-appengine-auth]
@@ -79,4 +80,4 @@ You can do this by executing the following command from your server's shell:
 License
 -------
 * Released under MIT License
-* Copyright (c) 2012-2013 Marc Hoersken <info@marc-hoersken.de>
+* Copyright (c) 2012-2014 Marc Hoersken <info@marc-hoersken.de>
