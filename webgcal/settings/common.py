@@ -16,6 +16,7 @@ INSTALLED_APPS = (
 
     'south',
     'djcelery',
+    'djcelery_model',
     'social_auth',
     'appengine_auth',
 

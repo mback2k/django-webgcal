@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
-from celery.result import BaseAsyncResult
+from djcelery_model.models import TaskMixin
 import datetime
 
-class Calendar(models.Model):
+class Calendar(models.Model, TaskMixin):
     user = models.ForeignKey(User, related_name='calendars')
     name = models.CharField(_('Name'), max_length=100)
     google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
-    task_id = models.TextField(_('Task ID'), blank=True, null=True)
     status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
@@ -22,32 +20,17 @@ class Calendar(models.Model):
         return self.name
 
     @property
-    def task(self):
-        task_id = self.task_id
-        if task_id:
-            return BaseAsyncResult(task_id)
-        return None
-
-    @property
     def running(self):
-        task = self.task
-        if task:
-            if task.ready():
-                task.forget()
-                self.task_id = None
-                self.save(update_fields=['task_id'])
-            else:
-                return True
-        return False
+        self.clear_task_results()
+        return self.has_running_task
 
-class Website(models.Model):
+class Website(models.Model, TaskMixin):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('Name'), max_length=100)
     href = models.URLField(_('Link'))
     timezone = models.CharField(_('Timezone'), max_length=50, default='UTC')
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
-    task_id = models.TextField(_('Task ID'), blank=True, null=True)
     status = models.TextField(_('Status'), blank=True, null=True)
     
     class Meta:
@@ -57,23 +40,9 @@ class Website(models.Model):
         return self.name
 
     @property
-    def task(self):
-        task_id = self.task_id
-        if task_id:
-            return BaseAsyncResult(task_id)
-        return None
-
-    @property
     def running(self):
-        task = self.task
-        if task:
-            if task.ready():
-                task.forget()
-                self.task_id = None
-                self.save(update_fields=['task_id'])
-            else:
-                return True
-        return False
+        self.clear_task_results()
+        return self.has_running_task
 
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')

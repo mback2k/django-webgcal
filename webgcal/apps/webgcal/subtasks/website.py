@@ -5,16 +5,15 @@ from django.db import transaction
 from ....libs.keeperr.models import Error
 from ..models import User, Website, Event
 from .calendar import task_sync_calendar
-from .utils import clean_task_result
 import hcalendar
 import logging
 import urllib2
 import pytz
 
-@task(bind=True, default_retry_delay=120, max_retries=5)
-def task_parse_website(self, user_id, website_id):
+@task(default_retry_delay=120, max_retries=5)
+def task_parse_website(user_id, website_id):
     user = User.objects.get(id=user_id, is_active=True)
-    website = Website.objects.get(calendar__user=user, id=website_id, enabled=True, task_id=self.request.id)
+    website = Website.objects.get(calendar__user=user, id=website_id, enabled=True)
     website.status = 'Parsing website'
     website.save()
 
@@ -28,16 +27,13 @@ def task_parse_website(self, user_id, website_id):
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = False
-        website.task_id = None
         website.status = 'Error: Unable to parse website'
         website.save()
 
-    if website.calendar.enabled and not website.calendar.running and not website.calendar.websites.exclude(task_id=None).exists():
-        website.calendar.task_id = 'sync-calendar-%d-%d' % (user.id, website.calendar.id)
-        website.calendar.save()
-
-        clean_task_result(website.calendar.task_id)
-        task_sync_calendar.apply_async(args=[user.id, website.calendar.id], task_id=website.calendar.task_id)
+    if website.calendar.enabled and not website.calendar.running and not filter(lambda x: x.running, website.calendar.websites.exclude(id=website.id)):
+        args = (user.id, website.calendar.id)
+        task_id = 'sync-calendar-%d-%d' % args
+        website.calendar.apply_async(task_sync_calendar, args=args, task_id=task_id, countdown=10)
 
         logging.info('Deferred sync of calendar "%s" for user "%s"' % (website.calendar, user))
 
@@ -101,7 +97,6 @@ def parse_website(user, website):
             event.save()
 
     website.updated = timezone.now()
-    website.task_id = None
     website.status = 'Finished parsing website'
     website.save()
 

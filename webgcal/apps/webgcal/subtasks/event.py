@@ -9,15 +9,14 @@ from django.core.cache import cache
 from ....libs.keeperr.models import Error
 from ..models import User, Calendar, Website, Event
 from .. import google
-from .utils import clean_task_result
 import datetime
 import logging
 
-@task(bind=True, default_retry_delay=120, max_retries=5)
-def task_sync_website(self, user_id, calendar_id, website_id, cursor=None, limit=500):
+@task(default_retry_delay=120, max_retries=5)
+def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     user = User.objects.get(id=user_id, is_active=True)
     calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True)
-    website = Website.objects.get(calendar__user=user, calendar=calendar, id=website_id, task_id=self.request.id)
+    website = Website.objects.get(calendar__user=user, calendar=calendar, id=website_id)
     website.status = 'Syncing website (%d/%d)' % (website.events.filter(id__lt=cursor).count() if cursor else 0, website.events.count())
     website.save()
 
@@ -28,7 +27,6 @@ def task_sync_website(self, user_id, calendar_id, website_id, cursor=None, limit
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = e.resp.status in (403, 503)
-        website.task_id = None
         website.status = u'HTTP: %s' % e.resp.reason
         website.save()
 
@@ -36,13 +34,11 @@ def task_sync_website(self, user_id, calendar_id, website_id, cursor=None, limit
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = False
-        website.task_id = None
         website.status = 'Error: Fatal error'
         website.save()
 
-    if not calendar.websites.exclude(task_id=None).exists():
+    if not filter(lambda x: x.running, calendar.websites.exclude(id=website.id)):
         calendar.updated = timezone.now()
-        calendar.task_id = None
         calendar.status = 'Finished syncing calendar'
         calendar.save()
 
@@ -140,16 +136,13 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
 
 
     if events.count() > limit:
-        website.task_id = 'sync-website-%d-%d-%d-%d-%d' % (user.id, calendar.id, website.id, events[limit].id, limit)
-        website.save()
-
-        clean_task_result(website.task_id)
-        task_sync_website.apply_async(args=[user.id, calendar.id, website.id, events[limit].id, limit], task_id=website.task_id, countdown=10)
+        args = (user.id, calendar.id, website.id, events[limit].id, limit)
+        task_id = 'sync-website-%d-%d-%d-%d-%d' % args
+        website.apply_async(task_sync_website, args=args, task_id=task_id, countdown=10)
 
         logging.info('Deferred additional sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
 
     else:
-        website.task_id = None
         website.status = 'Finished syncing website'
         website.save()
 
