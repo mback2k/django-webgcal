@@ -52,7 +52,7 @@
         <td>{{ website.events.count }}</td>
         <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}<br />{{ website.status }}</td>
         <td>
-          {% if not website.running %}
+          {% if not website.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
           <a class="ym-button ym-{% if not website.enabled %}enable{% else %}disable{% endif %}" href="{% url 'webgcal:switch_website' calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
           <a class="ym-button ym-delete" href="{% url 'webgcal:delete_website_ask' calendar.id website.id %}" title="Delete">Delete</a>
@@ -98,7 +98,7 @@
         <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}<br />{{ calendar.status }}</td>
         <td>
           <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Show Websites">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} Websites</a>
-          {% if not calendar.running %}
+          {% if not calendar.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_calendar' calendar.id %}" title="Edit">Edit</a>
           <a class="ym-button ym-{% if not calendar.enabled %}enable{% else %}disable{% endif %}" href="{% url 'webgcal:switch_calendar' calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}">{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}</a>
           <a class="ym-button ym-delete" href="{% url 'webgcal:delete_calendar_ask' calendar.id %}" title="Delete">Delete</a>

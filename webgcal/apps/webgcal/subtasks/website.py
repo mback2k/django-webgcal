@@ -10,7 +10,7 @@ import logging
 import urllib2
 import pytz
 
-@task(default_retry_delay=120, max_retries=5)
+@task(ignore_result=True, default_retry_delay=120, max_retries=5)
 def task_parse_website(user_id, website_id):
     user = User.objects.get(id=user_id, is_active=True)
     website = Website.objects.get(calendar__user=user, id=website_id, enabled=True)
@@ -30,7 +30,7 @@ def task_parse_website(user_id, website_id):
         website.status = 'Error: Unable to parse website'
         website.save()
 
-    if website.calendar.enabled and not website.calendar.running and not filter(lambda x: x.running, website.calendar.websites.exclude(id=website.id)):
+    if website.calendar.enabled and not website.calendar.has_running_task and not filter(lambda x: x.has_running_task, website.calendar.websites.exclude(id=website.id)):
         args = (user.id, website.calendar.id)
         task_id = 'sync-calendar-%d-%d' % args
         website.calendar.apply_async(task_sync_calendar, args=args, task_id=task_id, countdown=10)

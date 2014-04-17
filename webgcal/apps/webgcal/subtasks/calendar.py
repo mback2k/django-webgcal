@@ -8,7 +8,7 @@ from .. import google
 from .event import task_sync_website
 import logging
 
-@task(default_retry_delay=120, max_retries=5)
+@task(ignore_result=True, default_retry_delay=120, max_retries=5)
 def task_sync_calendar(user_id, calendar_id):
     user = User.objects.get(id=user_id, is_active=True)
     calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True)
@@ -32,7 +32,7 @@ def task_sync_calendar(user_id, calendar_id):
         calendar.status = 'Error: Fatal error'
         calendar.save()
 
-    if calendar.enabled and calendar.running and calendar.google_id:
+    if calendar.enabled and calendar.has_running_task and calendar.google_id:
         for website in calendar.websites.all():
             args = (user.id, calendar.id, website.id)
             task_id = 'sync-website-%d-%d-%d' % args

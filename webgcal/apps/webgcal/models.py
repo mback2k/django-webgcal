@@ -12,17 +12,12 @@ class Calendar(models.Model, TaskMixin):
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
     status = models.TextField(_('Status'), blank=True, null=True)
-    
+
     class Meta:
         ordering = ('name',)
-    
+
     def __unicode__(self):
         return self.name
-
-    @property
-    def running(self):
-        self.clear_task_results()
-        return self.has_running_task
 
 class Website(models.Model, TaskMixin):
     calendar = models.ForeignKey(Calendar, related_name='websites')
@@ -32,17 +27,12 @@ class Website(models.Model, TaskMixin):
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
     status = models.TextField(_('Status'), blank=True, null=True)
-    
+
     class Meta:
         ordering = ('name',)
-    
+
     def __unicode__(self):
         return self.name
-
-    @property
-    def running(self):
-        self.clear_task_results()
-        return self.has_running_task
 
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')

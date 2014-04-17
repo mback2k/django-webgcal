@@ -12,7 +12,7 @@ from .. import google
 import datetime
 import logging
 
-@task(default_retry_delay=120, max_retries=5)
+@task(ignore_result=True, default_retry_delay=120, max_retries=5)
 def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     user = User.objects.get(id=user_id, is_active=True)
     calendar = Calendar.objects.get(user=user, id=calendar_id, enabled=True)
@@ -37,7 +37,7 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
         website.status = 'Error: Fatal error'
         website.save()
 
-    if not filter(lambda x: x.running, calendar.websites.exclude(id=website.id)):
+    if not filter(lambda x: x.has_running_task, calendar.websites.exclude(id=website.id)):
         calendar.updated = timezone.now()
         calendar.status = 'Finished syncing calendar'
         calendar.save()

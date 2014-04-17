@@ -93,7 +93,7 @@ def create_calendar(request):
 @login_required
 def edit_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    if calendar.running:
+    if calendar.has_running_task:
         return HttpResponseForbidden('Cannot manipulate calendar with active background task.')
 
     edit_form = CalendarForm(instance=calendar, data=request.POST if request.method == 'POST' else None)
@@ -117,7 +117,7 @@ def edit_calendar(request, calendar_id):
 @login_required
 def switch_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    if calendar.running:
+    if calendar.has_running_task:
         return HttpResponseForbidden('Cannot manipulate calendar with active background task.')
 
     calendar.enabled = not(calendar.enabled)
@@ -130,7 +130,7 @@ def switch_calendar(request, calendar_id):
 @login_required
 def delete_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    if calendar.running:
+    if calendar.has_running_task:
         return HttpResponseForbidden('Cannot manipulate calendar with active background task.')
 
     calendar.delete()
@@ -143,7 +143,7 @@ def delete_calendar(request, calendar_id):
 def delete_calendar_ask(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    if calendar.running:
+    if calendar.has_running_task:
         return HttpResponseForbidden('Cannot manipulate calendar with active background task.')
 
     create_form = CalendarForm()
@@ -161,7 +161,7 @@ def delete_calendar_ask(request, calendar_id):
 @permission_required('webgcal.edit_calendar')
 def sync_calendar_now(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
-    if calendar.running:
+    if calendar.has_running_task:
         return HttpResponseForbidden('Cannot manipulate calendar with active background task.')
 
     args = (request.user.id, calendar.id)
@@ -198,7 +198,7 @@ def create_website(request, calendar_id):
 def edit_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
-    if website.running:
+    if website.has_running_task:
         return HttpResponseForbidden('Cannot manipulate website with active background task.')
 
     edit_form = WebsiteForm(instance=website, data=request.POST if request.method == 'POST' else None)
@@ -224,7 +224,7 @@ def edit_website(request, calendar_id, website_id):
 def switch_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
-    if website.running:
+    if website.has_running_task:
         return HttpResponseForbidden('Cannot manipulate website with active background task.')
 
     website.enabled = not(website.enabled)
@@ -238,7 +238,7 @@ def switch_website(request, calendar_id, website_id):
 def delete_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
-    if website.running:
+    if website.has_running_task:
         return HttpResponseForbidden('Cannot manipulate website with active background task.')
 
     website.delete()
@@ -252,7 +252,7 @@ def delete_website_ask(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
-    if website.running:
+    if website.has_running_task:
         return HttpResponseForbidden('Cannot manipulate website with active background task.')
 
     create_form = WebsiteForm()
@@ -272,7 +272,7 @@ def delete_website_ask(request, calendar_id, website_id):
 def parse_website_now(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
-    if website.running:
+    if website.has_running_task:
         return HttpResponseForbidden('Cannot manipulate website with active background task.')
 
     args = (request.user.id, website.id)
