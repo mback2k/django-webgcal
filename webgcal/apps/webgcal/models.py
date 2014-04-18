@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from djcelery_model.models import TaskMixin
 import datetime
 
-class Calendar(models.Model, TaskMixin):
+class Calendar(TaskMixin, models.Model):
     user = models.ForeignKey(User, related_name='calendars')
     name = models.CharField(_('Name'), max_length=100)
     google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
@@ -19,7 +19,7 @@ class Calendar(models.Model, TaskMixin):
     def __unicode__(self):
         return self.name
 
-class Website(models.Model, TaskMixin):
+class Website(TaskMixin, models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('Name'), max_length=100)
     href = models.URLField(_('Link'))
