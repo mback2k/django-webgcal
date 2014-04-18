@@ -37,7 +37,7 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
         website.status = 'Error: Fatal error'
         website.save()
 
-    if not filter(lambda x: x.has_running_task, calendar.websites.exclude(id=website.id)):
+    if not calendar.websites.exclude(id=website.id).with_running_tasks().exists():
         calendar.updated = timezone.now()
         calendar.status = 'Finished syncing calendar'
         calendar.save()
