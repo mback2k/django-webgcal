@@ -148,7 +148,7 @@ def delete_calendar_ask(request, calendar_id):
 
     create_form = CalendarForm()
 
-    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_calendar', kwargs={'calendar_id': calendar_id})
+    button = '<a class="ym-button ym-delete ym-danger float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_calendar', kwargs={'calendar_id': calendar_id})
     messages.warning(request, '%sDo you want to delete calendar "%s"?' % (button, calendar))
 
     template_values = {
@@ -257,7 +257,7 @@ def delete_website_ask(request, calendar_id, website_id):
 
     create_form = WebsiteForm()
 
-    button = '<a class="ym-button ym-delete float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})
+    button = '<a class="ym-button ym-delete ym-danger float-right" href="%s" title="Yes">Yes</a>' % reverse('webgcal:delete_website', kwargs={'calendar_id': calendar_id, 'website_id': website_id})
     messages.warning(request, '%sDo you want to delete website "%s"?' % (button, website))
 
     template_values = {

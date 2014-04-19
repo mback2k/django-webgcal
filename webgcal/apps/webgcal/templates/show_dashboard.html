@@ -14,10 +14,10 @@
   {% if calendar_edit_form %}
   <form action="{% url 'webgcal:edit_calendar' calendar.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
-    <h6>Edit Calendar:</h6>
+    <h6 class="ym-fbox-heading">Edit Calendar:</h6>
     {{ calendar_edit_form|yamlform }}
-    <div class="ym-fbox-button">
-      <input class="ym-button ym-save" type="submit" name="submit" value="Save Calendar" />
+    <div class="ym-fbox-footer ym-fbox-button">
+      <input class="ym-button ym-save ym-primary" type="submit" name="submit" value="Save Calendar" />
       <a class="ym-button ym-next" href="{% url 'webgcal:show_dashboard' %}" title="Go Back">Go Back</a>
     </div>
   </form>
@@ -25,10 +25,10 @@
   {% if website_edit_form %}
   <form action="{% url 'webgcal:edit_website' calendar.id website.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
-    <h6>Edit Website:</h6>
+    <h6 class="ym-fbox-heading">Edit Website:</h6>
     {{ website_edit_form|yamlform }}
-    <div class="ym-fbox-button">
-      <input class="ym-button ym-save" type="submit" name="submit" value="Save Website" />
+    <div class="ym-fbox-footer ym-fbox-button">
+      <input class="ym-button ym-save ym-primary" type="submit" name="submit" value="Save Website" />
       <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Go Back">Go Back</a>
     </div>
   </form>
@@ -54,8 +54,8 @@
         <td>
           {% if not website.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
-          <a class="ym-button ym-{% if not website.enabled %}enable{% else %}disable{% endif %}" href="{% url 'webgcal:switch_website' calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
-          <a class="ym-button ym-delete" href="{% url 'webgcal:delete_website_ask' calendar.id website.id %}" title="Delete">Delete</a>
+          <a class="ym-button {% if not website.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_website' calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
+          <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_website_ask' calendar.id website.id %}" title="Delete">Delete</a>
           {% if perms.webgcal.change_website %}
           <a class="ym-button ym-next" href="{% url 'webgcal:parse_website_now' calendar.id website.id %}" title="Parse now">Parse now</a>
           {% endif %}
@@ -73,10 +73,10 @@
   {% if website_create_form %}
   <form action="{% url 'webgcal:create_website' calendar.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
-    <h6>Add Website:</h6>
+    <h6 class="ym-fbox-heading">Add Website:</h6>
     {{ website_create_form|yamlform }}
-    <div class="ym-fbox-button">
-      <input class="ym-button ym-save" type="submit" name="submit" value="Add Website" />
+    <div class="ym-fbox-footer ym-fbox-button">
+      <input class="ym-button ym-save ym-primary" type="submit" name="submit" value="Add Website" />
       <a class="ym-button ym-next" href="{% url 'webgcal:show_dashboard' %}" title="Go Back">Go Back</a>
     </div>
   </form>
@@ -100,8 +100,8 @@
           <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Show Websites">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} Websites</a>
           {% if not calendar.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_calendar' calendar.id %}" title="Edit">Edit</a>
-          <a class="ym-button ym-{% if not calendar.enabled %}enable{% else %}disable{% endif %}" href="{% url 'webgcal:switch_calendar' calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}">{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}</a>
-          <a class="ym-button ym-delete" href="{% url 'webgcal:delete_calendar_ask' calendar.id %}" title="Delete">Delete</a>
+          <a class="ym-button {% if not calendar.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_calendar' calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}">{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}</a>
+          <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_calendar_ask' calendar.id %}" title="Delete">Delete</a>
           {% if perms.webgcal.change_calendar %}
           <a class="ym-button ym-next" href="{% url 'webgcal:sync_calendar_now' calendar.id %}" title="Sync now">Sync now</a>
           {% endif %}
@@ -115,10 +115,10 @@
   {% if calendar_create_form %}
   <form action="{% url 'webgcal:create_calendar' %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
-    <h6>Add Calendar:</h6>
+    <h6 class="ym-fbox-heading">Add Calendar:</h6>
     {{ calendar_create_form|yamlform }}
-    <div class="ym-fbox-button">
-      <input class="ym-button ym-save" type="submit" name="submit" value="Add Calendar" />
+    <div class="ym-fbox-footer ym-fbox-button">
+      <input class="ym-button ym-save ym-primary" type="submit" name="submit" value="Add Calendar" />
     </div>
   </form>
   {% endif %}
