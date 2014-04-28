@@ -156,7 +156,7 @@ def delete_calendar_ask(request, calendar_id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
-@permission_required('webgcal.edit_calendar')
+@permission_required('webgcal.change_calendar')
 def sync_calendar_now(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     if calendar.has_running_task:
@@ -266,7 +266,7 @@ def delete_website_ask(request, calendar_id, website_id):
 
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
-@permission_required('webgcal.edit_website')
+@permission_required('webgcal.change_website')
 def parse_website_now(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
