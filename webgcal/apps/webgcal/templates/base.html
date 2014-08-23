@@ -51,5 +51,14 @@
 {% endblock %}
 
 {% block footer %}
-  <p>Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://www.djangoproject.com/">Django</a>, <a href="http://www.celeryproject.org/">Celery</a> and <a href="http://www.redis.io/">Redis</a> | <a href="https://github.com/mback2k/django-webgcal/">Source Code</a> on <a href="https://github.com/">Github</a></p>
+  <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+  <p>Developed by <a href="http://www.marc-hoersken.de/" title="Marc H&ouml;rsken">Marc H&ouml;rsken</a> | Layout based on <a href="http://www.yaml.de">YAML</a> | Powered by <a href="http://www.djangoproject.com/">Django</a>, <a href="http://www.celeryproject.org/">Celery</a> and <a href="http://www.redis.io/">Redis</a> | <a href="https://github.com/mback2k/django-webgcal/">Source Code</a> on <a href="https://github.com/">Github</a>
+  {% if user.is_authenticated %}|
+    <input type="hidden" name="cmd" value="_s-xclick" />
+    <input type="hidden" name="hosted_button_id" value="X7KSL6BATXBDC" />
+    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" style="margin-bottom: -5px;" />
+    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+  {% endif %}
+  </p>
+  </form>
 {% endblock %}
