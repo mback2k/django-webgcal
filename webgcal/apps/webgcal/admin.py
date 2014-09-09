@@ -13,7 +13,16 @@ class WebsiteAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 class EventAdmin(admin.ModelAdmin):
-    fields = ('summary', 'website', 'google_id', 'dtstart', 'dtend')
+    readonly_fields = ('parsed', 'synced')
+    fieldsets = (
+        (None, {
+            'fields': ('summary', 'website', 'google_id', 'parsed', 'synced')
+        }),
+        ('Event Information', {
+            'fields': ('uid', 'summary', 'description', 'location', 'category',
+                       'status', 'dtstart', 'dtend', 'dtstamp', 'last_modified')
+        }),
+    )
     list_display = ('summary', 'website', 'parsed', 'synced')
 
 admin.site.register(Calendar, CalendarAdmin)
