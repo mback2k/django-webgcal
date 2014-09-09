@@ -229,7 +229,7 @@ def make_event_body(calendar, website, event, eventBody = {}):
     if event.location:
         eventBody['location'] = event.location
     if event.status:
-        eventBody['status'] = event.status
+        eventBody['status'] = event.status.lower()
     else:
         eventBody['status'] = 'confirmed'
     if event.description:
