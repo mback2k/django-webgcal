@@ -52,10 +52,11 @@ def parse_website(user, website):
                 value = getattr(event_data, attr)
                 if value and not timezone.is_aware(value):
                     setattr(event_data, attr, timezone.make_aware(value, website_tz))
-            if event_data.uid:
-                events_data[event_data.uid] = event_data
-            elif event_data.summary and event_data.dtstart:
-                events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
+            if event_data.summary and event_data.dtstart:
+                if event_data.uid:
+                    events_data[event_data.uid] = event_data
+                else:
+                    events_data[hash(event_data.summary)^hash(event_data.dtstart)] = event_data
 
     logging.info('Parsed website "%s" for user "%s"' % (website, user))
 
