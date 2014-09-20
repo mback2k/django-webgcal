@@ -14,7 +14,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'south',
     'djcelery',
     'djcelery_model',
     'social_auth',

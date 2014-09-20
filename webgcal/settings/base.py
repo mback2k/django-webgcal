@@ -12,6 +12,8 @@ USE_TZ = True
 USE_I18N = True
 USE_L10N = True
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
