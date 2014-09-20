@@ -11,25 +11,20 @@ from .subtasks.website import task_parse_website
 from .subtasks.calendar import task_sync_calendar
 from . import google
 
-def check_social_auth(request):
-    if request.user.is_authenticated():
-        if not request.user.social_auth.filter(provider='google-oauth2').count():
-            return HttpResponseRedirect(reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'}))
-    return None
-
 def show_home(request):
-    check = check_social_auth(request)
-    if check:
-        return check
-
-    social_auth = google.get_social_auth(request.user)
-    if social_auth:
-        credentials = google.get_credentials(social_auth)
-        session = google.get_session(credentials)
-        service = google.get_calendar_service(session)
-        if not google.check_calendar_access(service):
+    if request.user.is_authenticated():
+        if request.user.social_auth.filter(provider='google-oauth2').exists():
+            social_auth = google.get_social_auth(request.user)
+            if social_auth:
+                credentials = google.get_credentials(social_auth)
+                session = google.get_session(credentials)
+                service = google.get_calendar_service(session)
+                if not google.check_calendar_access(service):
+                    button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+                    messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
+        else:
             button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
-            messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
+            messages.warning(request, '%sYou need to login to this application using your Google Account' % button)
 
     users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.filter(enabled=True).count()
