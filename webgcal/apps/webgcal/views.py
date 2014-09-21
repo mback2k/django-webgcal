@@ -11,20 +11,27 @@ from .subtasks.website import task_parse_website
 from .subtasks.calendar import task_sync_calendar
 from . import google
 
-def show_home(request):
+def migrate_social_auth(request):
     if request.user.is_authenticated():
-        if request.user.social_auth.filter(provider='google-oauth2').exists():
-            social_auth = google.get_social_auth(request.user)
-            if social_auth:
-                credentials = google.get_credentials(social_auth)
-                session = google.get_session(credentials)
-                service = google.get_calendar_service(session)
-                if not google.check_calendar_access(service):
-                    button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
-                    messages.warning(request, '%sYou need to grant this application access to your Google Calendar' % button)
-        else:
-            button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
-            messages.warning(request, '%sYou need to login to this application using your Google Account' % button)
+        if not request.user.social_auth.filter(provider='google-oauth2').exists():
+            button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Migrate Account">Migrate Account</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+            messages.info(request, '%sPlease migrate your account from Google App Engine to Google OAuth 2.0 for Login (OpenID Connect)' % button)
+            return True
+    return False
+
+def check_social_auth(request):
+    if not migrate_social_auth(request):
+        social_auth = google.get_social_auth(request.user)
+        if social_auth:
+            credentials = google.get_credentials(social_auth)
+            session = google.get_session(credentials)
+            service = google.get_calendar_service(session)
+            if not google.check_calendar_access(service):
+                button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+                messages.info(request, '%sPlease grant this application access to your Google Calendar' % button)
+
+def show_home(request):
+    check_social_auth(request)
 
     users = User.objects.filter(is_active=True).count()
     calendars = Calendar.objects.filter(enabled=True).count()
@@ -40,6 +47,8 @@ def show_home(request):
 
 @login_required
 def show_dashboard(request):
+    check_social_auth(request)
+
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     create_form = CalendarForm()
 
