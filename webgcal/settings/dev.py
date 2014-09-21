@@ -23,5 +23,7 @@ TEMPLATE_LOADERS = (
 INSTALLED_APPS += ('djkombu',)
 BROKER_TRANSPORT = 'djkombu.transport.DatabaseTransport'
 
+DRAGON_URL = 'http://localhost:9999/'
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'THIS_IS_A_DEVELOPMENT_KEY_WHICH_SHOULD_NOT_BE_USED_IN_PRODUCTION!'

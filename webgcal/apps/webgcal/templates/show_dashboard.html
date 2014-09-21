@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% load jdatetime %}
 {% load yamlform %}
+{% load compress %}
+
+{% block js %}
+{{ block.super }}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/angular-1.2.25.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/vendor/sockjs-0.3.4.min.js"></script>
+  <script type="text/javascript" src="{{ DRAGON_URL }}settings.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/swampdragon.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/datamapper.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/angular/services.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/webgcal.app.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/webgcal.controllers.js"></script>
+{% endblock %}}
 
 {% block navigation %}
   <li><a href="{% url 'webgcal:show_home' %}" title="Home">Home</a></li>
@@ -10,6 +23,7 @@
 {% endblock %}
 
 {% block content %}
+  <div ng-app="WebGCalApp">
   {% if calendar %}
   {% if calendar_edit_form %}
   <form action="{% url 'webgcal:edit_calendar' calendar.id %}" method="post" class="ym-form ym-columnar">
@@ -44,13 +58,13 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody ng-controller="WebGCalWebsiteController" ng-init="init({{ calendar.id }});">
       {% if calendar.websites %}
       {% for website in calendar.websites.all %}
       <tr{% if not website.enabled %} style="background: #fff8f8;"{% endif %}>
-        <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow">{{ website.name }}</a></td>
+        <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow" ng-bind="websites[{{ forloop.counter0 }}].name">{{ website.name }}</a></td>
         <td>{{ website.events.count }}</td>
-        <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}<br />{{ website.status }}</td>
+        <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="websites[{{ forloop.counter0 }}].status">{{ website.status }}</span></td>
         <td>
           {% if not website.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
@@ -91,11 +105,11 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody ng-controller="WebGCalCalendarController">
       {% for calendar in calendars %}
       <tr{% if not calendar.enabled %} style="background: #fff8f8;"{% endif %}>
-        <td>{{ calendar.name }}</td>
-        <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}<br />{{ calendar.status }}</td>
+        <td ng-bind="calendars[{{ forloop.counter0 }}].name">{{ calendar.name }}</td>
+        <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="calendars[{{ forloop.counter0 }}].status">{{ calendar.status }}</span></td>
         <td>
           <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Show Websites">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} Websites</a>
           {% if not calendar.has_running_task %}
@@ -122,4 +136,5 @@
     </div>
   </form>
   {% endif %}
+  </div>
 {% endblock %}

@@ -2,10 +2,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from swampdragon.models import SelfPublishModel
 from djcelery_model.models import TaskMixin
+from .serializers import CalendarSerializer, WebsiteSerializer
 import datetime
 
-class Calendar(TaskMixin, models.Model):
+class Calendar(SelfPublishModel, TaskMixin, models.Model):
     user = models.ForeignKey(User, related_name='calendars')
     name = models.CharField(_('Name'), max_length=100)
     google_id = models.CharField(_('Google ID'), max_length=200, blank=True, null=True)
@@ -13,13 +15,15 @@ class Calendar(TaskMixin, models.Model):
     enabled = models.BooleanField(_('Enabled'), default=True)
     status = models.TextField(_('Status'), blank=True, null=True)
 
+    serializer_class = CalendarSerializer
+
     class Meta:
         ordering = ('name',)
 
     def __unicode__(self):
         return self.name
 
-class Website(TaskMixin, models.Model):
+class Website(SelfPublishModel, TaskMixin, models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('Name'), max_length=100)
     href = models.URLField(_('Link'))
@@ -27,6 +31,8 @@ class Website(TaskMixin, models.Model):
     updated = models.DateTimeField(_('Date updated'), blank=True, null=True)
     enabled = models.BooleanField(_('Enabled'), default=True)
     status = models.TextField(_('Status'), blank=True, null=True)
+
+    serializer_class = WebsiteSerializer
 
     class Meta:
         ordering = ('name',)
