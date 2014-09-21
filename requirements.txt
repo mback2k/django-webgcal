@@ -2,7 +2,7 @@ Django==1.7
 South==1.0
 celery==3.1.15
 SwampDragon==0.3.6
-SwampDragon-auth==0.1.1
+SwampDragon-auth==0.1.2
 django-appengine-auth==0.1.3dev
 django-celery==3.1.15
 django-celery-model==0.0.3dev
