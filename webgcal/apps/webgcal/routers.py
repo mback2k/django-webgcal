@@ -21,10 +21,10 @@ class WebsiteRouter(ModelRouter):
     model = Website
 
     def get_object(self, **kwargs):
-        return self.model.objects.filter(user=self.connection.user).get(pk=kwargs['id'])
+        return self.model.objects.filter(calendar__user=self.connection.user).get(pk=kwargs['id'])
 
     def get_query_set(self, **kwargs):
-        return self.model.objects.filter(user=self.connection.user).filter(calendar__id=kwargs['calendar_id'])
+        return self.model.objects.filter(calendar__user=self.connection.user).filter(calendar__id=kwargs['calendar_id'])
 
 route_handler.register(CalendarRouter)
 route_handler.register(WebsiteRouter)
