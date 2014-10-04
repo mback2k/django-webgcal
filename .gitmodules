@@ -1,6 +1,6 @@
 [submodule "yamlcss"]
 	path = webgcal/libs/yamlcss
-	url = git://github.com/mback2k/django-yamlcss.git
+	url = https://github.com/mback2k/django-lib-yamlcss.git
 [submodule "jdatetime"]
 	path = webgcal/libs/jdatetime
-	url = git://github.com/mback2k/django-jdatetime.git
+	url = https://github.com/mback2k/django-lib-jdatetime.git
