@@ -20,6 +20,8 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 INSTALLED_APPS += ('djkombu',)
 BROKER_TRANSPORT = 'djkombu.transport.DatabaseTransport'
 
