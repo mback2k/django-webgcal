@@ -34,6 +34,7 @@ INSTALLED_APPS = (
 
 AUTHENTICATION_BACKENDS = (
     'appengine_auth.backends.GoogleAppEngineOAuthBackend',
+    'appengine_auth.backends.GoogleAppEngineOAuth2Backend',
     'social_auth.backends.google.GoogleOAuth2Backend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -42,7 +43,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     'webgcal.apps.webgcal.context_processors.dragon_url',
 )
 
-LOGIN_BACKEND = 'google-appengine-oauth'
+LOGIN_BACKEND = 'google-appengine-oauth2'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_ERROR_URL = LOGIN_REDIRECT_URL
@@ -65,5 +66,10 @@ GOOGLE_OAUTH_EXTRA_SCOPE = ['https://www.googleapis.com/auth/calendar']
 
 GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID', '')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET', '')
+
+GOOGLE_APPENGINE_CLIENT_ID = GOOGLE_OAUTH2_CLIENT_ID
+GOOGLE_APPENGINE_CLIENT_SECRET = GOOGLE_OAUTH2_CLIENT_SECRET
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 SWAMP_DRAGON_CONNECTION = ('webgcal.libs.connection.MysqlHeartbeatConnection', '/data')
