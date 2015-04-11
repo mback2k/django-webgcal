@@ -1,0 +1,47 @@
+web:
+  build: .
+  links:
+   - db
+   - redis
+  ports:
+   - "8000:8000"
+  volumes:
+   - .:/usr/src/app
+  command: sh -c "sleep 3s &&
+           /usr/src/env/bin/python manage.py migrate &&
+           /usr/src/env/bin/python manage.py runserver 0.0.0.0:8000"
+dragon:
+  build: .
+  links:
+   - db
+   - redis
+  ports:
+   - "9999:9999"
+  volumes:
+   - .:/usr/src/app
+  command: sh -c "sleep 6s &&
+           /usr/src/env/bin/python server.py 0.0.0.0:9999"
+celery:
+  build: .
+  links:
+   - db
+   - redis
+  volumes:
+   - .:/usr/src/app
+  command: sh -c "sleep 9s &&
+           /usr/src/env/bin/python manage.py celeryd -B -E -c 2"
+db:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: docker
+    MYSQL_DATABASE: docker
+    MYSQL_USER: docker
+    MYSQL_PASSWORD: docker
+redis:
+  image: redis
+phpmyadmin:
+  image: maxexcloo/phpmyadmin
+  links:
+   - db:mariadb
+  ports:
+   - "8080:80"
