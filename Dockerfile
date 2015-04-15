@@ -13,6 +13,7 @@ USER django
 RUN mkdir -p /usr/src/env
 RUN virtualenv /usr/src/env
 
+RUN /usr/src/env/bin/pip install --upgrade pip
 RUN /usr/src/env/bin/pip install mysql-python
 
 RUN mkdir -p /usr/src/app
