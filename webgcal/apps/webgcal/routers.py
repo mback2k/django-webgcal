@@ -10,10 +10,10 @@ class CalendarRouter(ModelRouter):
     model = Calendar
 
     def get_object(self, **kwargs):
-        return self.model.objects.filter(user=self.connection.user).get(pk=kwargs['id'])
+        return self.model.objects.filter(user=self.connection.user).get(id=kwargs['id'])
 
     def get_query_set(self, **kwargs):
-        return self.model.objects.filter(user=self.connection.user).order_by('name')
+        return self.model.objects.filter(user=self.connection.user).filter(id=kwargs['id'])
 
 class WebsiteRouter(ModelRouter):
     route_name = 'website'
@@ -21,10 +21,10 @@ class WebsiteRouter(ModelRouter):
     model = Website
 
     def get_object(self, **kwargs):
-        return self.model.objects.filter(calendar__user=self.connection.user).get(pk=kwargs['id'])
+        return self.model.objects.filter(calendar__user=self.connection.user).get(id=kwargs['id'])
 
     def get_query_set(self, **kwargs):
-        return self.model.objects.filter(calendar__user=self.connection.user).filter(calendar__id=kwargs['calendar_id'])
+        return self.model.objects.filter(calendar__user=self.connection.user).filter(id=kwargs['id'])
 
 route_handler.register(CalendarRouter)
 route_handler.register(WebsiteRouter)

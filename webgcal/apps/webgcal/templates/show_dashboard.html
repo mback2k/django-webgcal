@@ -60,13 +60,13 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
-    <tbody ng-controller="WebGCalWebsiteController" ng-init="init({{ calendar.id }});">
+    <tbody>
       {% if calendar.websites %}
       {% for website in calendar.websites.all %}
-      <tr{% if not website.enabled %} style="background: #fff8f8;"{% endif %}>
-        <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow" ng-bind="websites[{{ forloop.counter0 }}].name">{{ website.name }}</a></td>
+      <tr{% if not website.enabled %} style="background: #fff8f8;"{% endif %} ng-controller="WebGCalWebsiteController" ng-init="init({{ website.id }});">
+        <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow" ng-bind="websites[0].name">{{ website.name }}</a></td>
         <td>{{ website.events.count }}</td>
-        <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="websites[{{ forloop.counter0 }}].status">{{ website.status }}</span></td>
+        <td>{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="websites[0].status">{{ website.status }}</span></td>
         <td>
           {% if not website.has_running_task %}
           <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
@@ -107,11 +107,11 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
-    <tbody ng-controller="WebGCalCalendarController">
+    <tbody>
       {% for calendar in calendars %}
-      <tr{% if not calendar.enabled %} style="background: #fff8f8;"{% endif %}>
-        <td ng-bind="calendars[{{ forloop.counter0 }}].name">{{ calendar.name }}</td>
-        <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="calendars[{{ forloop.counter0 }}].status">{{ calendar.status }}</span></td>
+      <tr{% if not calendar.enabled %} style="background: #fff8f8;"{% endif %} ng-controller="WebGCalCalendarController" ng-init="init({{ calendar.id }});">
+        <td ng-bind="calendars[0].name">{{ calendar.name }}</td>
+        <td>{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}<br /><span ng-bind="calendars[0].status">{{ calendar.status }}</span></td>
         <td>
           <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Show Websites">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} Websites</a>
           {% if not calendar.has_running_task %}

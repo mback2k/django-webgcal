@@ -1,16 +1,21 @@
 var WebGCalControllers = angular.module('WebGCalControllers', []);
 
 WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon', function ($scope, $dragon) {
+    $scope.calendar_id = 0;
     $scope.calendars = {};
     $scope.channel = 'calendars';
     $scope.router = 'calendar';
 
+    $scope.init = function(calendar_id) {
+        $scope.calendar_id = calendar_id;
+    };
+
     $dragon.onReady(function() {
-        $dragon.subscribe($scope.router, $scope.channel, {}).then(function(response) {
+        $dragon.subscribe($scope.router, $scope.channel, {id: $scope.calendar_id}).then(function(response) {
             $scope.dataMapper = new DataMapper(response.data);
         });
 
-        $dragon.getList($scope.router, {}).then(function(response) {
+        $dragon.getList($scope.router, {id: $scope.calendar_id}).then(function(response) {
             $scope.calendars = response.data;
         });
     });
@@ -25,20 +30,21 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
 }]);
 
 WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', function ($scope, $dragon) {
+    $scope.website_id = 0;
     $scope.websites = {};
     $scope.channel = 'websites';
     $scope.router = 'website';
 
-    $scope.init = function(calendar_id) {
-        $scope.calendar_id = calendar_id;
+    $scope.init = function(website_id) {
+        $scope.website_id = website_id;
     };
 
     $dragon.onReady(function() {
-        $dragon.subscribe($scope.router, $scope.channel, {calendar_id: $scope.calendar_id}).then(function(response) {
+        $dragon.subscribe($scope.router, $scope.channel, {id: $scope.website_id}).then(function(response) {
             $scope.dataMapper = new DataMapper(response.data);
         });
 
-        $dragon.getList($scope.router, {calendar_id: $scope.calendar_id}).then(function(response) {
+        $dragon.getList($scope.router, {id: $scope.website_id}).then(function(response) {
             $scope.websites = response.data;
         });
     });
