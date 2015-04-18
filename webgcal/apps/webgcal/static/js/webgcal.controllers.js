@@ -11,6 +11,10 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
         $scope.calendar = calendar;
     };
 
+    $scope.parseDate = function(string) {
+        return DateISO8601(string.replace(' ', 'T'));
+    };
+
     $dragon.onReady(function() {
         $dragon.subscribe($scope.router, $scope.channel, {id: $scope.calendar_id}).then(function(response) {
             $scope.dataMapper = new DataMapper(response.data);
@@ -39,6 +43,10 @@ WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', 
     $scope.init = function(website_id, website) {
         $scope.website_id = website_id;
         $scope.website = website;
+    };
+
+    $scope.parseDate = function(string) {
+        return DateISO8601(string.replace(' ', 'T'));
     };
 
     $dragon.onReady(function() {
