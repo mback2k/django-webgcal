@@ -2,12 +2,13 @@ var WebGCalControllers = angular.module('WebGCalControllers', []);
 
 WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.calendar_id = 0;
-    $scope.calendars = {};
+    $scope.calendars = [];
     $scope.channel = 'calendars';
     $scope.router = 'calendar';
 
-    $scope.init = function(calendar_id) {
+    $scope.init = function(calendar_id, calendar) {
         $scope.calendar_id = calendar_id;
+        $scope.calendars = [calendar];
     };
 
     $dragon.onReady(function() {
@@ -31,12 +32,13 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
 
 WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.website_id = 0;
-    $scope.websites = {};
+    $scope.websites = [];
     $scope.channel = 'websites';
     $scope.router = 'website';
 
-    $scope.init = function(website_id) {
+    $scope.init = function(website_id, website) {
         $scope.website_id = website_id;
+        $scope.websites = [website];
     };
 
     $dragon.onReady(function() {

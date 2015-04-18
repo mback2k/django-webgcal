@@ -6,6 +6,7 @@ from swampdragon.models import SelfPublishModel
 from djcelery_model.models import TaskMixin
 from .serializers import CalendarSerializer, WebsiteSerializer
 import datetime
+import json
 
 class Calendar(SelfPublishModel, TaskMixin, models.Model):
     user = models.ForeignKey(User, related_name='calendars')
@@ -23,6 +24,9 @@ class Calendar(SelfPublishModel, TaskMixin, models.Model):
     def __unicode__(self):
         return self.name
 
+    def serialize_as_json(self):
+        return json.dumps(self.serialize())
+
 class Website(SelfPublishModel, TaskMixin, models.Model):
     calendar = models.ForeignKey(Calendar, related_name='websites')
     name = models.CharField(_('Name'), max_length=100)
@@ -39,6 +43,9 @@ class Website(SelfPublishModel, TaskMixin, models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def serialize_as_json(self):
+        return json.dumps(self.serialize())
 
 class Event(models.Model):
     website = models.ForeignKey(Website, related_name='events')
