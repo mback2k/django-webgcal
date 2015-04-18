@@ -2,13 +2,13 @@ var WebGCalControllers = angular.module('WebGCalControllers', []);
 
 WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.calendar_id = 0;
-    $scope.calendars = [];
+    $scope.calendar = {};
     $scope.channel = 'calendars';
     $scope.router = 'calendar';
 
     $scope.init = function(calendar_id, calendar) {
         $scope.calendar_id = calendar_id;
-        $scope.calendars = [calendar];
+        $scope.calendar = calendar;
     };
 
     $dragon.onReady(function() {
@@ -16,15 +16,15 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
             $scope.dataMapper = new DataMapper(response.data);
         });
 
-        $dragon.getList($scope.router, {id: $scope.calendar_id}).then(function(response) {
-            $scope.calendars = response.data;
+        $dragon.getSingle($scope.router, {id: $scope.calendar_id}).then(function(response) {
+            $scope.calendar = response.data;
         });
     });
 
     $dragon.onChannelMessage(function(channels, message) {
         if (indexOf.call(channels, $scope.channel) > -1) {
             $scope.$apply(function() {
-                $scope.dataMapper.mapData($scope.calendars, message);
+                $scope.dataMapper.mapData($scope.calendar, message);
             });
         }
     });
@@ -32,13 +32,13 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
 
 WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.website_id = 0;
-    $scope.websites = [];
+    $scope.website = {};
     $scope.channel = 'websites';
     $scope.router = 'website';
 
     $scope.init = function(website_id, website) {
         $scope.website_id = website_id;
-        $scope.websites = [website];
+        $scope.website = website;
     };
 
     $dragon.onReady(function() {
@@ -46,15 +46,15 @@ WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', 
             $scope.dataMapper = new DataMapper(response.data);
         });
 
-        $dragon.getList($scope.router, {id: $scope.website_id}).then(function(response) {
-            $scope.websites = response.data;
+        $dragon.getSingle($scope.router, {id: $scope.website_id}).then(function(response) {
+            $scope.website = response.data;
         });
     });
 
     $dragon.onChannelMessage(function(channels, message) {
         if (indexOf.call(channels, $scope.channel) > -1) {
             $scope.$apply(function() {
-                $scope.dataMapper.mapData($scope.websites, message);
+                $scope.dataMapper.mapData($scope.website, message);
             });
         }
     });
