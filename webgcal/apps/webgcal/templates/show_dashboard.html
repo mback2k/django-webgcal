@@ -69,7 +69,9 @@
         <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow" ng-bind="website.name">{{ website.name }}</a></td>
         <td>{{ website.events.count }}</td>
         <td>
-          <span ng-bind="website.updated">{% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}</span><br />
+          <span ng-bind-template="{% verbatim %}{{ website.updated|date:'medium' }}{% endverbatim %}">
+            {% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}
+          </span><br />
           <span ng-bind="website.status">{{ website.status }}</span>
         </td>
         <td>
@@ -119,7 +121,9 @@
           ng-init="init({{ calendar.id }}, {{ calendar.serialize_as_json }});">
         <td ng-bind="calendar.name">{{ calendar.name }}</td>
         <td>
-          <span ng-bind="calendar.updated">{% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}</span><br />
+          <span ng-bind-template="{% verbatim %}{{ calendar.updated|date:'medium' }}{% endverbatim %}">
+            {% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}
+          </span><br />
           <span ng-bind="calendar.status">{{ calendar.status }}</span>
         </td>
         <td>
