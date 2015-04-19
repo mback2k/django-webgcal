@@ -3,12 +3,13 @@ var WebGCalControllers = angular.module('WebGCalControllers', []);
 WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.calendar_id = 0;
     $scope.calendar = {};
-    $scope.channel = 'calendars';
+    $scope.channel = 'calendar';
     $scope.router = 'calendar';
 
     $scope.init = function(calendar_id, calendar) {
         $scope.calendar_id = calendar_id;
         $scope.calendar = calendar;
+        $scope.channel = 'calendar-' + calendar_id;
     };
 
     $scope.parseDate = function(string) {
@@ -37,12 +38,13 @@ WebGCalControllers.controller('WebGCalCalendarController', ['$scope', '$dragon',
 WebGCalControllers.controller('WebGCalWebsiteController', ['$scope', '$dragon', function ($scope, $dragon) {
     $scope.website_id = 0;
     $scope.website = {};
-    $scope.channel = 'websites';
+    $scope.channel = 'website';
     $scope.router = 'website';
 
     $scope.init = function(website_id, website) {
         $scope.website_id = website_id;
         $scope.website = website;
+        $scope.channel = 'website-' + website_id;
     };
 
     $scope.parseDate = function(string) {
