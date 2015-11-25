@@ -20,7 +20,7 @@ dragon:
   volumes:
    - .:/usr/src/app
   command: sh -c "sleep 6s &&
-           /usr/src/env/bin/python server.py 0.0.0.0:9999"
+           /usr/src/env/bin/python manage.py runsd 0.0.0.0:9999"
 celery:
   build: .
   links:
