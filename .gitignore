@@ -8,3 +8,4 @@ _static
 celerybeat-schedule
 devdatabase.sqlite
 desktop.ini
+org.eclipse.core.resources.prefs
