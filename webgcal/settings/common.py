@@ -16,8 +16,9 @@ INSTALLED_APPS = (
 
     'djcelery',
     'djcelery_model',
-    'social_auth',
-    'appengine_auth',
+
+    'social.apps.django_app.default',
+    'social_appengine_auth',
 
     'webgcal.libs.yamlcss',
     'webgcal.libs.jdatetime',
@@ -33,9 +34,9 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'appengine_auth.backends.GoogleAppEngineOAuthBackend',
-    'appengine_auth.backends.GoogleAppEngineOAuth2Backend',
-    'social_auth.backends.google.GoogleOAuth2Backend',
+    'social.backends.google.GoogleOAuth2',
+    'social_appengine_auth.backends.GoogleAppEngineOAuth',
+    'social_appengine_auth.backends.GoogleAppEngineOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -58,18 +59,16 @@ CELERY_ACCEPT_CONTENT = ['pickle']
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
-GOOGLE_APPENGINE_OAUTH_SERVER = 'oauth-profile.appspot.com'
-GOOGLE_APPENGINE_OAUTH_USE_UNIQUE_USER_ID = True
+SOCIAL_AUTH_GOOGLE_OAUTH2_USE_UNIQUE_USER_ID = True
+SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline', 'approval_prompt': 'force'}
 
-GOOGLE_OAUTH2_USE_UNIQUE_USER_ID = True
-GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline', 'approval_prompt': 'force'}
-GOOGLE_OAUTH_EXTRA_SCOPE = ['https://www.googleapis.com/auth/calendar']
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', '')
 
-GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID', '')
-GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET', '')
+SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_USE_UNIQUE_USER_ID = SOCIAL_AUTH_GOOGLE_OAUTH2_USE_UNIQUE_USER_ID
 
-GOOGLE_APPENGINE_CLIENT_ID = GOOGLE_OAUTH2_CLIENT_ID
-GOOGLE_APPENGINE_CLIENT_SECRET = GOOGLE_OAUTH2_CLIENT_SECRET
+SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_KEY = SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_SECRET = SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 

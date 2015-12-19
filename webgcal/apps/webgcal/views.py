@@ -14,7 +14,7 @@ from . import google
 def migrate_social_auth(request):
     if request.user.is_authenticated():
         if not request.user.social_auth.filter(provider='google-oauth2').exists():
-            button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Migrate Account">Migrate Account</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+            button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Migrate Account">Migrate Account</a>' % reverse('social:begin', kwargs={'backend': 'google-oauth2'})
             messages.info(request, '%sPlease migrate your account from Google App Engine to Google OAuth 2.0 for Login (OpenID Connect)' % button)
             return True
     return False

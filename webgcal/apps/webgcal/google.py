@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from oauth2client.client import OAuth2Credentials, AccessTokenRefreshError
-from social_auth.backends.google import GoogleOAuth2
+from social.backends.google import GoogleOAuth2
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 import httplib2
@@ -14,8 +14,8 @@ def get_social_auth(user):
     return None
 
 def get_credentials(social_auth):
-    client_id = getattr(settings, GoogleOAuth2.SETTINGS_KEY_NAME)
-    client_secret = getattr(settings, GoogleOAuth2.SETTINGS_SECRET_NAME)
+    client_id = getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+    client_secret = getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
     credentials = OAuth2Credentials(
         access_token=social_auth.extra_data['access_token'],

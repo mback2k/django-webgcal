@@ -2,13 +2,13 @@ Django==1.7.10
 celery==3.1.19
 https://github.com/jonashagstedt/swampdragon/archive/0.4.3.zip
 SwampDragon-auth==0.1.3
-django-appengine-auth==1.0
 django-celery==3.1.17
 django-celery-model==0.1.1
 django_compressor==1.5
 django-redis==4.3.0
-django-social-auth==0.7.28
 google-api-python-client==1.4.2
+python-social-auth==0.2.13
+python-appengine-auth==0.1.dev0
 python-dateutil==2.4.2
 python-hcalendar==0.2
 pytz
