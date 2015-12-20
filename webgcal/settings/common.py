@@ -35,7 +35,6 @@ INSTALLED_APPS = (
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.google.GoogleOAuth2',
-    'social_appengine_auth.backends.GoogleAppEngineOAuth',
     'social_appengine_auth.backends.GoogleAppEngineOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
