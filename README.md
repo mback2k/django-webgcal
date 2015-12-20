@@ -10,8 +10,8 @@ Dependencies
 - django-celery      [https://github.com/ask/django-celery]
 - django-celery-model [https://github.com/mback2k/django-celery-model]
 - django_compressor  [https://github.com/jezdez/django_compressor]
-- django-social-auth [https://github.com/omab/django-social-auth]
-- django-appengine-auth [https://github.com/mback2k/django-appengine-auth]
+- python-social-auth [https://github.com/omab/python-social-auth]
+- python-appengine-auth [https://github.com/mback2k/python-appengine-auth]
 - python-hcalendar   [https://github.com/mback2k/python-hcalendar]
 
 Submodules
