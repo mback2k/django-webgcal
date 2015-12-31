@@ -39,10 +39,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS += (
-    'webgcal.apps.webgcal.context_processors.dragon_url',
-)
-
 LOGIN_BACKEND = 'google-appengine-oauth2'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
