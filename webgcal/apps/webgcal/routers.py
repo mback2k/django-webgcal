@@ -9,6 +9,10 @@ class CalendarRouter(ModelRouter):
     serializer_class = CalendarSerializer
     model = Calendar
 
+    def get_subscription_contexts(self, **kwargs):
+        kwargs['user_id'] = self.connection.user.id
+        return kwargs
+
     def get_object(self, **kwargs):
         return self.model.objects.filter(user=self.connection.user).get(id=kwargs['id'])
 
@@ -19,6 +23,10 @@ class WebsiteRouter(ModelRouter):
     route_name = 'website'
     serializer_class = WebsiteSerializer
     model = Website
+
+    def get_subscription_contexts(self, **kwargs):
+        kwargs['calendar__user_id'] = self.connection.user.id
+        return kwargs
 
     def get_object(self, **kwargs):
         return self.model.objects.filter(calendar__user=self.connection.user).get(id=kwargs['id'])
