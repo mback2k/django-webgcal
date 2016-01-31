@@ -11,6 +11,7 @@ loaddata:
   links:
    - db
    - redis
+   - migrate
   volumes:
    - .:/usr/src/app
   command: /usr/src/env/bin/python manage.py loaddata docker-fixture.json
@@ -56,8 +57,10 @@ db:
 redis:
   image: redis
 phpmyadmin:
-  image: maxexcloo/phpmyadmin
+  image: phpmyadmin/phpmyadmin
+  environment:
+   - PMA_ARBITRARY=1
   links:
    - db:mariadb
   ports:
-   - "8080:80"
+   - "8080:8080"
