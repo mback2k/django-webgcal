@@ -5,6 +5,7 @@ Dependencies
 ------------
 - Django             [https://www.djangoproject.com/]
 - Celery             [http://www.celeryproject.org/]
+- SwampDragon        [http://swampdragon.net/]
 - pytz               [http://pytz.sourceforge.net/]
 - Google API         [https://code.google.com/p/google-api-python-client/]
 - django-celery      [https://github.com/ask/django-celery]
@@ -47,14 +48,13 @@ Installation
 First of all you need to install all the dependencies.
 It is recommended to perform the installations using the pip command.
 
-The next step is to get all source from github.com:
+The next step is to get all source from github.com and PyPI:
 
-    git clone git://github.com/mback2k/django-webgcal.git webgcal
+    git clone --recursive https://github.com/mback2k/django-webgcal.git webgcal
     
     cd webgcal
     
-    git submodule init
-    git submodule update
+    pip install -r requirements.txt
 
 After that you need to collect and compress the static files using:
 
@@ -78,4 +78,4 @@ You can do this by executing the following command from your server's shell:
 License
 -------
 * Released under MIT License
-* Copyright (c) 2012-2014 Marc Hoersken <info@marc-hoersken.de>
+* Copyright (c) 2012-2016 Marc Hoersken <info@marc-hoersken.de>
