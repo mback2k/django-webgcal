@@ -11,13 +11,12 @@ python:
 install:
   - "pip install coverage pylint"
   - "pip install -r requirements.txt"
-  - "pip install ."
 # command to run before tests
 before_script:
   - "python -m compileall ."
+  - "python manage.py check"
 # command to run tests
 script:
-  - "python manage.py check"
   - "coverage run manage.py test"
 # command to run after tests
 after_script:
