@@ -20,10 +20,9 @@ Submodules
 - django-jdatetime   [https://github.com/mback2k/django-jdatetime]
 - django-yamlcss     [https://github.com/mback2k/django-yamlcss]
 
-Message Broker (during development)
+Message Broker
 --------------
 - Kombu              [http://pypi.python.org/pypi/kombu/]
-- django-kombu       [https://github.com/ask/django-kombu]
 
 All Celery supported AMQP message brokers can be used.
 

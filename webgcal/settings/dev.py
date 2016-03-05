@@ -22,8 +22,8 @@ TEMPLATE_LOADERS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-INSTALLED_APPS += ('djkombu',)
-BROKER_TRANSPORT = 'djkombu.transport.DatabaseTransport'
+INSTALLED_APPS += ('kombu.transport.django',)
+BROKER_URL = 'django://'
 
 DRAGON_URL = 'http://localhost:9999/'
 
