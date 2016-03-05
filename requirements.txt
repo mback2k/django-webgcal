@@ -1,4 +1,4 @@
-Django==1.8.8
+Django==1.8.10
 celery==3.1.19
 https://github.com/jonashagstedt/swampdragon/archive/0.4.3.zip
 SwampDragon-auth==0.1.3
