@@ -18,14 +18,14 @@ def task_sync_calendar(user_id, calendar_id):
     try:
         sync_calendar(user, calendar)
 
-    except HttpError, e:
+    except HttpError as e:
         logging.exception(e)
         Error.assign(calendar).save()
         calendar.enabled = e.resp.status in (403, 503)
         calendar.status = u'HTTP: %s' % e.resp.reason
         calendar.save()
 
-    except Exception, e:
+    except Exception as e:
         logging.exception(e)
         Error.assign(calendar).save()
         calendar.enabled = False
@@ -59,7 +59,7 @@ def sync_calendar(user, calendar):
             calendarItem = service.calendars().get(calendarId=calendar.google_id).execute()
         else:
             calendarItem = None
-    except HttpError, e:
+    except HttpError as e:
         if e.resp.status == 404:
             calendarItem = None
         else:

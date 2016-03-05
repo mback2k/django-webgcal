@@ -15,7 +15,7 @@ def task_check_user(user_id):
     try:
         check_user(user)
 
-    except HttpError, e:
+    except HttpError as e:
         logging.exception(e)
         Error.assign(user).save()
         return

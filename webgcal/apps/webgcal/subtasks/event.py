@@ -23,14 +23,14 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     try:
         sync_website(user, calendar, website, cursor, limit)
 
-    except HttpError, e:
+    except HttpError as e:
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = e.resp.status in (403, 503)
         website.status = u'HTTP: %s' % e.resp.reason
         website.save()
 
-    except Exception, e:
+    except Exception as e:
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = False

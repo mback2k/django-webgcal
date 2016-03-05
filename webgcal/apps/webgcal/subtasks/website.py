@@ -20,10 +20,10 @@ def task_parse_website(user_id, website_id):
     try:
         parse_website(user, website)
 
-    except urllib2.URLError, e:
+    except urllib2.URLError as e:
         raise task_parse_website.retry(exc=e)
 
-    except Exception, e:
+    except Exception as e:
         logging.exception(e)
         Error.assign(website).save()
         website.enabled = False
