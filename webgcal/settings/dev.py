@@ -22,8 +22,21 @@ TEMPLATE_LOADERS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-INSTALLED_APPS += ('kombu.transport.django',)
-BROKER_URL = 'django://'
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/0',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+BROKER_URL = 'redis://localhost:6379/1'
+CELERY_RESULT_BACKEND = BROKER_URL
 
 DRAGON_URL = 'http://localhost:9999/'
 
