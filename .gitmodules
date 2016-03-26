@@ -4,3 +4,6 @@
 [submodule "jdatetime"]
 	path = webgcal/libs/jdatetime
 	url = https://github.com/mback2k/django-lib-jdatetime.git
+[submodule "swampdragon-live"]
+	path = swampdragon-live
+	url = https://github.com/mback2k/swampdragon-live.git
