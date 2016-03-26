@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load swampdragon_tags %}
+{% load swampdragon_live %}
 {% load jdatetime %}
 {% load yamlform %}
 {% load compress %}
@@ -8,12 +9,8 @@
 {{ block.super }}
 {% swampdragon_settings %}
 {% compress js %}
-  <script type="text/javascript" src="{{ STATIC_URL }}js/angular-1.3.15.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/dist/swampdragon.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/dist/datamapper.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/angular/services.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/webgcal.app.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/webgcal.controllers.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}swampdragon/js/dist/swampdragon.live.js"></script>
 {% endcompress %}
 {% endblock %}}
 
@@ -25,7 +22,6 @@
 {% endblock %}
 
 {% block content %}
-  <div ng-app="WebGCalApp">
   {% if calendar %}
   {% if calendar_edit_form %}
   <form action="{% url 'webgcal:edit_calendar' calendar.id %}" method="post" class="ym-form ym-columnar">
@@ -60,38 +56,15 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
+    {% for website in calendar.websites.all %}
+    {% include_live 'tbody' 'includes/website_row.html' calendar=calendar website=website perms=perms %}
+    {% empty %}
     <tbody>
-      {% if calendar.websites %}
-      {% for website in calendar.websites.all %}
-      <tr{% if not website.enabled %} style="background: #fff8f8;"{% endif %}
-          ng-controller="WebGCalWebsiteController"
-          ng-init="init({{ website.id }}, {{ website.serialize_as_json }});">
-        <td><a href="{{ website.href }}" title="{{ website.href }}" rel="nofollow" ng-bind="website.name">{{ website.name }}</a></td>
-        <td>{{ website.events.count }}</td>
-        <td>
-          <span ng-bind-template="{% verbatim %}{{ parseDate(website.updated).toLocaleDateTimeString() }}{% endverbatim %}">
-            {% if website.updated %}{{ website.updated|localedatetime }}{% else %}None{% endif %}
-          </span><br />
-          <span ng-bind="website.status">{{ website.status }}</span>
-        </td>
-        <td>
-          {% if not website.has_running_task %}
-          <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
-          <a class="ym-button {% if not website.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_website' calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
-          <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_website_ask' calendar.id website.id %}" title="Delete">Delete</a>
-          {% if perms.webgcal.change_website %}
-          <a class="ym-button ym-next" href="{% url 'webgcal:parse_website_now' calendar.id website.id %}" title="Parse now">Parse now</a>
-          {% endif %}
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-      {% else %}
       <tr>
-        <td colspan="5">No websites added yet.</td>
+        <td colspan="4">No websites added yet.</td>
       </tr>
-      {% endif %}
     </tbody>
+    {% endfor %}
   </table>
   {% if website_create_form %}
   <form action="{% url 'webgcal:create_website' calendar.id %}" method="post" class="ym-form ym-columnar">
@@ -114,32 +87,15 @@
         <th scope="col">Manage</th>
       </tr>
     </thead>
+    {% for calendar in calendars %}
+    {% include_live 'tbody' 'includes/calendar_row.html' calendar=calendar perms=perms %}
+    {% empty %}
     <tbody>
-      {% for calendar in calendars %}
-      <tr{% if not calendar.enabled %} style="background: #fff8f8;"{% endif %}
-          ng-controller="WebGCalCalendarController"
-          ng-init="init({{ calendar.id }}, {{ calendar.serialize_as_json }});">
-        <td ng-bind="calendar.name">{{ calendar.name }}</td>
-        <td>
-          <span ng-bind-template="{% verbatim %}{{ parseDate(calendar.updated).toLocaleDateTimeString() }}{% endverbatim %}">
-            {% if calendar.updated %}{{ calendar.updated|localedatetime }}{% else %}None{% endif %}
-          </span><br />
-          <span ng-bind="calendar.status">{{ calendar.status }}</span>
-        </td>
-        <td>
-          <a class="ym-button ym-next" href="{% url 'webgcal:show_calendar' calendar.id %}" title="Show Websites">{% if calendar.websites.count %}{{ calendar.websites.count }}{% else %}Add{% endif %} Websites</a>
-          {% if not calendar.has_running_task %}
-          <a class="ym-button ym-edit" href="{% url 'webgcal:edit_calendar' calendar.id %}" title="Edit">Edit</a>
-          <a class="ym-button {% if not calendar.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_calendar' calendar.id %}" title="{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}">{% if not calendar.enabled %}Enable{% else %}Disable{% endif %}</a>
-          <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_calendar_ask' calendar.id %}" title="Delete">Delete</a>
-          {% if perms.webgcal.change_calendar %}
-          <a class="ym-button ym-next" href="{% url 'webgcal:sync_calendar_now' calendar.id %}" title="Sync now">Sync now</a>
-          {% endif %}
-          {% endif %}
-        </td>
+      <tr>
+        <td colspan="3">No calendars added yet.</td>
       </tr>
-      {% endfor %}
     </tbody>
+    {% endfor %}
   </table>
   <div class="box info">The websites are currently parsed every hour and after all parsing is done the Google Calendar will be updated in small batches.</div>
   {% if calendar_create_form %}
@@ -152,5 +108,4 @@
     </div>
   </form>
   {% endif %}
-  </div>
 {% endblock %}

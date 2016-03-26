@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 
     'swampdragon',
+    'swampdragon_live',
     'compressor',
 )
 
