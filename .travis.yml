@@ -22,4 +22,4 @@ script:
 # command to run after tests
 after_script:
   - "coverage report -m"
-  - "pylint --py3k hcalendar"
+  - "pylint --py3k webgcal"
