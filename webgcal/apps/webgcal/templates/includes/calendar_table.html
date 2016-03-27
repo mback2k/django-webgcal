@@ -1,0 +1,19 @@
+{% spaceless %}{% load swampdragon_live %}
+<table class="bordertable">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Status</th>
+      <th scope="col">Manage</th>
+    </tr>
+  </thead>
+  {% for calendar in calendars %}
+  {% include_live 'tbody' 'includes/calendar_row.html' calendar=calendar perms=perms %}
+  {% empty %}
+  <tbody>
+    <tr>
+      <td colspan="3">No calendars added yet.</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>{% endspaceless %}

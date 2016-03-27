@@ -8,11 +8,11 @@
   </td>
   <td>
     {% if not website.has_running_task %}
-    <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' calendar.id website.id %}" title="Edit">Edit</a>
-    <a class="ym-button {% if not website.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_website' calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
-    <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_website_ask' calendar.id website.id %}" title="Delete">Delete</a>
+    <a class="ym-button ym-edit" href="{% url 'webgcal:edit_website' website.calendar.id website.id %}" title="Edit">Edit</a>
+    <a class="ym-button {% if not website.enabled %}ym-enable ym-success{% else %}ym-disable ym-warning{% endif %}" href="{% url 'webgcal:switch_website' website.calendar.id website.id %}" title="{% if not website.enabled %}Enable{% else %}Disable{% endif %}">{% if not website.enabled %}Enable{% else %}Disable{% endif %}</a>
+    <a class="ym-button ym-delete ym-danger" href="{% url 'webgcal:delete_website_ask' website.calendar.id website.id %}" title="Delete">Delete</a>
     {% if perms.webgcal.change_website %}
-    <a class="ym-button ym-next" href="{% url 'webgcal:parse_website_now' calendar.id website.id %}" title="Parse now">Parse now</a>
+    <a class="ym-button ym-next" href="{% url 'webgcal:parse_website_now' website.calendar.id website.id %}" title="Parse now">Parse now</a>
     {% endif %}
     {% endif %}
   </td>

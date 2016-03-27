@@ -47,25 +47,7 @@
   {% endif %}
   <a class="ym-button ym-next float-right" href="{% url 'webgcal:show_dashboard' %}" title="Go Back">Go Back</a>
   <h3>Websites of {{ calendar.name }}</h3>
-  <table class="bordertable">
-    <thead>
-      <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Events</th>
-        <th scope="col">Status</th>
-        <th scope="col">Manage</th>
-      </tr>
-    </thead>
-    {% for website in calendar.websites.all %}
-    {% include_live 'tbody' 'includes/website_row.html' calendar=calendar website=website perms=perms %}
-    {% empty %}
-    <tbody>
-      <tr>
-        <td colspan="4">No websites added yet.</td>
-      </tr>
-    </tbody>
-    {% endfor %}
-  </table>
+  {% include_live 'div' 'includes/website_table.html' websites=calendar.websites.all perms=perms %}
   {% if website_create_form %}
   <form action="{% url 'webgcal:create_website' calendar.id %}" method="post" class="ym-form ym-columnar">
     {% csrf_token %}
@@ -79,24 +61,7 @@
   {% endif %}
   {% endif %}
   {% endif %}
-  <table class="bordertable">
-    <thead>
-      <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Status</th>
-        <th scope="col">Manage</th>
-      </tr>
-    </thead>
-    {% for calendar in calendars %}
-    {% include_live 'tbody' 'includes/calendar_row.html' calendar=calendar perms=perms %}
-    {% empty %}
-    <tbody>
-      <tr>
-        <td colspan="3">No calendars added yet.</td>
-      </tr>
-    </tbody>
-    {% endfor %}
-  </table>
+  {% include_live 'div' 'includes/calendar_table.html' calendars=calendars perms=perms %}
   <div class="box info">The websites are currently parsed every hour and after all parsing is done the Google Calendar will be updated in small batches.</div>
   {% if calendar_create_form %}
   <form action="{% url 'webgcal:create_calendar' %}" method="post" class="ym-form ym-columnar">

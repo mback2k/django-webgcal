@@ -1,0 +1,20 @@
+{% spaceless %}{% load swampdragon_live %}
+<table class="bordertable">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Events</th>
+      <th scope="col">Status</th>
+      <th scope="col">Manage</th>
+    </tr>
+  </thead>
+  {% for website in websites %}
+  {% include_live 'tbody' 'includes/website_row.html' website=website perms=perms %}
+  {% empty %}
+  <tbody>
+    <tr>
+      <td colspan="4">No websites added yet.</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>{% endspaceless %}
