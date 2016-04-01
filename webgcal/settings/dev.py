@@ -14,6 +14,7 @@ DATABASES = {
         'OPTIONS': { }
     }
 }
+DATABASES['default']['ENGINE'] = 'transaction_hooks.backends.sqlite3'
 
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',

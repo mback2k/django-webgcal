@@ -16,6 +16,7 @@ DATABASES = {
         }
     }
 }
+DATABASES['default']['ENGINE'] = 'transaction_hooks.backends.mysql'
 
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
