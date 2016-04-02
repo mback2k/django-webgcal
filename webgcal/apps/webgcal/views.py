@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
+from django.db import transaction
 from .forms import CalendarForm, WebsiteForm
 from .models import User, Calendar, Website
 from .subtasks.website import task_parse_website
@@ -74,6 +75,7 @@ def show_calendar(request, calendar_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @login_required
+@transaction.atomic
 def create_calendar(request):
     create_form = CalendarForm(data=request.POST)
 
@@ -93,6 +95,7 @@ def create_calendar(request):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @login_required
+@transaction.atomic
 def edit_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     if calendar.has_running_task:
@@ -117,6 +120,7 @@ def edit_calendar(request, calendar_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @login_required
+@transaction.atomic
 def switch_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     if calendar.has_running_task:
@@ -130,6 +134,7 @@ def switch_calendar(request, calendar_id):
     return HttpResponseRedirect(reverse('webgcal:show_dashboard'))
 
 @login_required
+@transaction.atomic
 def delete_calendar(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     if calendar.has_running_task:
@@ -142,6 +147,7 @@ def delete_calendar(request, calendar_id):
     return HttpResponseRedirect(reverse('webgcal:show_dashboard'))
 
 @login_required
+@transaction.atomic
 def delete_calendar_ask(request, calendar_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
@@ -161,6 +167,7 @@ def delete_calendar_ask(request, calendar_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @permission_required('webgcal.change_calendar')
+@transaction.atomic
 def sync_calendar_now(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     if calendar.has_running_task:
@@ -176,6 +183,7 @@ def sync_calendar_now(request, calendar_id):
 
 
 @login_required
+@transaction.atomic
 def create_website(request, calendar_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     create_form = WebsiteForm(data=request.POST)
@@ -197,6 +205,7 @@ def create_website(request, calendar_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @login_required
+@transaction.atomic
 def edit_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
@@ -223,6 +232,7 @@ def edit_website(request, calendar_id, website_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @login_required
+@transaction.atomic
 def switch_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
@@ -237,6 +247,7 @@ def switch_website(request, calendar_id, website_id):
     return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
 @login_required
+@transaction.atomic
 def delete_website(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
@@ -250,6 +261,7 @@ def delete_website(request, calendar_id, website_id):
     return HttpResponseRedirect(reverse('webgcal:show_calendar', kwargs={'calendar_id': calendar.id}))
 
 @login_required
+@transaction.atomic
 def delete_website_ask(request, calendar_id, website_id):
     calendars = Calendar.objects.filter(user=request.user).order_by('name')
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
@@ -271,6 +283,7 @@ def delete_website_ask(request, calendar_id, website_id):
     return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
 
 @permission_required('webgcal.change_website')
+@transaction.atomic
 def parse_website_now(request, calendar_id, website_id):
     calendar = get_object_or_404(Calendar, user=request.user, id=calendar_id)
     website = get_object_or_404(Website, calendar=calendar, id=website_id)
