@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib import messages
 from .forms import CalendarForm, WebsiteForm
-from .models import User, Calendar, Website, Event
+from .models import User, Calendar, Website
 from .subtasks.website import task_parse_website
 from .subtasks.calendar import task_sync_calendar
 from . import google
