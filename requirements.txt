@@ -1,6 +1,6 @@
 Django==1.8.11
 celery==3.1.21
-https://github.com/jonashagstedt/swampdragon/archive/0.4.3.zip
+# SwampDragon>=0.4.2
 SwampDragon-auth==0.1.3
 django-celery==3.1.17
 django-celery-model==0.1.1
@@ -12,3 +12,6 @@ python-appengine-auth==0.1.dev0
 python-dateutil==2.4.2
 python-hcalendar==0.2
 pytz
+
+# SwampDragon 0.4.3 (9 Sep 2015)
+https://github.com/jonashagstedt/swampdragon/archive/ebff57a2f2115be48ad759b9963680c538854470.zip
