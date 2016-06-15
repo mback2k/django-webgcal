@@ -1,3 +1,4 @@
+import os
 import os.path
 import sys
 
@@ -11,4 +12,5 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, '_static')
 
 TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, 'templates'),)
 
-sys.path.append(PROJECT_ROOT)
+if os.path.exists('/etc/ssl/certs/ca-certificates.crt'):
+    os.environ['REQUESTS_CA_BUNDLE'] = '/etc/ssl/certs/ca-certificates.crt'
