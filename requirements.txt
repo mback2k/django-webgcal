@@ -6,10 +6,10 @@ django-celery==3.1.17
 django-celery-model==0.1.2
 django_compressor==2.1
 django-redis==4.6.0
-google-api-python-client==1.4.2
+google-api-python-client==1.5.5
 python-social-auth==0.2.21
 python-appengine-auth==0.1.dev0
-python-dateutil==2.4.2
+python-dateutil==2.6.0
 python-hcalendar==0.2.1
 pytz
 
