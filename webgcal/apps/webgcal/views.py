@@ -28,7 +28,7 @@ def check_social_auth(request):
             session = google.get_session(credentials)
             service = google.get_calendar_service(session)
             if not google.check_calendar_access(service):
-                button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('socialauth_begin', kwargs={'backend': 'google-oauth2'})
+                button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('social:begin', kwargs={'backend': 'google-oauth2'})
                 messages.info(request, '%sPlease grant this application access to your Google Calendar' % button)
 
 def show_home(request):
