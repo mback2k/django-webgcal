@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from .common import *
 
 DEBUG = True
@@ -24,8 +26,8 @@ TEMPLATE_LOADERS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-BROKER_URL = 'redis://redis:6379/1'
-CELERY_RESULT_BACKEND = BROKER_URL
+CELERY_BROKER_URL = 'redis://redis:6379/1'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 SWAMP_DRAGON_REDIS_HOST = 'redis'
 SWAMP_DRAGON_HOST = '0.0.0.0'

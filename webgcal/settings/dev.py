@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from .common import *
 
 DEBUG = True
@@ -35,8 +37,8 @@ CACHES = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
-BROKER_URL = 'redis://localhost:6379/1'
-CELERY_RESULT_BACKEND = BROKER_URL
+CELERY_BROKER_URL = 'redis://localhost:6379/1'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 DRAGON_URL = 'http://localhost:9999/'
 

@@ -1,6 +1,5 @@
-import djcelery
-djcelery.setup_loader()
-
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from .base import *
 import os
 
@@ -14,7 +13,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'djcelery',
+    'django_celery_beat',
+    'django_celery_results',
     'djcelery_model',
 
     'social.apps.django_app.default',
@@ -47,15 +47,11 @@ LOGIN_ERROR_URL = LOGIN_REDIRECT_URL
 LOGIN_URL = '/login/%s/' % LOGIN_BACKEND
 LOGOUT_URL = '/logout/?next=%s' % LOGOUT_REDIRECT_URL
 
-CELERY_RESULT_BACKEND = 'djcelery.backends.database.DatabaseBackend'
-CELERY_TRACK_STARTED = True
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_SEND_SENT_EVENT = True
 CELERY_SEND_EVENTS = True
-CELERY_SEND_TASK_SENT_EVENT = True
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = CELERY_TASK_SERIALIZER
-CELERY_ACCEPT_CONTENT = [CELERY_TASK_SERIALIZER]
-
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
