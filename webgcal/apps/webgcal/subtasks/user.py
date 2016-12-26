@@ -20,7 +20,7 @@ def task_check_user(user_id):
         Error.assign(user).save()
         return
 
-    for website in Website.objects.filter(calendar__user=user):
+    for website in Website.objects.filter(calendar__user=user, enabled=True):
         args = (user.id, website.id)
         task_id = 'parse-website-%d-%d' % args
         website.apply_async(task_parse_website, args=args, task_id=task_id, countdown=5)
