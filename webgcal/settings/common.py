@@ -80,4 +80,4 @@ SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_SECRET = SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
-SWAMP_DRAGON_CONNECTION = ('webgcal.libs.connection.MysqlHeartbeatConnection', '/data')
+SWAMP_DRAGON_CONNECTION = ('webgcal.libs.connection.MysqlHeartbeatConnection', b'/data')
