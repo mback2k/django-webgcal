@@ -26,7 +26,7 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     except HttpError as e:
         logging.exception(e)
         Error.assign(website).save()
-        website.enabled = e.resp.status in (403, 503)
+        website.enabled = website.enabled and e.resp.status in (403, 503)
         website.status = u'HTTP: %s' % e.resp.reason
         website.save()
 
