@@ -7,7 +7,7 @@ from ..models import User, Website, Event
 from .calendar import task_sync_calendar
 import hcalendar
 import logging
-import urllib2
+import urllib
 import pytz
 
 @task(ignore_result=True, default_retry_delay=120, max_retries=5)
@@ -20,7 +20,7 @@ def task_parse_website(user_id, website_id):
     try:
         parse_website(user, website)
 
-    except urllib2.URLError as e:
+    except urllib.request.URLError as e:
         raise task_parse_website.retry(exc=e)
 
     except Exception as e:
@@ -42,8 +42,8 @@ def parse_website(user, website):
     logging.info('Parsing website "%s" for user "%s"' % (website, user))
 
     website_tz = pytz.timezone(website.timezone)
-    website_req = urllib2.Request(website.href, headers={'User-agent': 'WebGCal/0.1'})
-    website_file = urllib2.urlopen(website_req)
+    website_req = urllib.request.Request(website.href, headers={'User-agent': 'WebGCal/0.1'})
+    website_file = urllib.request.urlopen(website_req)
 
     events_data = {}
     for calendar_data in hcalendar.hCalendar(website_file):

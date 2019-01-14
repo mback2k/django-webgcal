@@ -16,7 +16,7 @@ class Calendar(TaskMixin, models.Model):
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class Website(TaskMixin, models.Model):
@@ -31,7 +31,7 @@ class Website(TaskMixin, models.Model):
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class Event(models.Model):
@@ -52,5 +52,5 @@ class Event(models.Model):
     dtstamp = models.DateTimeField(_('DTStamp'), blank=True, null=True)
     last_modified = models.DateTimeField(_('Last modified'), blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.summary
