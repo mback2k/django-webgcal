@@ -1,5 +1,5 @@
-{% spaceless %}{% load swampdragon_live %}
-<table class="bordertable {{ swampdragon_live }}">
+{% spaceless %}{% load django_live_template %}
+<table class="bordertable {{ django_live_template }}">
   <thead>
     <tr>
       <th scope="col">Name</th>
@@ -9,7 +9,7 @@
     </tr>
   </thead>
   {% for website in websites %}
-  {% include_live 'website-table-row' 'includes/website_row.html' website=website perms=perms %}
+  {% include_live 'includes/website_row.html' website=website perms=perms %}
   {% empty %}
   <tbody>
     <tr>

@@ -1,5 +1,5 @@
-{% spaceless %}{% load swampdragon_live %}
-<table class="bordertable {{ swampdragon_live }}">
+{% spaceless %}{% load django_live_template %}
+<table class="bordertable {{ django_live_template }}">
   <thead>
     <tr>
       <th scope="col">Name</th>
@@ -8,7 +8,7 @@
     </tr>
   </thead>
   {% for calendar in calendars %}
-  {% include_live 'calendar-table-row' 'includes/calendar_row.html' calendar=calendar perms=perms %}
+  {% include_live 'includes/calendar_row.html' calendar=calendar perms=perms %}
   {% empty %}
   <tbody>
     <tr>

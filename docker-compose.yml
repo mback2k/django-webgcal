@@ -9,6 +9,9 @@ web:
    - .:/app
   environment:
     DJANGO_PERFORM_SETUP: "yes"
+    LC_ALL: "C.UTF-8"
+    LANG: "C.UTF-8"
+  command: /usr/local/bin/uvicorn webgcal.asgi:application --host 0.0.0.0 --port 8000
 celery_worker:
   image: mback2k/django-webgcal
   links:

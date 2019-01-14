@@ -18,22 +18,42 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'webgcal',
+    },
+    'django-live-templates': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/2',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 CELERY_BROKER_URL = 'redis://redis:6379/1'
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-SWAMP_DRAGON_REDIS_HOST = 'redis'
-SWAMP_DRAGON_HOST = '0.0.0.0'
-SWAMP_DRAGON_PORT = 9999
-DRAGON_URL = 'http://dockerhost:9999/'
-
-ALLOWED_HOSTS = ['dockerhost']
-DEFAULT_FROM_EMAIL = 'no-reply@dockerhost'
+ALLOWED_HOSTS = ['localhost']
+DEFAULT_FROM_EMAIL = 'no-reply@localhost'
 
 SESSION_COOKIE_NAME = 'webgcal'
-SESSION_COOKIE_DOMAIN = 'dockerhost'
+SESSION_COOKIE_DOMAIN = 'localhost'
 SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 

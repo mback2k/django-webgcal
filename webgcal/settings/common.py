@@ -29,8 +29,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
 
-    'swampdragon',
-    'swampdragon_live',
+    'channels',
+    'django_live_templates',
     'compressor',
 )
 
@@ -39,6 +39,8 @@ AUTHENTICATION_BACKENDS = (
     'social_appengine_auth.backends.GoogleAppEngineOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+ASGI_APPLICATION = 'webgcal.routing.application'
 
 LOGIN_BACKEND = 'google-appengine-oauth2'
 LOGIN_REDIRECT_URL = '/'
@@ -79,5 +81,3 @@ SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_KEY = SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
 SOCIAL_AUTH_GOOGLE_APPENGINE_OAUTH2_SECRET = SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
-
-SWAMP_DRAGON_CONNECTION = ('webgcal.libs.connection.MysqlHeartbeatConnection', b'/data')
