@@ -17,7 +17,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'djcelery_model',
 
-    'social.apps.django_app.default',
+    'social_django',
     'social_appengine_auth',
 
     'webgcal.libs.yamlcss',

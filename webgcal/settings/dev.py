@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 from .common import *
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
@@ -16,11 +15,6 @@ DATABASES = {
         'OPTIONS': { }
     }
 }
-
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

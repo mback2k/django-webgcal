@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from . import views
 
-urlpatterns = patterns('',
+urlpatterns = (
     url(r'^$', views.show_home, name='show_home'),
     url(r'^dashboard/$', views.show_dashboard, name='show_dashboard'),
     url(r'^dashboard/calendar/create/$', views.create_calendar, name='create_calendar'),

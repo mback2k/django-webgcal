@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
 from .forms import CalendarForm, WebsiteForm
@@ -44,7 +44,7 @@ def show_home(request):
         'websites': websites,
     }
 
-    return render_to_response('show_home.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_home.html', template_values)
 
 @login_required
 def show_dashboard(request):
@@ -58,7 +58,7 @@ def show_dashboard(request):
         'calendar_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 def show_calendar(request, calendar_id):
@@ -72,7 +72,7 @@ def show_calendar(request, calendar_id):
         'website_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 @transaction.atomic
@@ -92,7 +92,7 @@ def create_calendar(request):
         'calendar_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 @transaction.atomic
@@ -117,7 +117,7 @@ def edit_calendar(request, calendar_id):
         'calendar_edit_form': edit_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 @transaction.atomic
@@ -164,7 +164,7 @@ def delete_calendar_ask(request, calendar_id):
         'calendar_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @permission_required('webgcal.change_calendar')
 @transaction.atomic
@@ -202,7 +202,7 @@ def create_website(request, calendar_id):
         'website_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 @transaction.atomic
@@ -229,7 +229,7 @@ def edit_website(request, calendar_id, website_id):
         'website_edit_form': edit_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @login_required
 @transaction.atomic
@@ -280,7 +280,7 @@ def delete_website_ask(request, calendar_id, website_id):
         'website_create_form': create_form,
     }
 
-    return render_to_response('show_dashboard.html', template_values, context_instance=RequestContext(request))
+    return render(request, 'show_dashboard.html', template_values)
 
 @permission_required('webgcal.change_website')
 @transaction.atomic
