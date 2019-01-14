@@ -1,54 +1,36 @@
-migrate:
-  build: .
-  links:
-   - db
-   - redis
-  volumes:
-   - .:/usr/src/app
-  command: /usr/src/env/bin/python manage.py migrate
-loaddata:
-  build: .
-  links:
-   - db
-   - redis
-   - migrate
-  volumes:
-   - .:/usr/src/app
-  command: /usr/src/env/bin/python manage.py loaddata docker-fixture.json
 web:
-  build: .
+  image: mback2k/django-webgcal
   links:
    - db
    - redis
-   - migrate
-   - loaddata
   ports:
    - "8000:8000"
   volumes:
-   - .:/usr/src/app
-  command: /usr/src/env/bin/python manage.py runserver 0.0.0.0:8000
-dragon:
-  build: .
+   - .:/app
+  environment:
+    DJANGO_PERFORM_SETUP: "yes"
+celery_worker:
+  image: mback2k/django-webgcal
   links:
    - db
    - redis
-   - web
-  ports:
-   - "9999:9999"
   volumes:
-   - .:/usr/src/app
-  command: /usr/src/env/bin/python manage.py runsd 0.0.0.0:9999
-celery:
-  build: .
+   - .:/app
+  environment:
+    DJANGO_PERFORM_SETUP: "no"
+  command: /usr/local/bin/celery worker -A webgcal -E -c 2 -l info
+celery_beat:
+  image: mback2k/django-webgcal
   links:
    - db
    - redis
-   - web
   volumes:
-   - .:/usr/src/app
-  command: /usr/src/env/bin/python manage.py celeryd -B -E -c 2
+   - .:/app
+  environment:
+    DJANGO_PERFORM_SETUP: "no"
+  command: /usr/local/bin/celery beat -A webgcal -S django -l info
 db:
-  image: mysql
+  image: mariadb
   environment:
     MYSQL_ROOT_PASSWORD: docker
     MYSQL_DATABASE: docker

@@ -1,38 +1,34 @@
-FROM python:2-wheezy
+FROM mback2k/ubuntu:rolling
 
-MAINTAINER Marc Hoersken "info@marc-hoersken.de"
+RUN adduser --disabled-password --disabled-login --system --group \
+        --uid 999 --home /app django
 
-RUN apt-get update
-RUN apt-get install -y python-dev python-setuptools python-mysqldb
-RUN apt-get clean
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3 python3-dev python3-pip python3-mysqldb && \
+    apt-get install -y --no-install-recommends \
+        build-essential msmtp msmtp-mta && \
+    apt-get clean
 
-RUN useradd --user-group --home /usr/src django
-RUN chown django:django -R /usr/src
+RUN pip3 install --upgrade pip setuptools wheel
 
-USER django
-RUN mkdir -p /usr/src/env
-RUN virtualenv /usr/src/env
+RUN mkdir -p /app
+WORKDIR /app
 
-RUN /usr/src/env/bin/pip install --upgrade pip
-RUN /usr/src/env/bin/pip install mysql-python
+ADD requirements.txt /app/requirements.txt
+RUN pip3 install --upgrade --requirement requirements.txt
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-
-COPY requirements.txt /usr/src/app/
-RUN /usr/src/env/bin/pip install -r requirements.txt
-
-ADD . /usr/src/app
-
-USER root
-RUN chown django:django -R /usr/src
-
-USER django
-RUN /usr/src/env/bin/python -m compileall /usr/src/app
+ADD . /app
+RUN python3 -m compileall /app
 
 ENV DJANGO_SETTINGS_MODULE=webgcal.settings.docker
-RUN /usr/src/env/bin/python manage.py collectstatic --noinput
-RUN /usr/src/env/bin/python manage.py compress --force
 
+RUN python3 manage.py collectstatic --noinput
+RUN python3 manage.py compress --force
+
+USER django
 EXPOSE 8000
-CMD /usr/src/env/bin/python manage.py runserver 0.0.0.0:8000
+
+ADD docker-entrypoint.d/ /run/docker-entrypoint.d/
+
+CMD ["/usr/bin/python3", "manage.py", "runserver", "0.0.0.0:8000"]
