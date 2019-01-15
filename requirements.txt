@@ -1,6 +1,6 @@
 Django==1.11.18
 channels==2.1.6
-channels_redis==2.3.2
+channels_redis[cryptography]==2.3.2
 celery[redis]==4.2.1
 django-celery-beat==1.4.0
 django-celery-results==1.0.4
@@ -15,5 +15,6 @@ python-dateutil==2.7.5
 python-hcalendar==0.2.1
 oauth2client==4.1.3
 uvicorn
+gunicorn
 whitenoise
 pytz
