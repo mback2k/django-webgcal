@@ -69,7 +69,7 @@ def parse_website(user, website):
 
     logging.info('Updating events of website "%s" for user "%s"' % (website, user))
 
-    for key, event_data in events_data.iteritems():
+    for key, event_data in events_data.items():
         if not key in events:
             kwargs = {'website': website, 'parsed': timezone.now()}
             for attr in ('uid', 'summary', 'description', 'location', 'category', 'status', 'dtstart', 'dtend', 'dtstamp', 'last_modified'):
@@ -92,7 +92,7 @@ def parse_website(user, website):
 
     logging.info('Deleting events of website "%s" for user "%s"' % (website, user))
 
-    for key, event in events.iteritems():
+    for key, event in events.items():
         if not key in events_data:
             event.deleted = True
             event.save()
