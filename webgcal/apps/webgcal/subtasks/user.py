@@ -33,6 +33,6 @@ def check_user(user):
     if not social_auth:
         raise RuntimeWarning('No social auth available for user "%s"' % user)
 
-    service = google.build_calendar_service(social_auth)
+    service, _ = google.build_calendar_service(social_auth)
     if not google.check_calendar_access(service):
         raise RuntimeWarning('No calendar access available for user "%s"' % user)

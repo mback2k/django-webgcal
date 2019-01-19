@@ -53,7 +53,7 @@ def build_calendar_service(social_auth):
     session = get_session(credentials)
     discovery_cache = DjangoDiscoveryCache()
     service = get_calendar_service(discovery_cache, session)
-    return service
+    return service, session
 
 def check_calendar_access(calendar_service):
     try:

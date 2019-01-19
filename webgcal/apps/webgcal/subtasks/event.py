@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from googleapiclient.http import BatchHttpRequest
 from googleapiclient.errors import HttpError
 from celery.task import task
 from django.db.models import Q, F
@@ -51,7 +50,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
     if not social_auth:
         raise RuntimeWarning('No social auth available for user "%s"' % user)
 
-    service = google.build_calendar_service(social_auth)
+    service, session = google.build_calendar_service(social_auth)
     if not google.check_calendar_access(service):
         raise RuntimeWarning('No calendar access available for user "%s"' % user)
 
@@ -65,7 +64,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
 
 
     if events.exclude(google_id=None).exists():
-        batch = BatchHttpRequest(callback=query_event)
+        batch = service.new_batch_http_request(callback=query_event)
         operations = 0
 
         for event in events.exclude(google_id=None)[:limit]:
@@ -80,7 +79,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
 
 
     if events.filter(google_id=None).exists():
-        batch = BatchHttpRequest(callback=verify_event)
+        batch = service.new_batch_http_request(callback=verify_event)
         operations = 0
 
         for event in events.filter(google_id=None)[:limit]:
@@ -95,7 +94,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
 
 
     if events.exists():
-        batch = BatchHttpRequest(callback=update_event)
+        batch = service.new_batch_http_request(callback=update_event)
         operations = 0
 
         with transaction.atomic():
