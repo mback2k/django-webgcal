@@ -24,7 +24,7 @@ def check_social_auth(request):
     if not migrate_social_auth(request):
         social_auth = google.get_social_auth(request.user)
         if social_auth:
-            service = google.build_calendar_service(social_auth)
+            service, _ = google.build_calendar_service(social_auth)
             if not google.check_calendar_access(service):
                 button = '<a class="ym-button ym-next ym-success float-right" href="%s" title="Grant Access">Grant Access</a>' % reverse('social:begin', kwargs={'backend': 'google-oauth2'})
                 messages.info(request, '%sPlease grant this application access to your Google Calendar' % button)
