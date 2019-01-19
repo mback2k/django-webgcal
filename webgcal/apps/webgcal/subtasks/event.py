@@ -147,7 +147,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
 
 @transaction.atomic
 def query_event(request_id, response, exception):
-    event_id = long(request_id, 16)
+    event_id = int(request_id, 16)
     event = Event.objects.get(id=event_id)
 
     if exception:
@@ -168,7 +168,7 @@ def query_event(request_id, response, exception):
 
 @transaction.atomic
 def verify_event(request_id, response, exception):
-    event_id = long(request_id, 16)
+    event_id = int(request_id, 16)
     event = Event.objects.get(id=event_id)
 
     if exception:
@@ -183,7 +183,7 @@ def verify_event(request_id, response, exception):
 
 @transaction.atomic
 def update_event(request_id, response, exception):
-    event_id = long(request_id, 16)
+    event_id = int(request_id, 16)
     event = Event.objects.get(id=event_id)
 
     if exception:
