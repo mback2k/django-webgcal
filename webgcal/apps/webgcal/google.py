@@ -1,9 +1,21 @@
-from apiclient.discovery import build
+from googleapiclient.discovery import build
+from googleapiclient.discovery_cache.base import Cache
 from oauth2client.client import OAuth2Credentials, AccessTokenRefreshError
 from social.backends.google import GoogleOAuth2
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.cache import caches
 from django.conf import settings
 import httplib2
+
+class DjangoDiscoveryCache(Cache):
+    def __init__(self):
+        self.cache = caches['default']
+
+    def get(self, url):
+        return self.cache.get(url, None)
+
+    def set(self, url, content):
+        return self.cache.set(url, content)
 
 def get_social_auth(user):
     if user.is_authenticated():
@@ -32,8 +44,15 @@ def get_session(credentials):
     session = credentials.authorize(http)
     return session
 
-def get_calendar_service(session):
-    service = build('calendar', 'v3', http=session)
+def get_calendar_service(discovery_cache, session):
+    service = build('calendar', 'v3', cache=discovery_cache, http=session)
+    return service
+
+def build_calendar_service(social_auth):
+    credentials = get_credentials(social_auth)
+    session = get_session(credentials)
+    discovery_cache = DjangoDiscoveryCache()
+    service = get_calendar_service(discovery_cache, session)
     return service
 
 def check_calendar_access(calendar_service):

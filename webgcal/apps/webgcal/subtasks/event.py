@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from apiclient.http import BatchHttpRequest
-from apiclient.errors import HttpError
+from googleapiclient.http import BatchHttpRequest
+from googleapiclient.errors import HttpError
 from celery.task import task
 from django.db.models import Q, F
 from django.utils import timezone
@@ -51,9 +51,7 @@ def sync_website(user, calendar, website, cursor=None, limit=500):
     if not social_auth:
         raise RuntimeWarning('No social auth available for user "%s"' % user)
 
-    credentials = google.get_credentials(social_auth)
-    session = google.get_session(credentials)
-    service = google.get_calendar_service(session)
+    service = google.build_calendar_service(social_auth)
     if not google.check_calendar_access(service):
         raise RuntimeWarning('No calendar access available for user "%s"' % user)
 

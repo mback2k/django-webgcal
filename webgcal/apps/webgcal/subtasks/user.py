@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from apiclient.errors import HttpError
+from googleapiclient.errors import HttpError
 from celery.task import task
 from django.db import transaction
 from ....libs.keeperr.models import Error
@@ -33,8 +33,6 @@ def check_user(user):
     if not social_auth:
         raise RuntimeWarning('No social auth available for user "%s"' % user)
 
-    credentials = google.get_credentials(social_auth)
-    session = google.get_session(credentials)
-    service = google.get_calendar_service(session)
+    service = google.build_calendar_service(social_auth)
     if not google.check_calendar_access(service):
         raise RuntimeWarning('No calendar access available for user "%s"' % user)
