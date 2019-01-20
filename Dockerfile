@@ -11,6 +11,7 @@ RUN apt-get update && \
     apt-get clean
 
 RUN pip3 install --upgrade pip setuptools wheel
+RUN pip3 install --upgrade rollbar
 
 RUN mkdir -p /app
 WORKDIR /app
