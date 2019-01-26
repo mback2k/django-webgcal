@@ -5,7 +5,7 @@ from celery import group
 from .models import User
 from .subtasks.user import task_check_user
 
-@periodic_task(run_every=crontab(minute=0))
+@periodic_task(run_every=crontab(minute=0), ignore_result=True)
 def task_start_worker():
     user_id_list = User.objects.filter(is_active=True).values_list('id', flat=True).order_by('id')
 
