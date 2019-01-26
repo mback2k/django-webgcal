@@ -9,18 +9,19 @@ import logging
 import urllib
 import pytz
 
-@task(ignore_result=True, default_retry_delay=120, max_retries=5)
-def task_parse_website(user_id, website_id):
+@task(bind=True, ignore_result=True, retry_backoff=60, retry_jitter=True, max_retries=5)
+def task_parse_website(self, user_id, website_id):
     user = User.objects.get(id=user_id, is_active=True)
     website = Website.objects.get(calendar__user=user, id=website_id, enabled=True)
     website.status = 'Parsing website'
     website.save()
 
     try:
-        parse_website(user, website)
+        try:
+            parse_website(user, website)
 
-    except urllib.request.URLError as e:
-        raise task_parse_website.retry(exc=e)
+        except urllib.request.URLError as e:
+            raise self.retry(exc=e)
 
     except Exception as e:
         logging.exception(e)
