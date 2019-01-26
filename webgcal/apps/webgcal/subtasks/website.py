@@ -2,7 +2,6 @@
 from celery.task import task
 from django.utils import timezone
 from django.db import transaction
-from ....libs.keeperr.models import Error
 from ..models import User, Website, Event
 from .calendar import task_sync_calendar
 import hcalendar
@@ -25,7 +24,6 @@ def task_parse_website(user_id, website_id):
 
     except Exception as e:
         logging.exception(e)
-        Error.assign(website).save()
         website.enabled = False
         website.status = 'Error: Unable to parse website'
         website.save()

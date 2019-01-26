@@ -2,7 +2,6 @@
 from googleapiclient.errors import HttpError
 from celery.task import task
 from django.db import transaction
-from ....libs.keeperr.models import Error
 from ..models import User, Calendar
 from .. import google
 from .event import task_sync_website
@@ -20,14 +19,12 @@ def task_sync_calendar(user_id, calendar_id):
 
     except HttpError as e:
         logging.exception(e)
-        Error.assign(calendar).save()
         calendar.enabled = e.resp.status in (403, 503)
         calendar.status = u'HTTP: %s' % e.resp.reason
         calendar.save()
 
     except Exception as e:
         logging.exception(e)
-        Error.assign(calendar).save()
         calendar.enabled = False
         calendar.status = 'Error: Fatal error'
         calendar.save()

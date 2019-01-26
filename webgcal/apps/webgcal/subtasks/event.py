@@ -5,7 +5,6 @@ from django.db.models import Q, F
 from django.utils import timezone
 from django.db import transaction
 from django.core.cache import cache
-from ....libs.keeperr.models import Error
 from ..models import User, Calendar, Website, Event
 from .. import google
 import datetime
@@ -24,14 +23,12 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
 
     except HttpError as e:
         logging.exception(e)
-        Error.assign(website).save()
         website.enabled = website.enabled and e.resp.status in (403, 503)
         website.status = u'HTTP: %s' % e.resp.reason
         website.save()
 
     except Exception as e:
         logging.exception(e)
-        Error.assign(website).save()
         website.enabled = False
         website.status = 'Error: Fatal error'
         website.save()
@@ -160,8 +157,10 @@ def query_event(request_id, response, exception):
                     return event.save()
             elif exception.resp.status == 410: # deleted
                 return event.delete()
-
-        Error.assign(event).save()
+            else:
+                logging.exception(exception)
+        else:
+            logging.exception(exception)
 
     elif response and 'kind' in response and response['kind'] == 'calendar#event':
         cache.set('event-%d' % event.id, response, None)
@@ -172,7 +171,7 @@ def verify_event(request_id, response, exception):
     event = Event.objects.get(id=event_id)
 
     if exception:
-        Error.assign(event).save()
+        logging.exception(exception)
 
     elif response and 'kind' in response and response['kind'] == 'calendar#events':
         if 'items' in response and len(response['items']) == 1:
@@ -199,8 +198,10 @@ def update_event(request_id, response, exception):
                 return event.save()
             elif exception.resp.status == 410: # deleted
                 return event.delete()
-
-        Error.assign(event).save()
+            else:
+                logging.exception(exception)
+        else:
+            logging.exception(exception)
 
     elif response and 'kind' in response and response['kind'] == 'calendar#event':
         event.google_id = response['id']

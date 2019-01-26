@@ -22,7 +22,6 @@ INSTALLED_APPS = (
 
     'webgcal.libs.yamlcss',
     'webgcal.libs.jdatetime',
-    'webgcal.libs.keeperr',
 
     'webgcal.apps.webgcal',
 

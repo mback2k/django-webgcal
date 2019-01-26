@@ -2,7 +2,6 @@
 from googleapiclient.errors import HttpError
 from celery.task import task
 from django.db import transaction
-from ....libs.keeperr.models import Error
 from ..models import User, Website
 from .. import google
 from .website import task_parse_website
@@ -17,7 +16,6 @@ def task_check_user(user_id):
 
     except HttpError as e:
         logging.exception(e)
-        Error.assign(user).save()
         return
 
     for website in Website.objects.filter(calendar__user=user, enabled=True).without_running_tasks():
