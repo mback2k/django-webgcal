@@ -91,6 +91,11 @@ LOGGING = {
         },
     },
     'loggers': {
+        'celery.task': {
+            'handlers': ['stream', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         'celery': {
             'handlers': ['stream', 'mail_admins'],
             'level': 'WARNING',
