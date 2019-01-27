@@ -34,7 +34,5 @@ SESSION_CACHE_ALIAS = 'default'
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-DRAGON_URL = 'http://localhost:9999/'
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'THIS_IS_A_DEVELOPMENT_KEY_WHICH_SHOULD_NOT_BE_USED_IN_PRODUCTION!'
