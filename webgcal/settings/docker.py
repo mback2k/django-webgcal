@@ -25,7 +25,7 @@ CACHES = {
     },
     'django-live-templates': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/2',
+        'LOCATION': 'redis://redis:6379/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -36,7 +36,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('redis', 6379)],
+            'hosts': ['redis://redis:6379/2'],
         },
     },
 }
