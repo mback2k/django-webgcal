@@ -9,6 +9,7 @@ web:
    - .:/app
   environment:
     DJANGO_PERFORM_SETUP: "yes"
+    # required for uvicorn:
     LC_ALL: "C.UTF-8"
     LANG: "C.UTF-8"
   command: /usr/local/bin/uvicorn webgcal.asgi:application --host 0.0.0.0 --port 8000
