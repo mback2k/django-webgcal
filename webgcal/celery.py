@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from celery import Celery
+from celery import Celery, signals
 import os
 
 # set the default Django settings module for the 'celery' program.
@@ -16,3 +16,10 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
+
+# Use Django logging settings for Celery logging.
+@signals.setup_logging.connect
+def setup_logging(*args, **kwargs):
+    from django.conf import settings
+    from django.utils.log import configure_logging
+    configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
