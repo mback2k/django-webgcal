@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from celery.app.defaults import DEFAULT_PROCESS_LOG_FMT, DEFAULT_TASK_LOG_FMT
 from .path import *
 
 DEBUG = False
@@ -79,6 +80,24 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
     },
+    'formatters': {
+        'celery.task': {
+            '()': 'celery.app.log.TaskFormatter',
+            'format': DEFAULT_TASK_LOG_FMT,
+        },
+        'celery': {
+            '()': 'celery.utils.log.ColorFormatter',
+            'format': DEFAULT_PROCESS_LOG_FMT,
+        },
+        'django.request': {
+            '()': 'celery.utils.log.ColorFormatter',
+            'format': DEFAULT_PROCESS_LOG_FMT,
+        },
+        'django': {
+            '()': 'celery.utils.log.ColorFormatter',
+            'format': DEFAULT_PROCESS_LOG_FMT,
+        }
+    },
     'handlers': {
         'stream': {
             'level': 'WARNING',
@@ -100,6 +119,11 @@ LOGGING = {
             'handlers': ['stream', 'mail_admins'],
             'level': 'WARNING',
             'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['stream', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
         },
         'django': {
             'handlers': ['stream', 'mail_admins'],
