@@ -110,6 +110,21 @@ LOGGING = {
     'loggers': {
         'celery.task': {
             'handlers': ['console_task', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console', 'mail_admins'],
             'level': 'WARNING',
             'propagate': False,
         },
