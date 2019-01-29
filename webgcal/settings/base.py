@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from celery.app.defaults import DEFAULT_PROCESS_LOG_FMT, DEFAULT_TASK_LOG_FMT
+from celery.app import defaults as celery_defaults
 from .path import *
 
 DEBUG = False
@@ -83,19 +83,19 @@ LOGGING = {
     'formatters': {
         'celery.task': {
             '()': 'celery.app.log.TaskFormatter',
-            'format': DEFAULT_TASK_LOG_FMT,
+            'format': celery_defaults.DEFAULT_TASK_LOG_FMT,
         },
         'celery': {
             '()': 'celery.utils.log.ColorFormatter',
-            'format': DEFAULT_PROCESS_LOG_FMT,
+            'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
         },
         'django.request': {
             '()': 'celery.utils.log.ColorFormatter',
-            'format': DEFAULT_PROCESS_LOG_FMT,
+            'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
         },
         'django': {
             '()': 'celery.utils.log.ColorFormatter',
-            'format': DEFAULT_PROCESS_LOG_FMT,
+            'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
         }
     },
     'handlers': {
