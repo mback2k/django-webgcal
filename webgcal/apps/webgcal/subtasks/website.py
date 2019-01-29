@@ -9,6 +9,8 @@ import logging
 import urllib
 import pytz
 
+logging = logging.getLogger('celery.task')
+
 @task(bind=True, ignore_result=True, retry_backoff=60, retry_jitter=True, max_retries=5)
 def task_parse_website(self, user_id, website_id):
     user = User.objects.get(id=user_id, is_active=True)

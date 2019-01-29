@@ -7,6 +7,8 @@ from .. import google
 from .website import task_parse_website
 import logging
 
+logging = logging.getLogger('celery.task')
+
 @task(ignore_result=True)
 def task_check_user(user_id):
     user = User.objects.get(id=user_id, is_active=True)

@@ -7,6 +7,8 @@ from .. import google
 from .event import task_sync_website
 import logging
 
+logging = logging.getLogger('celery.task')
+
 @task(ignore_result=True, default_retry_delay=120, max_retries=5)
 def task_sync_calendar(user_id, calendar_id):
     user = User.objects.get(id=user_id, is_active=True)

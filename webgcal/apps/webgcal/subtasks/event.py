@@ -10,6 +10,8 @@ from .. import google
 import datetime
 import logging
 
+logging = logging.getLogger('celery.task')
+
 @task(ignore_result=True, default_retry_delay=120, max_retries=5)
 def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     user = User.objects.get(id=user_id, is_active=True)
