@@ -81,27 +81,25 @@ LOGGING = {
         },
     },
     'formatters': {
-        'celery.task': {
+        'console_task': {
             '()': 'celery.app.log.TaskFormatter',
             'format': celery_defaults.DEFAULT_TASK_LOG_FMT,
         },
-        'celery': {
+        'console': {
             '()': 'celery.utils.log.ColorFormatter',
             'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
         },
-        'django.request': {
-            '()': 'celery.utils.log.ColorFormatter',
-            'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
-        },
-        'django': {
-            '()': 'celery.utils.log.ColorFormatter',
-            'format': celery_defaults.DEFAULT_PROCESS_LOG_FMT,
-        }
     },
     'handlers': {
-        'stream': {
-            'level': 'WARNING',
+        'console_task': {
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'console_task',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -111,24 +109,13 @@ LOGGING = {
     },
     'loggers': {
         'celery.task': {
-            'handlers': ['stream', 'mail_admins'],
+            'handlers': ['console_task', 'mail_admins'],
             'level': 'WARNING',
             'propagate': False,
-        },
-        'celery': {
-            'handlers': ['stream', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['stream', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'django': {
-            'handlers': ['stream', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': True,
         },
     },
+    'root': {
+        'handlers': ['console', 'mail_admins'],
+        'level': 'WARNING',
+    }
 }
