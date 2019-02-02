@@ -4,6 +4,8 @@ from celery.task import task
 from django.db.models import Q, F
 from django.utils import timezone
 from django.db import transaction
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 from ..models import User, Calendar, Website, Event
 from .. import google
@@ -26,14 +28,16 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
     except HttpError as e:
         logging.exception(e)
         website.enabled = website.enabled and e.resp.status in (403, 503)
-        website.status = u'HTTP: %s' % e.resp.reason
+        website.status = 'HTTP: %s' % e.resp.reason
         website.save()
+        mail_user_website(user, website, website.status)
 
     except Exception as e:
         logging.exception(e)
         website.enabled = False
         website.status = 'Error: Fatal error'
         website.save()
+        mail_user_website(user, website, website.status)
 
     if not calendar.websites.exclude(id=website.id).with_running_tasks().exists():
         calendar.updated = timezone.now()
@@ -237,3 +241,13 @@ def make_event_body(calendar, website, event, eventBody = {}):
     eventBody['transparency'] = 'transparent'
     eventBody['iCalUID'] = 'webgcal-%d' % event.id
     return eventBody
+
+def mail_user_website(user, website, message):
+    current_site = Site.objects.get_current()
+    kwargs = {'calendar_id': website.calendar.id, 'website_id': website.id}
+    edit_website = 'https://%s%s' % (current_site.domain, reverse('webgcal:edit_website', kwargs=kwargs))
+
+    user.email_user('WebGCal - Sync failure for %s - Action required!' % user,
+                    'WebGCal tried to sync your website "%s", but failed to do so, because of the following error:\n\n' \
+                    '%s\n\n' \
+                    'Please go to %s and check your website!' % (website, message, edit_website))

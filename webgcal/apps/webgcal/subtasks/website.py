@@ -2,6 +2,8 @@
 from celery.task import task
 from django.utils import timezone
 from django.db import transaction
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 from ..models import User, Website, Event
 from .calendar import task_sync_calendar
 import hcalendar
@@ -30,6 +32,7 @@ def task_parse_website(self, user_id, website_id):
         website.enabled = False
         website.status = 'Error: Unable to parse website'
         website.save()
+        mail_user_website(user, website, website.status)
 
     if website.calendar.enabled and not website.calendar.has_running_task and not website.calendar.websites.exclude(id=website.id).with_running_tasks().exists():
         args = (user.id, website.calendar.id)
@@ -103,3 +106,13 @@ def parse_website(user, website):
     website.save()
 
     logging.info('Parsed all events of website "%s" for user "%s"' % (website, user))
+
+def mail_user_website(user, website, message):
+    current_site = Site.objects.get_current()
+    kwargs = {'calendar_id': website.calendar.id, 'website_id': website.id}
+    edit_website = 'https://%s%s' % (current_site.domain, reverse('webgcal:edit_website', kwargs=kwargs))
+
+    user.email_user('WebGCal - Parse failure for %s - Action required!' % user,
+                    'WebGCal tried to parse your website "%s", but failed to do so, because of the following error:\n\n' \
+                    '%s\n\n' \
+                    'Please go to %s and check your website!' % (website, message, edit_website))
