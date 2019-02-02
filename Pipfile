@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
+coverage = "*"
 
 [packages]
 channels = "==2.1.7"
