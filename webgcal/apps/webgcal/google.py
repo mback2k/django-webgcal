@@ -5,6 +5,7 @@ from social.backends.google import GoogleOAuth2
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import caches
 from django.conf import settings
+from functools import wraps
 import httplib2
 
 class DjangoDiscoveryCache(Cache):
@@ -61,3 +62,17 @@ def check_calendar_access(calendar_service):
     except AccessTokenRefreshError:
         return False
     return True
+
+def require_calendar_access(func):
+    @wraps(func)
+    def get_calendar_access(user, *args, **kwargs):
+        social_auth = get_social_auth(user)
+        if not social_auth:
+            raise RuntimeWarning('No social auth available for user "%s"' % user)
+
+        service, _ = build_calendar_service(social_auth)
+        if not check_calendar_access(service):
+            raise RuntimeWarning('No calendar access available for user "%s"' % user)
+
+        return func(user, social_auth, service, *args, **kwargs)
+    return get_calendar_access

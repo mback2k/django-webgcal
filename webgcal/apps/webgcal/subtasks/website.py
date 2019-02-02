@@ -6,6 +6,7 @@ from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from ..models import User, Website, Event
+from ..google import require_calendar_access
 from .calendar import task_sync_calendar
 import hcalendar
 import logging
@@ -38,12 +39,9 @@ def task_parse_website(self, user_id, website_id):
         website.save()
         mail_user_website(user, website, website.status)
 
-    if website.calendar.enabled and not website.calendar.has_running_task and not website.calendar.websites.exclude(id=website.id).with_running_tasks().exists():
-        args = (user.id, website.calendar.id)
-        task_id = 'sync-calendar-%d-%d' % args
-        website.calendar.apply_async(task_sync_calendar, args=args, task_id=task_id, countdown=10)
-
-        logging.info('Deferred sync of calendar "%s" for user "%s"' % (website.calendar, user))
+    if website.calendar.enabled and not website.calendar.has_running_task:
+        if not website.calendar.websites.exclude(id=website.id).with_running_tasks().exists():
+            sync_website_calendar(user, website)
 
 @transaction.atomic
 def parse_website(user, website):
@@ -110,6 +108,14 @@ def parse_website(user, website):
     website.save()
 
     logging.info('Parsed all events of website "%s" for user "%s"' % (website, user))
+
+@require_calendar_access
+def sync_website_calendar(user, social_auth, service, website):
+    args = (user.id, website.calendar.id)
+    task_id = 'sync-calendar-%d-%d' % args
+    website.calendar.apply_async(task_sync_calendar, args=args, task_id=task_id, countdown=10)
+
+    logging.info('Deferred sync of calendar "%s" for user "%s"' % (website.calendar, user))
 
 def mail_user_website(user, website, message):
     current_site = Site.objects.get_current()

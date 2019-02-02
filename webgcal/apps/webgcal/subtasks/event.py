@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from ..models import User, Calendar, Website, Event
-from .. import google
+from ..google import require_calendar_access
 import datetime
 import logging
 
@@ -46,17 +46,9 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
 
         logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, user))
 
-def sync_website(user, calendar, website, cursor=None, limit=500):
+@require_calendar_access
+def sync_website(user, social_auth, service, calendar, website, cursor=None, limit=500):
     logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, user))
-
-    social_auth = google.get_social_auth(user)
-    if not social_auth:
-        raise RuntimeWarning('No social auth available for user "%s"' % user)
-
-    service, session = google.build_calendar_service(social_auth)
-    if not google.check_calendar_access(service):
-        raise RuntimeWarning('No calendar access available for user "%s"' % user)
-
 
     sync_datetime = timezone.now()
     sync_timeout = sync_datetime - datetime.timedelta(days=1)
@@ -216,7 +208,7 @@ def update_event(request_id, response, exception):
 
 def make_event_body(calendar, website, event, eventBody = {}):
     if calendar.websites.count() > 1:
-        eventBody['summary'] = u'%s: %s' % (website.name, event.summary)
+        eventBody['summary'] = '%s: %s' % (website.name, event.summary)
     else:
         eventBody['summary'] = event.summary
     if event.dtstart.hour == 0 and event.dtstart.minute == 0 and event.dtstart.second == 0 and not event.dtend:

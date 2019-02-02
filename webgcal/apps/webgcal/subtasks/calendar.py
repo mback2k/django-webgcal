@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from ..models import User, Calendar
-from .. import google
+from ..google import require_calendar_access
 from .event import task_sync_website
 import logging
 
@@ -36,24 +36,13 @@ def task_sync_calendar(user_id, calendar_id):
         mail_user_calendar(user, calendar, calendar.status)
 
     if calendar.enabled and calendar.has_running_task and calendar.google_id:
-        for website in calendar.websites.all():
-            args = (user.id, calendar.id, website.id)
-            task_id = 'sync-website-%d-%d-%d' % args
-            website.apply_async(task_sync_website, args=args, task_id=task_id, countdown=5)
-
-            logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
+        if not calendar.websites.with_running_tasks().exists():
+            sync_calendar_websites(user, calendar)
 
 @transaction.atomic
-def sync_calendar(user, calendar):
+@require_calendar_access
+def sync_calendar(user, social_auth, service, calendar):
     logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, user))
-
-    social_auth = google.get_social_auth(user)
-    if not social_auth:
-        raise RuntimeWarning('No social auth available for user "%s"' % user)
-
-    service, _ = google.build_calendar_service(social_auth)
-    if not google.check_calendar_access(service):
-        raise RuntimeWarning('No calendar access available for user "%s"' % user)
 
     try:
         if calendar.google_id:
@@ -74,6 +63,15 @@ def sync_calendar(user, calendar):
         calendar.save()
 
         logging.info('Inserted calendar "%s" for user "%s"' % (calendar.name, user))
+
+@require_calendar_access
+def sync_calendar_websites(user, social_auth, service, calendar):
+    for website in calendar.websites.all():
+        args = (user.id, calendar.id, website.id)
+        task_id = 'sync-website-%d-%d-%d' % args
+        website.apply_async(task_sync_website, args=args, task_id=task_id, countdown=5)
+
+        logging.info('Deferred initial sync of calendar "%s" and website "%s" for user "%s"' % (calendar, website, user))
 
 def make_calendar_body(calendar, calendarBody = {}):
     calendarBody['summary'] = calendar.name
