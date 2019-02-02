@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from celery.task import task
+from celery.exceptions import Retry
 from django.utils import timezone
 from django.db import transaction
 from django.core.urlresolvers import reverse
@@ -26,6 +27,9 @@ def task_parse_website(self, user_id, website_id):
 
         except urllib.request.URLError as e:
             raise self.retry(exc=e)
+
+    except Retry as e:
+        raise e
 
     except Exception as e:
         logging.exception(e)
