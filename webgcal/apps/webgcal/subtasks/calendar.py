@@ -41,7 +41,7 @@ def task_sync_calendar(user_id, calendar_id):
 
 @transaction.atomic
 @require_calendar_access
-def sync_calendar(user, social_auth, service, calendar):
+def sync_calendar(user, social_auth, service, session, calendar):
     logging.info('Starting sync of calendar "%s" for "%s"' % (calendar, user))
 
     try:
@@ -65,7 +65,7 @@ def sync_calendar(user, social_auth, service, calendar):
         logging.info('Inserted calendar "%s" for user "%s"' % (calendar.name, user))
 
 @require_calendar_access
-def sync_calendar_websites(user, social_auth, service, calendar):
+def sync_calendar_websites(user, social_auth, service, session, calendar):
     for website in calendar.websites.all():
         args = (user.id, calendar.id, website.id)
         task_id = 'sync-website-%d-%d-%d' % args

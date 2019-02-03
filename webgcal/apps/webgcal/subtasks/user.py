@@ -33,7 +33,7 @@ def task_check_user(user_id):
         mail_user(user, e)
 
 @require_calendar_access
-def parse_websites(user, social_auth, service):
+def parse_websites(user, social_auth, service, session):
     for website in Website.objects.filter(calendar__user=user, calendar__enabled=True, enabled=True).without_running_tasks():
         args = (user.id, website.id)
         task_id = 'parse-website-%d-%d' % args

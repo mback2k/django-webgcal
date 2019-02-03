@@ -47,7 +47,7 @@ def task_sync_website(user_id, calendar_id, website_id, cursor=None, limit=500):
         logging.info('Finished sync of calendar "%s" for user "%s"' % (calendar, user))
 
 @require_calendar_access
-def sync_website(user, social_auth, service, calendar, website, cursor=None, limit=500):
+def sync_website(user, social_auth, service, session, calendar, website, cursor=None, limit=500):
     logging.info('Syncing %d events after cursor "%s" of calendar "%s" and website "%s" for "%s"' % (limit, cursor, calendar, website, user))
 
     sync_datetime = timezone.now()

@@ -110,7 +110,7 @@ def parse_website(user, website):
     logging.info('Parsed all events of website "%s" for user "%s"' % (website, user))
 
 @require_calendar_access
-def sync_website_calendar(user, social_auth, service, website):
+def sync_website_calendar(user, social_auth, service, session, website):
     args = (user.id, website.calendar.id)
     task_id = 'sync-calendar-%d-%d' % args
     website.calendar.apply_async(task_sync_calendar, args=args, task_id=task_id, countdown=10)

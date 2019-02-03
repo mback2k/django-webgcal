@@ -70,9 +70,9 @@ def require_calendar_access(func):
         if not social_auth:
             raise RuntimeWarning('No social auth available for user "%s"' % user)
 
-        service, _ = build_calendar_service(social_auth)
+        service, session = build_calendar_service(social_auth)
         if not check_calendar_access(service):
             raise RuntimeWarning('No calendar access available for user "%s"' % user)
 
-        return func(user, social_auth, service, *args, **kwargs)
+        return func(user, social_auth, service, session, *args, **kwargs)
     return get_calendar_access
