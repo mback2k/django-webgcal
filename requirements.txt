@@ -54,7 +54,7 @@ pyhamcrest==1.9.0
 pyjwt==1.7.1
 python-appengine-auth==0.1.dev0
 python-crontab==2.3.6
-python-dateutil==2.7.5
+python-dateutil==2.8.0
 python-hcalendar==0.2.4
 python-jose==3.0.1
 python-social-auth==0.3.6
