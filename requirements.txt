@@ -68,7 +68,7 @@ rjsmin==1.0.12
 rsa==4.0
 six==1.12.0
 social-auth-app-django==3.1.0
-social-auth-core[openidconnect]==2.0.0
+social-auth-core[openidconnect]==3.0.0
 soupsieve==1.7.3
 twisted==18.9.0
 txaio==18.8.1
