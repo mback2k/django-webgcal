@@ -8,7 +8,7 @@ attrs==18.2.0
 autobahn==19.1.1
 automat==0.7.0
 beautifulsoup4==4.7.1
-billiard==3.5.0.5
+billiard==3.6.0.0
 cachetools==3.1.0
 celery[redis]==4.2.1
 certifi==2018.11.29
