@@ -1,4 +1,4 @@
-FROM mback2k/ubuntu:rolling
+FROM mback2k/ubuntu:bionic
 
 RUN adduser --disabled-password --disabled-login --system --group \
         --uid 999 --home /app django
