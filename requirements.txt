@@ -4,7 +4,7 @@ amqp==2.5.2
 asgiref==3.2.3
 async-timeout==3.0.1
 attrs==19.3.0
-autobahn==20.2.1
+autobahn==21.2.1
 automat==0.8.0
 beautifulsoup4==4.8.2
 billiard==3.6.2.0
