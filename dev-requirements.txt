@@ -1,6 +1,6 @@
 -i https://pypi.org/simple/
 astroid==2.3.3
-coverage==5.0
+coverage==5.5
 isort==4.3.21
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
