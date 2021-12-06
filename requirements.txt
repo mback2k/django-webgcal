@@ -9,7 +9,7 @@ automat==0.8.0
 beautifulsoup4==4.8.2
 billiard==3.6.2.0
 cachetools==4.0.0
-celery[redis]==4.4.0
+celery[redis]==5.2.1
 certifi==2019.11.28
 cffi==1.14.0
 channels-redis[cryptography]==2.4.0
