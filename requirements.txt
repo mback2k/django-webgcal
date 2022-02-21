@@ -35,7 +35,7 @@ google-auth==1.11.0
 gunicorn==20.0.4
 h11==0.8.1
 hiredis==1.0.1
-httplib2==0.17.0
+httplib2==0.20.4
 httptools==0.0.13
 hyperlink==19.0.0
 idna==2.8
