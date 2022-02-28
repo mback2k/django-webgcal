@@ -70,7 +70,7 @@ six==1.14.0
 social-auth-app-django==3.1.0
 social-auth-core[openidconnect]==3.2.0
 soupsieve==1.9.5
-twisted[tls]==19.10.0
+twisted[tls]==22.1.0
 txaio==20.1.1
 uritemplate==3.0.1
 urllib3==1.25.8
