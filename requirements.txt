@@ -27,7 +27,7 @@ django-celery-results==2.3.1
 django-compressor==2.3
 django-redis==4.10.0
 django-timezone-field==3.1
-django==1.11.28
+django==4.0.4
 ecdsa==0.15
 google-api-python-client==1.7.7
 google-auth-httplib2==0.0.3
